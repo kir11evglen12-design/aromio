@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AROMIO — PARFUM’S</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #242424;
+    --panel: #2d2d2d;
+    --card: #f1eee9;
+    --text: #ffffff;
+    --muted: #a7a7a7;
+    --accent: #8d2635;
+    --accent-light: #b33a4b;
+    --dark: #181818;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* HEADER */
+
+header {
+    height: 76px;
+    background: #1c1c1c;
+    border-bottom: 1px solid #3b3b3b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: 3px;
+}
+
+.logo span {
+    display: block;
+    font-size: 8px;
+    letter-spacing: 4px;
+    color: #aaa;
+    text-align: center;
+    margin-top: 3px;
+}
+
+nav {
+    display: flex;
+    gap: 28px;
+}
+
+nav button {
+    background: none;
+    border: 0;
+    color: #bbb;
+    transition: .2s;
+}
+
+nav button:hover {
+    color: white;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.icon-btn {
+    width: 43px;
+    height: 43px;
+    border: 1px solid #444;
+    border-radius: 50%;
+    background: #292929;
+    color: white;
+    position: relative;
+}
+
+.cart-count {
+    position: absolute;
+    top: -5px;
+    right: -4px;
+    background: var(--accent);
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    font-size: 11px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* HERO */
+
+.hero {
+    min-height: 500px;
+    padding: 100px 7%;
+    display: flex;
+    align-items: center;
+    background:
+        radial-gradient(circle at 75% 40%, rgba(141,38,53,.25), transparent 30%),
+        #242424;
+}
+
+.hero-content {
+    max-width: 650px;
+}
+
+.hero-label {
+    color: #aaa;
+    letter-spacing: 4px;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: clamp(50px, 8vw, 100px);
+    line-height: .9;
+    margin-bottom: 25px;
+}
+
+.hero h1 span {
+    color: #a32e40;
+}
+
+.hero p {
+    color: #aaa;
+    font-size: 17px;
+    line-height: 1.6;
+    max-width: 500px;
+}
+
+.hero-btn {
+    margin-top: 30px;
+    padding: 15px 28px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-weight: bold;
+}
+
+.hero-btn:hover {
+    background: var(--accent-light);
+}
+
+/* CATALOG */
+
+.catalog {
+    padding: 70px 6%;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: 30px;
+}
+
+.section-title h2 {
+    font-size: 35px;
+}
+
+.section-title p {
+    color: #888;
+}
+
+.filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 30px;
+    overflow-x: auto;
+}
+
+.filter {
+    padding: 10px 17px;
+    border-radius: 30px;
+    border: 1px solid #454545;
+    background: transparent;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+.filter.active,
+.filter:hover {
+    background: white;
+    color: #222;
+}
+
+/* PRODUCTS */
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.product {
+    background: var(--card);
+    color: #222;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform .2s;
+}
+
+.product:hover {
+    transform: translateY(-5px);
+}
+
+.product-image {
+    height: 270px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: #e9e6e1;
+}
+
+.bottle {
+    width: 105px;
+    height: 175px;
+    background: linear-gradient(90deg,#181818,#555,#181818);
+    border-radius: 15px 15px 20px 20px;
+    position: relative;
+    box-shadow: 0 18px 30px rgba(0,0,0,.2);
+}
+
+.bottle::before {
+    content: "";
+    position: absolute;
+    width: 42px;
+    height: 35px;
+    top: -28px;
+    left: 31px;
+    background: #222;
+    border-radius: 5px 5px 2px 2px;
+}
+
+.bottle::after {
+    content: "AROMIO";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 70px;
+    padding: 8px 0;
+    text-align: center;
+    color: white;
+    font-size: 8px;
+    letter-spacing: 2px;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+}
+
+.product-info {
+    padding: 18px;
+}
+
+.product-brand {
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.product-name {
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.product-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 17px;
+}
+
+.price {
+    font-weight: bold;
+}
+
+.add {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 50%;
+    background: #222;
+    color: white;
+    font-size: 20px;
+}
+
+/* DRAWER */
+
+.drawer {
+    position: fixed;
+    right: -420px;
+    top: 0;
+    width: min(420px,100%);
+    height: 100%;
+    background: #202020;
+    z-index: 500;
+    transition: .3s;
+    padding: 25px;
+    box-shadow: -10px 0 40px rgba(0,0,0,.4);
+}
+
+.drawer.open {
+    right: 0;
+}
+
+.drawer-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.close {
+    border: 0;
+    background: #333;
+    color: white;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #2c2c2c;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.delete {
+    border: 0;
+    background: none;
+    color: #d65c6c;
+}
+
+.checkout {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-weight: bold;
+}
+
+/* SEARCH */
+
+.search-box {
+    display: flex;
+    gap: 8px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid #444;
+    background: #292929;
+    color: white;
+    border-radius: 8px;
+}
+
+/* FOOTER */
+
+footer {
+    margin-top: 50px;
+    border-top: 1px solid #3b3b3b;
+    padding: 40px 6%;
+    color: #777;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* MOBILE */
+
+@media(max-width:900px) {
+    nav {
+        display: none;
+    }
+
+    .products {
+        grid-template-columns: repeat(2,1fr);
+    }
+}
+
+@media(max-width:550px) {
+    header {
+        padding: 0 20px;
+    }
+
+    .hero {
+        padding: 70px 25px;
+    }
+
+    .catalog {
+        padding: 50px 20px;
+    }
+
+    .products {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .product-image {
+        height: 210px;
+    }
+
+    .bottle {
+        transform: scale(.75);
+    }
+
+    footer {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        AROMIO
+        <span>PARFUM’S</span>
+    </div>
+
+    <nav>
+        <button onclick="showCategory('all')">Каталог</button>
+        <button onclick="showCategory('women')">Женские</button>
+        <button onclick="showCategory('men')">Мужские</button>
+        <button onclick="showCategory('unisex')">Унисекс</button>
+        <button onclick="showCategory('niche')">Нишевая</button>
+        <button onclick="scrollToGifts()">Подарки</button>
+    </nav>
+
+    <div class="header-actions">
+        <button class="icon-btn" onclick="openSearch()">⌕</button>
+
+        <button class="icon-btn" onclick="openCart()">
+            🛒
+            <span class="cart-count" id="cartCount">0</span>
+        </button>
+    </div>
+
+</header>
+
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-label">
+            AROMIO PARFUM’S
+        </div>
+
+        <h1>
+            Аромат,<br>
+            который <span>остаётся.</span>
+        </h1>
+
+        <p>
+            Открой коллекцию ароматов AROMIO.
+            Найди композицию, которая подходит именно тебе.
+        </p>
+
+        <button class="hero-btn" onclick="scrollToCatalog()">
+            Смотреть каталог
+        </button>
+
+    </div>
+
+</section>
+
+
+<section class="catalog" id="catalog">
+
+    <div class="section-title">
+
+        <div>
+            <h2>Каталог</h2>
+            <p>Выбери свой аромат</p>
+        </div>
+
+    </div>
+
+
+    <div class="filters">
+
+        <button class="filter active" onclick="showCategory('all',this)">
+            Все
+        </button>
+
+        <button class="filter" onclick="showCategory('women',this)">
+            Женские
+        </button>
+
+        <button class="filter" onclick="showCategory('men',this)">
+            Мужские
+        </button>
+
+        <button class="filter" onclick="showCategory('unisex',this)">
+            Унисекс
+        </button>
+
+        <button class="filter" onclick="showCategory('niche',this)">
+            Нишевая
+        </button>
+
+    </div>
+
+
+    <div class="products" id="products"></div>
+
+</section>
+
+
+<footer>
+
+    <div>
+        <b>AROMIO</b><br>
+        <small>PARFUM’S</small>
+    </div>
+
+    <div>
+        © 2026 AROMIO
+    </div>
+
+</footer>
+
+
+<!-- CART -->
+
+<div class="drawer" id="cartDrawer">
+
+    <div class="drawer-head">
+        <h2>Корзина</h2>
+        <button class="close" onclick="closeDrawers()">×</button>
+    </div>
+
+    <div id="cartItems"></div>
+
+    <h3 id="cartTotal">Итого: 0 ₽</h3>
+
+    <button class="checkout" onclick="checkout()">
+        Оформить заказ
+    </button>
+
+</div>
+
+
+<!-- SEARCH -->
+
+<div class="drawer" id="searchDrawer">
+
+    <div class="drawer-head">
+        <h2>Поиск</h2>
+        <button class="close" onclick="closeDrawers()">×</button>
+    </div>
+
+    <div class="search-box">
+        <input
+            id="searchInput"
+            placeholder="Название аромата..."
+            oninput="searchProducts()"
+        >
+    </div>
+
+    <div id="searchResults"></div>
+
+</div>
+
+
+<script>
+
+const products = [
+
+    {
+        id:1,
+        name:"AROMIO No. 01",
+        brand:"AROMIO",
+        price:4990,
+        category:"women"
+    },
+
+    {
+        id:2,
+        name:"AROMIO No. 02",
+        brand:"AROMIO",
+        price:5490,
+        category:"men"
+    },
+
+    {
+        id:3,
+        name:"AROMIO No. 03",
+        brand:"AROMIO",
+        price:5990,
+        category:"unisex"
+    },
+
+    {
+        id:4,
+        name:"AROMIO No. 04",
+        brand:"AROMIO",
+        price:6490,
+        category:"niche"
+    },
+
+    {
+        id:5,
+        name:"AROMIO No. 05",
+        brand:"AROMIO",
+        price:4590,
+        category:"women"
+    },
+
+    {
+        id:6,
+        name:"AROMIO No. 06",
+        brand:"AROMIO",
+        price:5290,
+        category:"men"
+    },
+
+    {
+        id:7,
+        name:"AROMIO No. 07",
+        brand:"AROMIO",
+        price:6990,
+        category:"unisex"
+    },
+
+    {
+        id:8,
+        name:"AROMIO No. 08",
+        brand:"AROMIO",
+        price:7490,
+        category:"niche"
+    }
+
+];
+
+
+let cart = JSON.parse(localStorage.getItem("aromioCart")) || [];
+
+
+/* CATALOG */
+
+function renderProducts(list = products) {
+
+    const container = document.getElementById("products");
+
+    container.innerHTML = "";
+
+    list.forEach(product => {
+
+        container.innerHTML += `
+
+        <div class="product">
+
+            <div class="product-image">
+
+                <div class="bottle"></div>
+
+            </div>
+
+            <div class="product-info">
+
+                <div class="product-brand">
+                    ${product.brand}
+                </div>
+
+                <div class="product-name">
+                    ${product.name}
+                </div>
+
+                <div class="product-bottom">
+
+                    <div class="price">
+                        ${product.price.toLocaleString("ru-RU")} ₽
+                    </div>
+
+                    <button
+                        class="add"
+                        onclick="addToCart(${product.id})"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+
+/* CATEGORY */
+
+function showCategory(category, button) {
+
+    let filtered = products;
+
+    if(category !== "all") {
+        filtered = products.filter(p => p.category === category);
+    }
+
+    renderProducts(filtered);
+
+    document.querySelectorAll(".filter")
+        .forEach(b => b.classList.remove("active"));
+
+    if(button) {
+        button.classList.add("active");
+    }
+
+    scrollToCatalog();
+
+}
+
+
+/* CART */
+
+function addToCart(id) {
+
+    const product = products.find(p => p.id === id);
+
+    cart.push(product);
+
+    localStorage.setItem(
+        "aromioCart",
+        JSON.stringify(cart)
+    );
+
+    updateCart();
+
+    alert(product.name + " добавлен в корзину");
+
+}
+
+
+function removeFromCart(index) {
+
+    cart.splice(index,1);
+
+    localStorage.setItem(
+        "aromioCart",
+        JSON.stringify(cart)
+    );
+
+    updateCart();
+
+}
+
+
+function updateCart() {
+
+    document.getElementById("cartCount").textContent =
+        cart.length;
+
+    const items =
+        document.getElementById("cartItems");
+
+    items.innerHTML = "";
+
+    let total = 0;
+
+    cart.forEach((product,index) => {
+
+        total += product.price;
+
+        items.innerHTML += `
+
+        <div class="cart-item">
+
+            <div>
+                <b>${product.name}</b><br>
+                ${product.price.toLocaleString("ru-RU")} ₽
+            </div>
+
+            <button
+                class="delete"
+                onclick="removeFromCart(${index})"
+            >
+                Удалить
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+    document.getElementById("cartTotal").textContent =
+        "Итого: " + total.toLocaleString("ru-RU") + " ₽";
+
+}
+
+
+/* SEARCH */
+
+function searchProducts() {
+
+    const value =
+        document.getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    const result =
+        products.filter(p =>
+            p.name.toLowerCase().includes(value)
+        );
+
+    const container =
+        document.getElementById("searchResults");
+
+    container.innerHTML = "";
+
+    result.forEach(product => {
+
+        container.innerHTML += `
+
+        <div class="cart-item">
+
+            <div>
+                <b>${product.name}</b><br>
+                ${product.price.toLocaleString("ru-RU")} ₽
+            </div>
+
+            <button
+                class="delete"
+                onclick="addToCart(${product.id})"
+            >
+                +
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+
+/* DRAWERS */
+
+function openCart() {
+
+    closeDrawers();
+
+    document
+        .getElementById("cartDrawer")
+        .classList.add("open");
+
+}
+
+
+function openSearch() {
+
+    closeDrawers();
+
+    document
+        .getElementById("searchDrawer")
+        .classList.add("open");
+
+    document
+        .getElementById("searchInput")
+        .focus();
+
+}
+
+
+function closeDrawers() {
+
+    document
+        .querySelectorAll(".drawer")
+        .forEach(d => d.classList.remove("open"));
+
+}
+
+
+/* CHECKOUT */
+
+function checkout() {
+
+    if(cart.length === 0) {
+
+        alert("Корзина пустая");
+
+        return;
+
+    }
+
+    alert(
+        "Заказ принят! Номер заказа: ARO-" +
+        Math.floor(Math.random()*90000+10000)
+    );
+
+    cart = [];
+
+    localStorage.removeItem("aromioCart");
+
+    updateCart();
+
+    closeDrawers();
+
+}
+
+
+/* NAVIGATION */
+
+function scrollToCatalog() {
+
+    document
+        .getElementById("catalog")
+        .scrollIntoView({
+            behavior:"smooth"
+        });
+
+}
+
+
+function scrollToGifts() {
+
+    scrollToCatalog();
+
+    alert(
+        "Раздел подарков скоро будет доступен."
+    );
+
+}
+
+
+/* START */
+
+renderProducts();
+
+updateCart();
+
+</script>
+
+</body>
+</html>
