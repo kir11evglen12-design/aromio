@@ -135,12 +135,22 @@
     btn.classList.add("is-loading");
     btn.disabled = true;
 
+    const totals = Aromio.Store.getCartTotals();
+
     setTimeout(() => {
       checkoutDone = true;
       const orderNumber = "ARO-" + Math.floor(10000 + Math.random() * 90000);
+
+      Aromio.Store.addOrder({
+        number: orderNumber,
+        date: new Date().toISOString(),
+        items: totals.items.map((i) => ({ name: i.product.name, ml: i.ml, qty: i.qty, lineTotal: i.lineTotal })),
+        total: totals.total,
+      });
+
       renderSuccess(orderNumber);
       Aromio.Store.clearCart();
-      Aromio.Toast.show({ type: "success", title: "Спасибо за заказ!", message: "Номер заказа " + orderNumber });
+      if (Aromio.Effects) Aromio.Effects.confetti();
     }, 900);
   }
 

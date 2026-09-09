@@ -6,13 +6,15 @@
 (function (Aromio) {
   "use strict";
 
-  /** Derive 30ml / 50ml / 100ml prices from a 50ml base price, rounded to a "…90" ending. */
+  /** Derive 2ml / 30ml / 50ml / 100ml prices from a 50ml base price, rounded to a "…90" ending. */
   function round90(n) {
     return Math.round((n - 90) / 100) * 100 + 90;
   }
 
+  // Volumes stay in ascending ml order; index 2 (50ml) is the catalog reference tier.
   function volumesFrom(base50) {
     return [
+      { ml: 2, price: round90(base50 * 0.06), sample: true },
       { ml: 30, price: round90(base50 * 0.72) },
       { ml: 50, price: base50 },
       { ml: 100, price: round90(base50 * 1.6) },
@@ -135,11 +137,179 @@
       notes: { top: ["Инжир", "Розовый перец"], heart: ["Ирис", "Мускус"], base: ["Амбра", "Кашемировое дерево"] },
       description: "Коллекционный мускусный аромат: инжирная свежесть, пудровый ирис и бесконечный тёплый мускусно-амбровый след.",
     },
+    {
+      id: 17, code: "No. 17", name: "Iris Nocturne", category: "women", gender: "women", family: "floral",
+      price50: 5690, oldPrice50: null, badges: [], rating: 4.4, reviews: 29,
+      intensity: 3, occasions: ["evening", "office"], color: "#a8577a",
+      notes: { top: ["Бергамот", "Малина"], heart: ["Ирис", "Фиалка"], base: ["Мускус", "Ветивер"] },
+      description: "Пудровый ирис на малиново-бергамотовой искре — сдержанный вечерний аромат для города.",
+    },
+    {
+      id: 18, code: "No. 18", name: "Bianco Fiore", category: "women", gender: "women", family: "floral",
+      price50: 3990, oldPrice50: null, badges: ["new"], rating: 4.2, reviews: 18,
+      intensity: 1, occasions: ["day", "casual"], color: "#eddce0",
+      notes: { top: ["Лимон", "Пион"], heart: ["Жасмин", "Ландыш"], base: ["Белый мускус"] },
+      description: "Лёгкий белый букет пиона и ландыша — простой и свежий аромат на каждый день.",
+    },
+    {
+      id: 19, code: "No. 19", name: "Ambra Dolce", category: "women", gender: "women", family: "oriental",
+      price50: 8990, oldPrice50: null, badges: ["bestseller"], rating: 4.8, reviews: 167,
+      intensity: 4, occasions: ["evening", "special"], color: "#7a3b2e",
+      notes: { top: ["Мандарин", "Гвоздика"], heart: ["Амбра", "Роза"], base: ["Ваниль", "Сандал"] },
+      description: "Сладкая амбра с пряной гвоздикой и ванильно-сандаловым дном — для холодных вечеров.",
+    },
+    {
+      id: 20, code: "No. 20", name: "Fico di Sole", category: "women", gender: "women", family: "citrus",
+      price50: 4490, oldPrice50: 5290, badges: ["sale"], rating: 4.5, reviews: 64,
+      intensity: 2, occasions: ["day", "casual"], color: "#d8b25c",
+      notes: { top: ["Инжир", "Бергамот"], heart: ["Жасмин", "Зелёный лист"], base: ["Кедр", "Мускус"] },
+      description: "Солнечный инжир и зелёный жасмин на лёгкой кедровой базе — аромат итальянского полдня.",
+    },
+    {
+      id: 21, code: "No. 21", name: "Rosa Segreta", category: "women", gender: "women", family: "floral",
+      price50: 6990, oldPrice50: null, badges: ["limited"], rating: 4.9, reviews: 88,
+      intensity: 3, occasions: ["date", "special"], color: "#c23f56",
+      notes: { top: ["Розовый перец", "Личи"], heart: ["Дамасская роза", "Пион"], base: ["Мускус", "Кашемировое дерево"] },
+      description: "Лимитированная роза: сочный личи сверху, бархатное сердце дамасской розы, тёплый мускусный шлейф.",
+    },
+    {
+      id: 22, code: "No. 22", name: "Notte Blu", category: "women", gender: "women", family: "oriental",
+      price50: 9990, oldPrice50: null, badges: ["bestseller", "limited"], rating: 4.9, reviews: 211,
+      intensity: 5, occasions: ["evening", "special"], color: "#1c2a4a",
+      notes: { top: ["Бергамот", "Кардамон"], heart: ["Ирис", "Фиалка"], base: ["Амбра", "Ветивер"] },
+      description: "Ночной флагман линии: холодный ирис и тёплая амбра сталкиваются в глубокой, почти чёрной композиции.",
+    },
+    {
+      id: 23, code: "No. 23", name: "Cuoio Nero", category: "men", gender: "men", family: "woody",
+      price50: 6490, oldPrice50: null, badges: ["bestseller"], rating: 4.7, reviews: 132,
+      intensity: 4, occasions: ["evening", "office"], color: "#3a2a20",
+      notes: { top: ["Бергамот", "Чёрный перец"], heart: ["Кожа", "Табак"], base: ["Пачули", "Ветивер"] },
+      description: "Плотная чёрная кожа с табачным сердцем — уверенный аромат для вечерних переговоров.",
+    },
+    {
+      id: 24, code: "No. 24", name: "Marina Blu", category: "men", gender: "men", family: "citrus",
+      price50: 4290, oldPrice50: null, badges: ["new"], rating: 4.3, reviews: 22,
+      intensity: 1, occasions: ["day", "casual"], color: "#4778a6",
+      notes: { top: ["Лимон", "Морская нота"], heart: ["Розмарин", "Лаванда"], base: ["Мускус", "Амброксан"] },
+      description: "Лёгкий средиземноморский всплеск лимона и розмарина — на каждый жаркий день.",
+    },
+    {
+      id: 25, code: "No. 25", name: "Fumo di Quercia", category: "men", gender: "men", family: "woody",
+      price50: 7290, oldPrice50: 8290, badges: ["sale"], rating: 4.6, reviews: 57,
+      intensity: 4, occasions: ["evening", "special"], color: "#4e3a2a",
+      notes: { top: ["Дымная нота", "Грейпфрут"], heart: ["Дуб", "Кедр"], base: ["Ветивер", "Смола"] },
+      description: "Дымный дуб и смолистый ветивер — аромат старой библиотеки и вечернего камина.",
+    },
+    {
+      id: 26, code: "No. 26", name: "Ferro e Vetiver", category: "men", gender: "men", family: "fougere",
+      price50: 5990, oldPrice50: null, badges: [], rating: 4.4, reviews: 41,
+      intensity: 3, occasions: ["office", "casual"], color: "#52585c",
+      notes: { top: ["Мята", "Бергамот"], heart: ["Ветивер", "Герань"], base: ["Мускус", "Кедр"] },
+      description: "Металлическая свежесть мяты поверх земляного ветивера — строгий офисный характер.",
+    },
+    {
+      id: 27, code: "No. 27", name: "Tabacco Reale", category: "men", gender: "men", family: "oriental",
+      price50: 8490, oldPrice50: null, badges: ["limited", "bestseller"], rating: 4.9, reviews: 149,
+      intensity: 5, occasions: ["evening", "special"], color: "#5a3418",
+      notes: { top: ["Ром", "Корица"], heart: ["Табак", "Кожа"], base: ["Ваниль", "Пачули"] },
+      description: "Ромовый табак с кожаным сердцем — плотный лимитированный аромат для особых вечеров.",
+    },
+    {
+      id: 28, code: "No. 28", name: "Sale Marino", category: "men", gender: "men", family: "fougere",
+      price50: 4790, oldPrice50: null, badges: ["new"], rating: 4.2, reviews: 15,
+      intensity: 2, occasions: ["day", "casual"], color: "#6e8f96",
+      notes: { top: ["Морская соль", "Бергамот"], heart: ["Шалфей", "Лаванда"], base: ["Амброксан", "Кедр"] },
+      description: "Солёный бриз и шалфей — свежий будничный аромат для прогулок вдоль побережья.",
+    },
+    {
+      id: 29, code: "No. 29", name: "Neve", category: "unisex", gender: "unisex", family: "woody",
+      price50: 6290, oldPrice50: null, badges: ["new"], rating: 4.5, reviews: 33,
+      intensity: 2, occasions: ["day", "office"], color: "#cfd3d6",
+      notes: { top: ["Кардамон", "Груша"], heart: ["Кашемировое дерево", "Ирис"], base: ["Мускус", "Сандал"] },
+      description: "«Снежная» пудровая композиция: кашемировое дерево и ирис на мягком мускусном фоне.",
+    },
+    {
+      id: 30, code: "No. 30", name: "Fumo Bianco", category: "unisex", gender: "unisex", family: "oriental",
+      price50: 7990, oldPrice50: 9290, badges: ["sale"], rating: 4.7, reviews: 79,
+      intensity: 4, occasions: ["evening", "date"], color: "#8a8378",
+      notes: { top: ["Ладан", "Бергамот"], heart: ["Ладанник", "Роза"], base: ["Амбра", "Кедр"] },
+      description: "Белый дым ладана и ладанника вокруг розы — унисекс-аромат для особенных вечеров.",
+    },
+    {
+      id: 31, code: "No. 31", name: "Foglia d'Oro", category: "unisex", gender: "unisex", family: "woody",
+      price50: 9490, oldPrice50: null, badges: ["limited"], rating: 4.9, reviews: 102,
+      intensity: 4, occasions: ["special", "evening"], color: "#8c6a2f",
+      notes: { top: ["Шафран", "Мандарин"], heart: ["Сандал", "Кожа"], base: ["Амбра", "Ваниль"] },
+      description: "«Золотой лист»: шафран и сандаловая кожа в лимитированной унисекс-композиции.",
+    },
+    {
+      id: 32, code: "No. 32", name: "Acqua Chiara", category: "unisex", gender: "unisex", family: "citrus",
+      price50: 3990, oldPrice50: null, badges: [], rating: 4.1, reviews: 12,
+      intensity: 1, occasions: ["day", "casual"], color: "#9fd0c7",
+      notes: { top: ["Бергамот", "Мята"], heart: ["Нероли", "Зелёный чай"], base: ["Белый мускус"] },
+      description: "Прозрачная водяная свежесть бергамота и зелёного чая — базовый аромат на каждый день.",
+    },
+    {
+      id: 33, code: "No. 33", name: "Pietra Grigia", category: "unisex", gender: "unisex", family: "woody",
+      price50: 6790, oldPrice50: null, badges: ["bestseller"], rating: 4.6, reviews: 94,
+      intensity: 3, occasions: ["office", "casual"], color: "#6d6963",
+      notes: { top: ["Перец", "Грейпфрут"], heart: ["Ветивер", "Ирис"], base: ["Кедр", "Мускус"] },
+      description: "«Серый камень»: минеральный ветивер и пудровый ирис — сдержанный городской унисекс.",
+    },
+    {
+      id: 34, code: "No. 34", name: "Vento del Sud", category: "unisex", gender: "unisex", family: "fougere",
+      price50: 5490, oldPrice50: null, badges: ["new"], rating: 4.3, reviews: 27,
+      intensity: 2, occasions: ["casual", "date"], color: "#b7a888",
+      notes: { top: ["Бергамот", "Лаванда"], heart: ["Гелиотроп", "Миндаль"], base: ["Тонка", "Мускус"] },
+      description: "Тёплый южный ветер: миндальный гелиотроп на лавандовой свежести.",
+    },
+    {
+      id: 35, code: "No. 35", name: "Incenso Sacro", category: "niche", gender: "unisex", family: "oriental",
+      price50: 10990, oldPrice50: null, badges: ["bestseller", "limited"], rating: 4.9, reviews: 188,
+      intensity: 5, occasions: ["special", "evening"], color: "#241a14",
+      notes: { top: ["Ладан", "Шафран"], heart: ["Роза", "Уд"], base: ["Амбра", "Сандал"] },
+      description: "Флагман нишевой линии: храмовый ладан и дымный уд вокруг розы, стойкость больше суток.",
+    },
+    {
+      id: 36, code: "No. 36", name: "Giardino Segreto", category: "niche", gender: "women", family: "floral",
+      price50: 8290, oldPrice50: 9490, badges: ["sale"], rating: 4.7, reviews: 61,
+      intensity: 3, occasions: ["special", "day"], color: "#5c7048",
+      notes: { top: ["Зелёные листья", "Фрезия"], heart: ["Жасмин", "Тубероза"], base: ["Мускус", "Кедр"] },
+      description: "«Тайный сад»: зелёная фрезия и плотная тубероза — нишевой букет для особого дня.",
+    },
+    {
+      id: 37, code: "No. 37", name: "Cenere", category: "niche", gender: "men", family: "woody",
+      price50: 9990, oldPrice50: null, badges: ["limited"], rating: 4.8, reviews: 73,
+      intensity: 4, occasions: ["evening", "special"], color: "#4a4642",
+      notes: { top: ["Дымная нота", "Кардамон"], heart: ["Ветивер", "Кожа"], base: ["Пачули", "Смола"] },
+      description: "«Пепел»: обугленный ветивер и кожа — плотный лимитированный аромат для холодных вечеров.",
+    },
+    {
+      id: 38, code: "No. 38", name: "Miele Selvatico", category: "niche", gender: "women", family: "oriental",
+      price50: 7690, oldPrice50: null, badges: ["new"], rating: 4.5, reviews: 24,
+      intensity: 3, occasions: ["date", "special"], color: "#a67a2e",
+      notes: { top: ["Мёд", "Бергамот"], heart: ["Бессмертник", "Роза"], base: ["Ваниль", "Мускус"] },
+      description: "«Дикий мёд»: тягучий бессмертник и роза на ванильно-мускусном дне.",
+    },
+    {
+      id: 39, code: "No. 39", name: "Ultima Notte", category: "niche", gender: "unisex", family: "oriental",
+      price50: 11990, oldPrice50: null, badges: ["bestseller", "limited"], rating: 4.9, reviews: 230,
+      intensity: 5, occasions: ["special", "evening"], color: "#150e12",
+      notes: { top: ["Чёрный перец", "Слива"], heart: ["Уд", "Роза"], base: ["Амбра", "Пачули"] },
+      description: "«Последняя ночь»: флагман коллекции — сливовая искра, дымный уд и роза на плотной амбровой базе.",
+    },
+    {
+      id: 40, code: "No. 40", name: "Fiore di Sale", category: "niche", gender: "unisex", family: "citrus",
+      price50: 5290, oldPrice50: null, badges: ["new"], rating: 4.3, reviews: 19,
+      intensity: 2, occasions: ["day", "casual"], color: "#e8c8a0",
+      notes: { top: ["Грейпфрут", "Морская соль"], heart: ["Нероли", "Инжир"], base: ["Кедр", "Белый мускус"] },
+      description: "«Солёный цветок»: грейпфрут и нероли на кедрово-мускусной базе — нишевая цитрусовая лёгкость.",
+    },
   ];
 
   const PRODUCTS = RAW_PRODUCTS.map((p) => {
     const volumes = volumesFrom(p.price50);
-    const price = volumes[1].price;
+    const price = volumes[2].price;
     const oldPrice = p.oldPrice50 ? round90(p.oldPrice50) : null;
     return Object.assign({}, p, {
       name: p.code + " · " + p.name,

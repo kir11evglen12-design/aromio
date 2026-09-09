@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AROMIO — PARFUM'S</title>
 <meta name="description" content="AROMIO — нишевая парфюмерия. Подробное описание аромата: ноты, стойкость, объёмы и похожие композиции.">
-<meta name="theme-color" content="#242424">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%238d2635'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='58' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%238a1f2d'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='58' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bodoni+Moda:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 
 <script defer src="js/data.js"></script>
@@ -19,8 +19,10 @@
 <script defer src="js/store.js"></script>
 <script defer src="js/card.js"></script>
 <script defer src="js/app.js"></script>
+<script defer src="js/effects.js"></script>
 <script defer src="js/cart.js"></script>
 <script defer src="js/favorites.js"></script>
+<script defer src="js/profile.js"></script>
 <script defer src="js/search.js"></script>
 <script defer src="js/quiz.js"></script>
 <script defer src="js/product.js"></script>
@@ -49,6 +51,9 @@
     </nav>
 
     <div class="header-actions">
+      <button class="icon-btn" data-open="profileDrawer" aria-label="Профиль">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      </button>
       <button class="icon-btn" data-open="searchDrawer" aria-label="Поиск">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
@@ -74,6 +79,7 @@
   <a href="index.html?category=unisex#catalog">Унисекс</a>
   <a href="index.html?category=niche#catalog">Нишевая</a>
   <button data-open="quizModal">Подбор аромата</button>
+  <button data-open="profileDrawer">Профиль и заказы</button>
 </div>
 
 <main>
@@ -93,11 +99,11 @@
     <section class="accordion" id="productAccordion">
       <div class="accordion-item">
         <button type="button" class="accordion-trigger" data-accordion-trigger>Доставка и оплата<span class="accordion-icon">+</span></button>
-        <div class="accordion-panel" data-accordion-panel><div class="accordion-panel-inner">Доставка по Москве — 1–2 дня, по России — 2–5 дней. Оплата картой онлайн или при получении. Бесплатная доставка при заказе от 5 000 ₽.</div></div>
+        <div class="accordion-panel" data-accordion-panel><div class="accordion-panel-inner">Курьером СДЭК: 1–2 дня по Москве и Санкт-Петербургу, 2–7 дней по остальной России (для отдалённых регионов — до 10 дней наземным тарифом). Оплата картой онлайн или при получении. Бесплатная доставка при заказе от 5 000 ₽.</div></div>
       </div>
       <div class="accordion-item">
         <button type="button" class="accordion-trigger" data-accordion-trigger>Как выбрать объём<span class="accordion-icon">+</span></button>
-        <div class="accordion-panel" data-accordion-panel><div class="accordion-panel-inner">30 мл — чтобы протестировать аромат или взять в поездку. 50 мл — оптимальный объём для ежедневного использования на 4–6 месяцев. 100 мл — выгоднее в пересчёте на миллилитр, для тех, кто уже влюблён в аромат.</div></div>
+        <div class="accordion-panel" data-accordion-panel><div class="accordion-panel-inner">2 мл — пробник, чтобы протестировать аромат перед покупкой полного флакона. 30 мл — компактный формат для сумки или поездки. 50 мл — оптимальный объём на 4–6 месяцев ежедневного использования. 100 мл — самый выгодный в пересчёте на миллилитр для тех, кто уже влюблён в аромат.</div></div>
       </div>
       <div class="accordion-item">
         <button type="button" class="accordion-trigger" data-accordion-trigger>Состав и хранение<span class="accordion-icon">+</span></button>
@@ -136,6 +142,7 @@
           <li><button type="button" data-open="quizModal">Подбор аромата</button></li>
           <li><button type="button" data-open="favoritesDrawer">Избранное</button></li>
           <li><button type="button" data-open="cartDrawer">Корзина</button></li>
+          <li><button type="button" data-open="profileDrawer">Профиль и заказы</button></li>
         </ul>
       </div>
       <div>
@@ -171,6 +178,15 @@
     <button class="close" data-close aria-label="Закрыть">×</button>
   </div>
   <div class="drawer-scroll" id="favoritesScroll"></div>
+</div>
+
+<!-- PROFILE -->
+<div class="drawer" id="profileDrawer">
+  <div class="drawer-head">
+    <h2>Профиль</h2>
+    <button class="close" data-close aria-label="Закрыть">×</button>
+  </div>
+  <div class="drawer-scroll" id="profileScroll"></div>
 </div>
 
 <!-- SEARCH -->

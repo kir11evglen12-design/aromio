@@ -14,11 +14,15 @@
     favorites: "aromio.favorites.v1",
     promo: "aromio.promo.v1",
     newsletter: "aromio.newsletter.v1",
+    orders: "aromio.orders.v1",
+    profileName: "aromio.profileName.v1",
   };
 
   let cart = utils.getJSON(KEYS.cart, []); // [{id, ml, qty}]
   let favorites = utils.getJSON(KEYS.favorites, []); // [id, ...]
   let promoCode = utils.getJSON(KEYS.promo, null); // "AROMIO10" | null
+  let orders = utils.getJSON(KEYS.orders, []); // [{number, date, items, total}]
+  let profileName = utils.getJSON(KEYS.profileName, "");
 
   const listeners = [];
   function subscribe(fn) {
@@ -46,7 +50,7 @@
       .map((item) => {
         const product = findProduct(item.id);
         if (!product) return null;
-        const volume = product.volumes.find((v) => v.ml === item.ml) || product.volumes[1];
+        const volume = product.volumes.find((v) => v.ml === item.ml) || product.volumes[2];
         return {
           key: cartKey(item.id, item.ml),
           id: item.id,
@@ -68,7 +72,7 @@
     qty = qty || 1;
     const product = findProduct(id);
     if (!product) return;
-    const volume = product.volumes.find((v) => v.ml === ml) || product.volumes[1];
+    const volume = product.volumes.find((v) => v.ml === ml) || product.volumes[2];
 
     const existing = cart.find((c) => c.id === id && c.ml === volume.ml);
     if (existing) {
@@ -212,6 +216,27 @@
     });
   }
 
+  // -------------------------------------------------------------- orders --
+  function getOrders() {
+    return orders.slice().reverse(); // newest first
+  }
+
+  function addOrder(order) {
+    orders.push(order);
+    utils.setJSON(KEYS.orders, orders);
+    notify();
+  }
+
+  function getProfileName() {
+    return profileName;
+  }
+
+  function setProfileName(name) {
+    profileName = String(name || "").trim();
+    utils.setJSON(KEYS.profileName, profileName);
+    notify();
+  }
+
   // ---------------------------------------------------------- newsletter --
   function hasNewsletterCode() {
     return !!utils.getJSON(KEYS.newsletter, false);
@@ -236,6 +261,10 @@
     getFavorites,
     getFavoritesCount,
     toggleFavorite,
+    getOrders,
+    addOrder,
+    getProfileName,
+    setProfileName,
     hasNewsletterCode,
     grantNewsletterCode,
   };

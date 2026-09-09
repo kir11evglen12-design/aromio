@@ -58,10 +58,10 @@
 
     document.title = product.name + " — AROMIO";
 
-    const state = { ml: product.volumes[1].ml, qty: 1 };
+    const state = { ml: product.volumes[2].ml, qty: 1 };
 
     function renderDetail() {
-      const volume = product.volumes.find((v) => v.ml === state.ml) || product.volumes[1];
+      const volume = product.volumes.find((v) => v.ml === state.ml) || product.volumes[2];
       const oldPrice = oldPriceForVolume(product, volume);
       const fav = Aromio.Store.isFavorite(product.id);
 
@@ -81,7 +81,7 @@
           .map(
             (v) =>
               '<button type="button" class="volume-chip' + (v.ml === state.ml ? " active" : "") + '" data-ml="' + v.ml + '">' +
-              v.ml + " мл</button>"
+              v.ml + " мл" + (v.sample ? " · пробник" : "") + "</button>"
           )
           .join("") +
         "</div>" +

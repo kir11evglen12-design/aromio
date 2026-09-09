@@ -98,9 +98,10 @@
         const id = Number(addBtn.dataset.add);
         const ml = Number(addBtn.dataset.ml) || undefined;
         const qty = Number(addBtn.dataset.qty) || 1;
+        const product = Aromio.PRODUCTS.find((p) => p.id === id);
         Aromio.Store.addToCart(id, ml, qty);
         utils.bump(addBtn, "is-bumping");
-        utils.bump(document.querySelector('[data-open="cartDrawer"]'), "is-bumping");
+        if (Aromio.Effects) Aromio.Effects.flyToCart(addBtn, product && product.color);
         return;
       }
 

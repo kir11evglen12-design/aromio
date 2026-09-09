@@ -160,6 +160,58 @@
     return "#" + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
   }
 
+  // ---- Cyrillic <-> Latin transliteration (for cross-script search) -----
+  const CYR_TO_LAT = {
+    а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z",
+    и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r",
+    с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh",
+    щ: "shch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+  };
+  const LAT_TO_CYR_MULTI = [
+    ["shch", "щ"], ["yu", "ю"], ["ya", "я"], ["zh", "ж"], ["kh", "х"],
+    ["ts", "ц"], ["ch", "ч"], ["sh", "ш"],
+  ];
+  const LAT_TO_CYR_SINGLE = {
+    a: "а", b: "б", c: "к", d: "д", e: "е", f: "ф", g: "г", h: "х", i: "и",
+    j: "й", k: "к", l: "л", m: "м", n: "н", o: "о", p: "п", q: "к", r: "р",
+    s: "с", t: "т", u: "у", v: "в", w: "в", x: "кс", y: "и", z: "з",
+  };
+
+  function translitToLatin(str) {
+    return String(str)
+      .toLowerCase()
+      .split("")
+      .map((ch) => (CYR_TO_LAT.hasOwnProperty(ch) ? CYR_TO_LAT[ch] : ch))
+      .join("");
+  }
+
+  function translitToCyrillic(str) {
+    let s = String(str).toLowerCase();
+    LAT_TO_CYR_MULTI.forEach(([lat, cyr]) => {
+      s = s.split(lat).join(cyr);
+    });
+    return s
+      .split("")
+      .map((ch) => (LAT_TO_CYR_SINGLE.hasOwnProperty(ch) ? LAT_TO_CYR_SINGLE[ch] : ch))
+      .join("");
+  }
+
+  function levenshtein(a, b) {
+    const m = a.length;
+    const n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    let prev = Array.from({ length: n + 1 }, (_, i) => i);
+    for (let i = 1; i <= m; i++) {
+      const cur = [i];
+      for (let j = 1; j <= n; j++) {
+        cur[j] = a[i - 1] === b[j - 1] ? prev[j - 1] : 1 + Math.min(prev[j - 1], prev[j], cur[j - 1]);
+      }
+      prev = cur;
+    }
+    return prev[n];
+  }
+
   // ---- memoized perfume-bottle illustration (inline SVG, no assets) -----
   const bottleCache = new Map();
   function bottleSVG(hex, uid) {
@@ -220,5 +272,8 @@
     starsHtml,
     shadeColor,
     bottleSVG,
+    translitToLatin,
+    translitToCyrillic,
+    levenshtein,
   };
 })((window.Aromio = window.Aromio || {}));

@@ -9,8 +9,13 @@
   const RECENT_KEY = "aromio.recentSearches.v1";
   const FAMILY_TAGS = Object.keys(Aromio.FAMILY_LABELS);
 
+  // "Smart" search: honest about what it is — cross-script (RU/EN) matching via
+  // transliteration plus light typo tolerance, not a claim of literal AI/ML.
+  const haystackCache = new Map();
   function haystack(product) {
-    return [
+    if (haystackCache.has(product.id)) return haystackCache.get(product.id);
+
+    const base = [
       product.name,
       product.shortName,
       product.brand,
@@ -22,12 +27,33 @@
     ]
       .join(" ")
       .toLowerCase();
+
+    // add a Cyrillic transliteration of the Latin brand/name so a Russian
+    // query (e.g. "оникс") can find a Latin-named product (e.g. "Onyx").
+    const translit = utils.translitToCyrillic(product.shortName + " " + product.brand);
+    const hay = base + " " + translit;
+    haystackCache.set(product.id, hay);
+    return hay;
+  }
+
+  function fuzzyContains(query, hay) {
+    if (!query) return false;
+    if (hay.indexOf(query) > -1) return true;
+    if (query.length < 4) return false;
+    return hay.split(/\s+/).some(
+      (word) => word.length >= 4 && utils.levenshtein(query, word) <= Math.min(2, Math.floor(word.length * 0.34))
+    );
   }
 
   function search(query) {
     const q = query.trim().toLowerCase();
     if (!q) return [];
-    return Aromio.PRODUCTS.filter((p) => haystack(p).indexOf(q) > -1).slice(0, 8);
+    const qLatin = utils.translitToLatin(q);
+
+    return Aromio.PRODUCTS.filter((p) => {
+      const hay = haystack(p);
+      return fuzzyContains(q, hay) || (qLatin !== q && fuzzyContains(qLatin, hay));
+    }).slice(0, 8);
   }
 
   function getRecent() {

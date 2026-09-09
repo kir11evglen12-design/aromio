@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AROMIO — PARFUM'S</title>
 <meta name="description" content="AROMIO — нишевая парфюмерия. Женские, мужские, унисекс и нишевые ароматы, подбор аромата за 30 секунд, быстрая доставка.">
-<meta name="theme-color" content="#242424">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%238d2635'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='58' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%238a1f2d'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='58' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bodoni+Moda:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 
 <script defer src="js/data.js"></script>
@@ -19,10 +19,13 @@
 <script defer src="js/store.js"></script>
 <script defer src="js/card.js"></script>
 <script defer src="js/app.js"></script>
+<script defer src="js/effects.js"></script>
 <script defer src="js/cart.js"></script>
 <script defer src="js/favorites.js"></script>
+<script defer src="js/profile.js"></script>
 <script defer src="js/search.js"></script>
 <script defer src="js/quiz.js"></script>
+<script defer src="js/stories.js"></script>
 <script defer src="js/catalog.js"></script>
 <script defer src="js/home.js"></script>
 </head>
@@ -50,6 +53,9 @@
     </nav>
 
     <div class="header-actions">
+      <button class="icon-btn" data-open="profileDrawer" aria-label="Профиль">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      </button>
       <button class="icon-btn" data-open="searchDrawer" aria-label="Поиск">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
@@ -75,15 +81,20 @@
   <button data-nav-category="unisex">Унисекс</button>
   <button data-nav-category="niche">Нишевая</button>
   <button data-open="quizModal">Подбор аромата</button>
+  <button data-open="profileDrawer">Профиль и заказы</button>
 </div>
 
 <main>
 
   <section class="hero">
     <div class="hero-content">
-      <div class="hero-label">AROMIO PARFUM'S</div>
-      <h1>Аромат,<br>который <em>остаётся.</em></h1>
-      <p>16 композиций — от лёгких цитрусовых до плотных нишевых удов. Откройте коллекцию AROMIO и найдите аромат, который станет частью вашей истории.</p>
+      <div class="eyebrow">AROMIO PARFUM'S</div>
+      <h1>
+        <span class="word" style="animation-delay:.05s">Аромат,</span><br>
+        <span class="word" style="animation-delay:.18s">который</span>
+        <span class="word" style="animation-delay:.3s"><em>остаётся.</em></span>
+      </h1>
+      <p>40 композиций — от лёгких цитрусовых до плотных нишевых удов. Откройте коллекцию AROMIO и найдите аромат, который станет частью вашей истории.</p>
       <div class="hero-actions">
         <button type="button" class="btn btn--primary btn--lg" data-nav-category="all">Смотреть каталог</button>
         <button type="button" class="btn btn--outline" data-open="quizModal">Подобрать аромат</button>
@@ -91,8 +102,15 @@
       <div class="hero-rating"><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:80%">★</span> 4.8 из 5 · 1 800+ отзывов</div>
     </div>
     <div class="hero-visual">
-      <div class="glow"></div>
+      <div class="ring"></div>
+      <div class="ring ring--2"></div>
       <div id="heroBottle"></div>
+    </div>
+  </section>
+
+  <section class="stories">
+    <div class="container">
+      <div class="stories-track scroll-x" id="storiesTrack"></div>
     </div>
   </section>
 
@@ -104,16 +122,25 @@
       </div>
       <div class="usp-item reveal">
         <svg viewBox="0 0 24 24"><rect x="2" y="7" width="12" height="9"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>
-        <div><strong>Бесплатная доставка</strong><span>При заказе от 5 000 ₽</span></div>
+        <div><strong>Доставка СДЭК</strong><span>1–2 дня по Москве, 2–7 по России</span></div>
       </div>
       <div class="usp-item reveal">
         <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="1"/><path d="M3 12h18"/><path d="M12 8v12"/><path d="M8 8c-1.5 0-2.5-2.5 0-3 2 0 3 1.5 4 3-1 0-2.5 0-4 0zM16 8c1.5 0 2.5-2.5 0-3-2 0-3 1.5-4 3 1 0 2.5 0 4 0z"/></svg>
-        <div><strong>Пробники в подарок</strong><span>К каждому заказу</span></div>
+        <div><strong>Пробники от 290 ₽</strong><span>2 мл — попробовать перед покупкой</span></div>
       </div>
       <div class="usp-item reveal">
         <svg viewBox="0 0 24 24"><path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5 14a8 8 0 0013.3 3.4M19 10A8 8 0 005.7 6.6"/></svg>
         <div><strong>Лёгкий возврат</strong><span>В течение 14 дней</span></div>
       </div>
+    </div>
+  </section>
+
+  <section class="container">
+    <div class="stats-row">
+      <div class="stat-tile reveal"><span class="stat-number" data-count-to="40">0</span><span class="stat-label">ароматов</span></div>
+      <div class="stat-tile reveal"><span class="stat-number" data-count-to="1800" data-count-suffix="+">0</span><span class="stat-label">отзывов</span></div>
+      <div class="stat-tile reveal"><span class="stat-number" data-count-to="98" data-count-suffix="%">0</span><span class="stat-label">рекомендуют</span></div>
+      <div class="stat-tile reveal"><span class="stat-number" data-count-to="7" data-count-suffix=" дн.">0</span><span class="stat-label">доставка по РФ</span></div>
     </div>
   </section>
 
@@ -161,7 +188,7 @@
     <div class="container">
       <div class="section-title reveal">
         <div><h2>Каталог</h2><p>Выберите аромат под настроение и повод</p></div>
-        <span class="catalog-count" id="catalogCount">16 ароматов</span>
+        <span class="catalog-count" id="catalogCount">40 ароматов</span>
       </div>
 
       <div class="catalog-toolbar">
@@ -188,7 +215,7 @@
           <div class="toolbar-group">
             <label class="price-range-field">
               <input type="range" id="priceRange">
-              <span id="priceRangeLabel">до 8 000 ₽</span>
+              <span id="priceRangeLabel">до 12 000 ₽</span>
             </label>
             <select class="select" id="sortSelect">
               <option value="popularity">По популярности</option>
@@ -222,18 +249,43 @@
       <div class="testimonials-grid">
         <div class="testimonial-card reveal">
           <div class="product-rating"><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span></div>
-          <p>«Заказывала Rose Élixir на годовщину — аромат держится весь вечер, постоянно ловлю комплименты. Упаковка тоже на высоте.»</p>
+          <p>«Заказывала Rose Élixir на годовщину — аромат держится весь вечер, постоянно ловлю комплименты.»</p>
           <div class="testimonial-author">Александра М. <span>· Москва</span></div>
         </div>
         <div class="testimonial-card reveal">
           <div class="product-rating"><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span></div>
-          <p>«Прошёл квиз на сайте — предложили Onyx, и это прямо в точку. Теперь беру только у AROMIO.»</p>
+          <p>«Прошёл квиз на сайте — предложили Onyx, и это прямо в точку.»</p>
           <div class="testimonial-author">Дмитрий К. <span>· Санкт-Петербург</span></div>
         </div>
         <div class="testimonial-card reveal">
           <div class="product-rating"><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:80%">★</span></div>
-          <p>«Black Oud — что-то невероятное. Стойкость колоссальная, а сама текстура сайта и оформление заказа приятно удивили.»</p>
+          <p>«Black Oud — что-то невероятное. Стойкость колоссальная.»</p>
           <div class="testimonial-author">Илья В. <span>· Казань</span></div>
+        </div>
+        <div class="testimonial-card reveal">
+          <div class="product-rating"><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span></div>
+          <p>«Ambra Dolce стал моим фирменным ароматом на зиму — тёплый, обволакивающий.»</p>
+          <div class="testimonial-author">Мария Т. <span>· Екатеринбург</span></div>
+        </div>
+        <div class="testimonial-card reveal">
+          <div class="product-rating"><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:60%">★</span></div>
+          <p>«Взял Cuoio Nero на подарок отцу — теперь просит добавку. Доставка СДЭК пришла за 3 дня.»</p>
+          <div class="testimonial-author">Максим П. <span>· Новосибирск</span></div>
+        </div>
+        <div class="testimonial-card reveal">
+          <div class="product-rating"><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span></div>
+          <p>«Fiore di Sale — идеальный летний вариант, лёгкий и не приторный.»</p>
+          <div class="testimonial-author">Полина С. <span>· Сочи</span></div>
+        </div>
+        <div class="testimonial-card reveal">
+          <div class="product-rating"><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span></div>
+          <p>«Incenso Sacro — это что-то на грани искусства. Стойкость колоссальная.»</p>
+          <div class="testimonial-author">Артём Р. <span>· Москва</span></div>
+        </div>
+        <div class="testimonial-card reveal">
+          <div class="product-rating"><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:100%">★</span><span class="star" style="--fill:40%">★</span></div>
+          <p>«Взяла пробник 2 мл Bianco Fiore, влюбилась и сразу заказала полный флакон.»</p>
+          <div class="testimonial-author">Екатерина Л. <span>· Краснодар</span></div>
         </div>
       </div>
     </div>
@@ -276,6 +328,7 @@
           <li><button type="button" data-open="quizModal">Подбор аромата</button></li>
           <li><button type="button" data-open="favoritesDrawer">Избранное</button></li>
           <li><button type="button" data-open="cartDrawer">Корзина</button></li>
+          <li><button type="button" data-open="profileDrawer">Профиль и заказы</button></li>
         </ul>
       </div>
       <div>
@@ -313,6 +366,15 @@
   <div class="drawer-scroll" id="favoritesScroll"></div>
 </div>
 
+<!-- PROFILE -->
+<div class="drawer" id="profileDrawer">
+  <div class="drawer-head">
+    <h2>Профиль</h2>
+    <button class="close" data-close aria-label="Закрыть">×</button>
+  </div>
+  <div class="drawer-scroll" id="profileScroll"></div>
+</div>
+
 <!-- SEARCH -->
 <div class="overlay search-overlay" id="searchDrawer">
   <div class="search-panel">
@@ -332,6 +394,19 @@
     <button class="close" data-close aria-label="Закрыть">×</button>
     <div class="quiz-progress" id="quizProgress"><span></span></div>
     <div id="quizBody"></div>
+  </div>
+</div>
+
+<!-- STORY -->
+<div class="modal" id="storyModal">
+  <div class="modal-panel story-modal-panel">
+    <button class="close" data-close aria-label="Закрыть">×</button>
+    <div class="story-progress-row" id="storyProgressRow"></div>
+    <div class="story-slide" id="storySlideBody"></div>
+    <div class="story-nav-zones">
+      <span data-story-prev></span>
+      <span data-story-next></span>
+    </div>
   </div>
 </div>
 

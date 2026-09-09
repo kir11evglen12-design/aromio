@@ -53,7 +53,7 @@
       '<span class="price">' + utils.formatPrice(product.price) + "</span>" +
       (product.oldPrice ? '<span class="price-old">' + utils.formatPrice(product.oldPrice) + "</span>" : "") +
       "</div>" +
-      '<button type="button" class="add" data-add="' + product.id + '" data-ml="' + product.volumes[1].ml + '" aria-label="Добавить в корзину">+</button>' +
+      '<button type="button" class="add" data-add="' + product.id + '" data-ml="' + product.volumes[2].ml + '" aria-label="Добавить в корзину">+</button>' +
       "</div>" +
       "</div>" +
       "</a>" +
@@ -71,7 +71,7 @@
       '<span class="row-card-name">' + product.name + "</span>" +
       '<span class="row-card-meta">' + utils.formatPrice(product.price) + "</span>" +
       "</a>" +
-      '<button type="button" class="add add--sm" data-add="' + product.id + '" data-ml="' + product.volumes[1].ml + '" aria-label="Добавить в корзину">+</button>' +
+      '<button type="button" class="add add--sm" data-add="' + product.id + '" data-ml="' + product.volumes[2].ml + '" aria-label="Добавить в корзину">+</button>' +
       "</div>"
     );
   }
