@@ -123,7 +123,7 @@ export default function Hero({ ready }: { ready: boolean }) {
       </div>
 
       <div className="hero-stage" ref={stage}>
-        <Bottle product={byId(1)} controls="static" style={{ ["--bw" as string]: "150px", ["--bh" as string]: "268px", ["--bd" as string]: "62px" }} />
+        <Bottle product={byId(1)} style={{ ["--bw" as string]: "150px", ["--bh" as string]: "268px" }} />
       </div>
 
       <div className="hero-side">Eau de Parfum — Made in France</div>

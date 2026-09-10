@@ -12,8 +12,8 @@ import { prefersReducedMotion } from "../lib/motion";
  * survives a resize without re-deriving anything.
  */
 
-const COLS = 44;
-const ROWS = 44;
+const COLS = 38;
+const ROWS = 38;
 /** the mesh is drawn wider than the viewport so the folds never show an edge */
 const BLEED = 0.16;
 
@@ -57,46 +57,61 @@ export default function Backdrop() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
+    /* the warped points, computed once a frame and walked twice */
+    const xs = new Float32Array((COLS + 1) * (ROWS + 1));
+    const ys = new Float32Array((COLS + 1) * (ROWS + 1));
+
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
-      /* the stroke follows the theme, so read it back rather than hard-code */
-      const line = getComputedStyle(cv).getPropertyValue("--mesh").trim() || "rgba(14,14,14,.16)";
-      ctx.strokeStyle = line;
+
+      /* the stroke is a live gradient in the house colours, so the mesh is
+         coloured light rather than plain white wireframe */
+      const g = ctx.createLinearGradient(0, 0, w, h);
+      g.addColorStop(0, "rgba(120,190,255,.30)");
+      g.addColorStop(0.34, "rgba(233,206,150,.34)");
+      g.addColorStop(0.62, "rgba(226,132,166,.30)");
+      g.addColorStop(1, "rgba(150,214,190,.28)");
+      ctx.strokeStyle = g;
       ctx.lineWidth = 1;
       ctx.lineJoin = "round";
 
-      const px = (u: number) => (u * (1 + BLEED * 2) - BLEED) * w;
-      const py = (v: number) => (v * (1 + BLEED * 2) - BLEED) * h;
+      const sx = (1 + BLEED * 2) * w, ox = -BLEED * w;
+      const syy = (1 + BLEED * 2) * h, oy = -BLEED * h;
 
-      /* the field is sampled a little further down the page as you scroll,
-         so the mesh parallaxes behind the content instead of sitting still */
+      /* the field is sampled further down the page as you scroll, so the
+         mesh parallaxes behind the content instead of sitting still */
       const off = sy * 0.00016;
+
+      for (let r = 0; r <= ROWS; r++) {
+        const rowBase = r * (COLS + 1);
+        const v0 = r / ROWS + off;
+        for (let c = 0; c <= COLS; c++) {
+          const [u, v] = warp(c / COLS, v0, t);
+          xs[rowBase + c] = u * sx + ox;
+          ys[rowBase + c] = v * syy + oy;
+        }
+      }
 
       ctx.beginPath();
       for (let r = 0; r <= ROWS; r++) {
-        for (let c = 0; c <= COLS; c++) {
-          const [u, v] = warp(c / COLS, r / ROWS + off, t);
-          const x = px(u), y = py(v);
-          c === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        }
+        const rowBase = r * (COLS + 1);
+        ctx.moveTo(xs[rowBase], ys[rowBase]);
+        for (let c = 1; c <= COLS; c++) ctx.lineTo(xs[rowBase + c], ys[rowBase + c]);
       }
       for (let c = 0; c <= COLS; c++) {
-        for (let r = 0; r <= ROWS; r++) {
-          const [u, v] = warp(c / COLS, r / ROWS + off, t);
-          const x = px(u), y = py(v);
-          r === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        }
+        ctx.moveTo(xs[c], ys[c]);
+        for (let r = 1; r <= ROWS; r++) ctx.lineTo(xs[r * (COLS + 1) + c], ys[r * (COLS + 1) + c]);
       }
       ctx.stroke();
     };
 
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
-      /* 40fps is plenty for a field this slow and leaves the main thread free */
-      if (now - last < 25) return;
+      /* advance by real time, so the field travels at the same speed on a
+         60Hz and a 120Hz display instead of running twice as fast */
+      const dt = last ? Math.min(now - last, 64) : 16;
       last = now;
-      t += 0.012;
-      sy = scrollY;
+      t += dt * 0.00055;
       draw();
     };
 

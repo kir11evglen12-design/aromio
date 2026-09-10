@@ -36,8 +36,8 @@ export default function Showcase() {
           <section className={"showcase" + (dark ? " showcase--alt section--dark" : "")} key={id}>
             <div className={"showcase-visual" + (p.photo ? " showcase-visual--photo" : "")}>
               <div className="showcase-ghost" aria-hidden>{p.line}</div>
-              <div className="showcase-holder"><Bottle product={p} controls="static"
-                     style={{ ["--bw" as string]: "138px", ["--bh" as string]: "246px", ["--bd" as string]: "56px" }} /></div>
+              <div className="showcase-holder"><Bottle product={p}
+                     style={{ ["--bw" as string]: "138px", ["--bh" as string]: "246px" }} /></div>
             </div>
 
             <div className="showcase-copy">
