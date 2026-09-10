@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Heart, X } from "lucide-react";
 import { byId, CATEGORY_LABEL, money, variantOf } from "../data/products";
+import { PRODUCT_STORIES } from "../data/facts";
 import { useShop } from "../lib/shop";
 import Bottle from "./Bottle";
 import Pyramid from "./Pyramid";
@@ -15,6 +16,7 @@ export default function ProductPage() {
   useEffect(() => { setMl(variantOf(p, 100).ml); }, [p]);
 
   const variant = variantOf(p, ml);
+  const story = PRODUCT_STORIES[p.id];
 
   return (
     <div className={"product-page" + (open ? " is-open" : "")} role="dialog" aria-modal="true"
@@ -34,6 +36,16 @@ export default function ProductPage() {
             <div className="eyebrow pp-anim">{p.brand} — {p.line}</div>
             <h2 className="display pp-name pp-anim">{p.name}</h2>
             <p className="lead pp-anim">{p.desc}</p>
+
+            {story && (
+              <aside className="story pp-anim">
+                <div className="story-meta">
+                  <span>{story.year}</span>
+                  {story.nose && <span>Парфюмер — {story.nose}</span>}
+                </div>
+                <p>{story.text}</p>
+              </aside>
+            )}
 
             <div className="pp-anim"><Pyramid product={p} /></div>
 

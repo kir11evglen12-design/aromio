@@ -2259,3 +2259,90 @@ html.anim [data-reveal="fade"] { transform: none; }
 .size.is-on span { color: rgb(243 241 237 / 70%); }
 
 .card-price i { font-style: normal; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+
+/* ============================================================
+   EDITORIAL — facts and stories
+   ============================================================ */
+
+.p-tile.has-story { cursor: pointer; }
+.p-tile:disabled { cursor: default; }
+
+.p-more {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(14 14 14 / 55%);
+  color: var(--paper);
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+}
+
+.p-note:hover .p-more, .p-tile.is-open .p-more { opacity: 1; transform: none; }
+@media (hover: none) { .p-more { opacity: 1; transform: none; } }
+
+.p-tile.is-open { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.p-fact {
+  position: relative;
+  max-width: 54ch;
+  margin-top: 6px;
+  padding: 20px 44px 20px 22px;
+  background: var(--paper-2);
+  border-left: 2px solid var(--sand);
+  text-align: left;
+}
+
+.p-fact p { margin-top: 8px; font-size: 14px; line-height: 1.7; color: #4a4740; }
+
+.p-fact-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--muted);
+  transition: background 0.3s, color 0.3s;
+}
+
+.p-fact-close:hover { background: var(--ink); color: var(--paper); }
+
+.p-hint {
+  margin-top: 4px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.story {
+  margin: 26px 0 0;
+  padding: 22px 24px;
+  background: var(--paper-2);
+  border-left: 2px solid var(--sand);
+}
+
+.story-meta {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.story p { font-size: 14px; line-height: 1.75; color: #4a4740; }
+
+.house-side { display: grid; gap: 14px; }
+.house-story { font-size: 13px; line-height: 1.7; color: #5c5850; max-width: 46ch; }

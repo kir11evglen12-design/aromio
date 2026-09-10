@@ -1,4 +1,5 @@
-import { byHouse, HOUSES, money } from "../data/products";
+import { byHouse, fromPrice, HOUSES, money } from "../data/products";
+import { HOUSE_STORIES } from "../data/facts";
 import { useShop } from "../lib/shop";
 import { revealFrom, useGsap } from "../lib/motion";
 import { scrollToId } from "./Header";
@@ -26,16 +27,19 @@ export default function Lines() {
           const items = byHouse(house);
           return (
             <div className="house-row" key={house}>
-              <button className="house-title" onClick={() => { setCategory(house); scrollToId("collection"); }}>
-                <b>{house}</b>
-                <span>{items.length} ароматов</span>
-              </button>
+              <div className="house-side">
+                <button className="house-title" onClick={() => { setCategory(house); scrollToId("collection"); }}>
+                  <b>{house}</b>
+                  <span>{HOUSE_STORIES[house].founded} — {HOUSE_STORIES[house].place} — {items.length} ароматов</span>
+                </button>
+                <p className="house-story">{HOUSE_STORIES[house].text}</p>
+              </div>
 
               <div className="house-items">
                 {items.map(p => (
                   <button className="house-item" key={p.id} onClick={() => openProduct(p.id)}>
                     <span>{p.name}</span>
-                    <i>{money(p.price)}</i>
+                    <i>от {money(fromPrice(p))}</i>
                   </button>
                 ))}
               </div>
