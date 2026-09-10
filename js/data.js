@@ -55,7 +55,7 @@
     },
     {
       id: 5, code: "No. 05", name: "Velvet Bloom", category: "women", gender: "women", family: "floral",
-      price50: 4590, oldPrice50: null, badges: ["new"], rating: 4.6, reviews: 89,
+      price50: 4590, oldPrice50: null, badges: [], rating: 4.6, reviews: 89,
       intensity: 2, occasions: ["office", "casual"], color: "#c96b7c",
       notes: { top: ["Груша", "Розовый перец"], heart: ["Пион", "Ландыш"], base: ["Белый мускус"] },
       description: "Лёгкий дневной букет из груши и пиона на прозрачном мускусном фоне — для офиса и повседневной элегантности.",
@@ -69,7 +69,7 @@
     },
     {
       id: 7, code: "No. 07", name: "Skin to Skin", category: "unisex", gender: "unisex", family: "fougere",
-      price50: 6990, oldPrice50: null, badges: ["new"], rating: 4.5, reviews: 62,
+      price50: 6990, oldPrice50: null, badges: [], rating: 4.5, reviews: 62,
       intensity: 2, occasions: ["casual", "date"], color: "#a89b8a",
       notes: { top: ["Лаванда", "Бергамот"], heart: ["Гелиотроп", "Миндаль"], base: ["Тонка", "Мускус"] },
       description: "«Вторая кожа»: тёплая миндально-лавандовая фужерная композиция почти без границ — аромат, который кажется естественным.",
@@ -90,7 +90,7 @@
     },
     {
       id: 10, code: "No. 10", name: "Iron Coast", category: "men", gender: "men", family: "fougere",
-      price50: 5790, oldPrice50: null, badges: ["new"], rating: 4.4, reviews: 41,
+      price50: 5790, oldPrice50: null, badges: [], rating: 4.4, reviews: 41,
       intensity: 3, occasions: ["casual", "office"], color: "#35506b",
       notes: { top: ["Морская нота", "Грейпфрут"], heart: ["Лаванда", "Гальбанум"], base: ["Амброксан", "Кедр"] },
       description: "Свежий «прибрежный» фужер: солёная минеральность и грейпфрут сверху, амброксановый чистый шлейф — на каждый день.",
@@ -111,7 +111,7 @@
     },
     {
       id: 13, code: "No. 13", name: "Lumière", category: "women", gender: "women", family: "citrus",
-      price50: 4290, oldPrice50: null, badges: ["new"], rating: 4.5, reviews: 56,
+      price50: 4290, oldPrice50: null, badges: [], rating: 4.5, reviews: 56,
       intensity: 2, occasions: ["casual", "office"], color: "#e0a96d",
       notes: { top: ["Лимон", "Бергамот"], heart: ["Нероли", "Жасмин"], base: ["Белый мускус"] },
       description: "Солнечный цитрусовый всплеск лимона и нероли на лёгкой мускусной базе — аромат для ясных дней.",
@@ -125,7 +125,7 @@
     },
     {
       id: 15, code: "No. 15", name: "Solstice", category: "unisex", gender: "unisex", family: "citrus",
-      price50: 4890, oldPrice50: null, badges: ["new"], rating: 4.3, reviews: 34,
+      price50: 4890, oldPrice50: null, badges: [], rating: 4.3, reviews: 34,
       intensity: 2, occasions: ["casual", "date"], color: "#d9b26a",
       notes: { top: ["Мандарин", "Имбирь"], heart: ["Нероли", "Инжир"], base: ["Кедр", "Мускус"] },
       description: "Тёплый цитрусовый унисекс-аромат — имбирно-мандариновая искра и инжирная мягкость сердца.",
@@ -216,7 +216,7 @@
     },
     {
       id: 28, code: "No. 28", name: "Sale Marino", category: "men", gender: "men", family: "fougere",
-      price50: 4790, oldPrice50: null, badges: ["new"], rating: 4.2, reviews: 15,
+      price50: 4790, oldPrice50: null, badges: [], rating: 4.2, reviews: 15,
       intensity: 2, occasions: ["day", "casual"], color: "#6e8f96",
       notes: { top: ["Морская соль", "Бергамот"], heart: ["Шалфей", "Лаванда"], base: ["Амброксан", "Кедр"] },
       description: "Солёный бриз и шалфей — свежий будничный аромат для прогулок вдоль побережья.",
@@ -258,7 +258,7 @@
     },
     {
       id: 34, code: "No. 34", name: "Vento del Sud", category: "unisex", gender: "unisex", family: "fougere",
-      price50: 5490, oldPrice50: null, badges: ["new"], rating: 4.3, reviews: 27,
+      price50: 5490, oldPrice50: null, badges: [], rating: 4.3, reviews: 27,
       intensity: 2, occasions: ["casual", "date"], color: "#b7a888",
       notes: { top: ["Бергамот", "Лаванда"], heart: ["Гелиотроп", "Миндаль"], base: ["Тонка", "Мускус"] },
       description: "Тёплый южный ветер: миндальный гелиотроп на лавандовой свежести.",
