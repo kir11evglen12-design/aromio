@@ -107,4 +107,33 @@ export function revealLines(
   );
 }
 
+/**
+ * Scroll-linked drift. Unlike a reveal this is scrubbed: the element's
+ * position is a function of where the section sits in the viewport, which
+ * is what gives an Apple product page its "the page moves with you" feel.
+ */
+export function parallax(
+  targets: gsap.TweenTarget,
+  opts: { y?: number; scale?: number; trigger?: gsap.DOMTarget; scrub?: number } = {}
+): gsap.core.Tween | undefined {
+  if (prefersReducedMotion()) return;
+  const { y = -70, scale, trigger, scrub = 0.6 } = opts;
+
+  return gsap.fromTo(targets,
+    { y: -y * 0.35, ...(scale ? { scale: 1 } : {}) },
+    {
+      y,
+      ...(scale ? { scale } : {}),
+      ease: "none",
+      immediateRender: false,
+      scrollTrigger: {
+        trigger: (trigger ?? targets) as gsap.DOMTarget,
+        start: "top bottom",
+        end: "bottom top",
+        scrub
+      }
+    }
+  );
+}
+
 export { gsap, ScrollTrigger };

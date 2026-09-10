@@ -2,7 +2,7 @@ import { Heart, Plus } from "lucide-react";
 import { CATEGORY_LABEL, fromPrice, HOUSES, money, products } from "../data/products";
 import type { Category as ProductCategory } from "../data/products";
 import { useShop, visibleProducts } from "../lib/shop";
-import { gsap, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
+import { gsap, parallax, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
 import Bottle from "./Bottle";
 
 const FILTERS: (ProductCategory | "all")[] = ["all", "women", "men", "unisex", "niche"];
@@ -13,6 +13,8 @@ export default function Collection() {
 
   const scope = useGsap(() => {
     revealFrom(".collection .section-head > div > *, .filters", { stagger: 0.07 });
+    /* the headline drifts against the grid as the section passes */
+    parallax(".collection .section-head > div", { y: -46, trigger: ".collection" });
   }, []);
 
   /* re-animate the grid whenever the filter changes */

@@ -7,15 +7,18 @@
    ============================================================ */
 
 @theme {
-  --color-paper:   #f3f1ed;
-  --color-paper-2: #eae7e1;
-  --color-ink:     #0e0e0e;
-  --color-graphite:#232323;
-  --color-muted:   #8b877f;
-  --color-muted-d: #9a958c;
-  --color-sand:    #a48c6c;
-  --color-line:    rgb(14 14 14 / 14%);
-  --color-line-d:  rgb(243 241 237 / 16%);
+  /* Dark house style: near-black ground, warm off-white type, one sand
+     accent. The names keep their roles — "paper" is always the page,
+     "ink" is always what is written on it. */
+  --color-paper:   #0b0b0c;
+  --color-paper-2: #121214;
+  --color-ink:     #f2f0ec;
+  --color-graphite:#141416;
+  --color-muted:   #8c8880;
+  --color-muted-d: #6e6a64;
+  --color-sand:    #c2a173;
+  --color-line:    rgb(242 240 236 / 13%);
+  --color-line-d:  rgb(11 11 12 / 18%);
 
   --font-display: "Cormorant", Georgia, serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -64,6 +67,8 @@
 
   @media (hover: hover) and (pointer: fine) {
     html.has-cursor body { cursor: none; }
+    html.cursor-text body { cursor: text; }
+    html.has-cursor input, html.has-cursor textarea { cursor: text; }
   }
 }
 
@@ -437,7 +442,7 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
-  html.has-cursor body { cursor: auto; }
+  html.has-cursor body, html.cursor-text body { cursor: auto; }
 }
 
 
@@ -459,7 +464,12 @@
   --line: var(--color-line);
   --line-dark: var(--color-line-d);
   --dark: #0a0908;
-  --card: #f6f2ea;
+  --card: #131315;
+  /* card and control surfaces: one step up from the page */
+  --white: #141416;
+  --surface-2: #1b1b1e;
+  /* the backdrop mesh reads its stroke from here */
+  --mesh: rgb(242 240 236 / 15%);
   --font-ui: var(--font-sans);
 }
 
@@ -483,25 +493,24 @@
     z-index: 9000;
     transform: translate(-50%,-50%);
     opacity: 0;
-    transition: opacity .3s;
+    /* difference blending inverts the ring over light surfaces, so it never
+       disappears into a solid button */
+    mix-blend-mode: difference;
+    transition: opacity .25s var(--ease);
 }
 
 .cursor {
     width: 34px; height: 34px;
-    border: 1px solid rgba(14,14,14,.45);
-    transition: width .35s var(--ease), height .35s var(--ease),
-                background .35s var(--ease), border-color .35s var(--ease), opacity .3s;
+    border: 1px solid rgb(255 255 255 / 70%);
+    transition: width .4s var(--ease), height .4s var(--ease),
+                background .4s var(--ease), opacity .25s var(--ease);
 }
 
-.cursor-dot { width: 4px; height: 4px; background: var(--ink); }
+.cursor-dot { width: 4px; height: 4px; background: #fff; }
+.cursor.is-active { width: 62px; height: 62px; background: rgb(255 255 255 / 12%); }
 
-.cursor.is-active { width: 64px; height: 64px; background: rgba(14,14,14,.06); }
-.cursor.on-dark { border-color: rgba(243,241,237,.55); }
-.cursor-dot.on-dark { background: var(--paper); }
-
-@media (hover:hover) and (pointer:fine) {
-    html.anim .cursor, html.anim .cursor-dot { opacity: 1; }
-    html.anim body { cursor: none; }
+@media (hover: hover) and (pointer: fine) {
+    html.cursor-on .cursor, html.cursor-on .cursor-dot { opacity: 1; }
 }
 
 /* ============================================================
@@ -652,7 +661,7 @@
 
 .header.is-compact {
     padding: 13px var(--gutter);
-    background: rgba(243,241,237,.82);
+    background: rgb(11 11 12 / 82%);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom-color: var(--line);
@@ -701,7 +710,7 @@
     transition: background .35s var(--ease);
 }
 
-.icon-btn:hover { background: rgba(14,14,14,.06); }
+.icon-btn:hover { background: rgb(255 255 255 / 8%); }
 .icon-btn svg { width: 19px; height: 19px; }
 
 .cart-count {
@@ -1316,7 +1325,7 @@ html:not(.anim) .manifest-text .w { opacity: 1; }
     display: grid; place-items: center;
     border: 1px solid var(--line);
     border-radius: 50%;
-    background: rgba(243,241,237,.86);
+    background: rgb(20 20 22 / 86%);
     backdrop-filter: blur(10px);
     transition: background .35s, color .35s, transform .35s var(--ease);
 }
@@ -1340,9 +1349,9 @@ html:not(.anim) .manifest-text .w { opacity: 1; }
     place-items: center;
     min-height: 52vh;
     background:
-        radial-gradient(120% 80% at 50% 20%, #ffffff, transparent 60%),
-        linear-gradient(170deg, #f7f5f2, #e9e6e0);
-    border: 1px solid rgba(14,14,14,.07);
+        radial-gradient(120% 80% at 50% 18%, rgb(255 255 255 / 6%), transparent 58%),
+        linear-gradient(170deg, #1b1b1f, #0e0e10);
+    border: 1px solid rgb(242 240 236 / 12%);
     padding: 40px;
 }
 
@@ -1442,7 +1451,7 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
     place-items: center;
     font-size: 9px;
     letter-spacing: .06em;
-    color: rgba(14,14,14,.72);
+    color: rgb(11 11 12 / 78%);
     font-weight: 600;
 }
 
@@ -1663,7 +1672,7 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
     position: fixed;
     inset: 0;
     z-index: 940;
-    background: rgba(14,14,14,.42);
+    background: rgb(4 4 5 / 62%);
     backdrop-filter: blur(3px);
     opacity: 0;
     pointer-events: none;
@@ -1956,7 +1965,7 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
     transition: background .3s, transform .3s var(--ease);
 }
 
-.fav-btn:hover { background: rgba(14,14,14,.07); transform: scale(1.08); }
+.fav-btn:hover { background: rgb(255 255 255 / 10%); transform: scale(1.08); }
 .fav-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.4; }
 .fav-btn.is-on svg { fill: var(--ink); }
 
@@ -2288,8 +2297,8 @@ html.anim [data-reveal="fade"] { transform: none; }
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: rgb(14 14 14 / 55%);
-  color: var(--paper);
+  background: rgb(242 240 236 / 22%);
+  color: var(--ink);
   font-size: 10px;
   font-weight: 600;
   opacity: 0;
@@ -2360,7 +2369,7 @@ html.anim [data-reveal="fade"] { transform: none; }
 .house-story { font-size: 13px; line-height: 1.7; color: #5c5850; max-width: 46ch; }
 
 
-/* ── Плавающий фон: чёрно-белая клетка и волнистые линии ─────────────── */
+/* ── Фон: живая деформированная сетка ───────────────────────────────── */
 
 .backdrop {
     position: fixed;
@@ -2368,79 +2377,79 @@ html.anim [data-reveal="fade"] { transform: none; }
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
+    background: var(--paper);
+    --mesh: rgb(242 240 236 / 21%);
 }
 
-/* the check itself: a 64px board drifting diagonally, kept faint so type
-   stays the loudest thing on the page */
-.bd-check {
+.bd-mesh { display: block; width: 100%; height: 100%; }
+
+/* the mesh is loudest in the middle of the screen; the veil keeps type
+   readable over it without flattening the folds */
+.bd-veil {
     position: absolute;
-    inset: -70px;
+    inset: 0;
     background:
-        repeating-conic-gradient(rgba(14,14,14,.055) 0 25%, transparent 0 50%)
-        0 0 / 64px 64px;
-    mask-image: radial-gradient(120% 90% at 50% 0%, #000 15%, rgba(0,0,0,.35) 62%, transparent 92%);
-    animation: bd-drift 46s linear infinite;
+        radial-gradient(120% 78% at 50% 42%, rgb(11 11 12 / 62%), rgb(11 11 12 / 22%) 58%, transparent 100%),
+        linear-gradient(180deg, rgb(11 11 12 / 72%), transparent 22% 78%, rgb(11 11 12 / 72%));
 }
 
-.bd-waves {
-    position: absolute;
-    left: -8%;
-    top: 12%;
-    width: 116%;
-    height: 76%;
-    fill: none;
-    stroke: rgba(14,14,14,.16);
-    stroke-width: 1.1;
-    mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
-}
-
-.bd-waves path {
-    animation: bd-wave 18s ease-in-out infinite alternate;
-    animation-delay: calc(var(--i) * -1.6s);
-    opacity: .55;
-}
-
-@keyframes bd-drift {
-    to { transform: translate3d(64px, 64px, 0); }
-}
-
-@keyframes bd-wave {
-    from { transform: translate3d(-26px, 0, 0); }
-    to   { transform: translate3d(26px, -14px, 0); }
-}
-
-/* a dark section paints over the backdrop, so the light ones must stay
-   see-through for it to read at all */
+/* a light section would hide the mesh entirely, so the light ones stay clear */
 .section:not(.section--dark) { background: transparent; }
 
-@media (prefers-reduced-motion: reduce) {
-    .bd-check, .bd-waves path { animation: none; }
+/* ── Тёмный интерфейс: поверхности, которые раньше были «тёмными» ────── */
+
+.section--dark { background: var(--graphite); color: var(--ink); }
+.section--dark .lead, .section--dark p { color: var(--muted); }
+.ticker--dark { background: var(--graphite); color: var(--ink); border-color: var(--line); }
+.footer { background: #08080a; color: var(--ink); }
+.split-panel--dark { background: var(--graphite); color: var(--ink); border-color: var(--line); }
+
+/* surfaces that used to be paper-white */
+.card, .card-add, .drawer, .product-page, .header.is-stuck,
+.preloader, .toast { background-color: var(--white); }
+
+.card-media {
+    background:
+        radial-gradient(120% 90% at 50% 8%, rgb(255 255 255 / 7%), transparent 60%),
+        linear-gradient(170deg, #1c1c20, #101012);
 }
+
+.showcase-holder, .pp-media {
+    background:
+        radial-gradient(120% 80% at 50% 18%, rgb(255 255 255 / 6%), transparent 58%),
+        linear-gradient(170deg, #1b1b1f, #0e0e10);
+}
+
+.rot-btn { background: rgb(255 255 255 / 8%); border-color: var(--line); color: var(--ink); }
+.rot-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.header { background: rgb(11 11 12 / 82%); }
 
 /* ── Рамка карточки товара ───────────────────────────────────────────── */
 
 .card {
-    border: 1px solid rgba(14,14,14,.16);
-    box-shadow: 0 0 0 1px rgba(255,255,255,.9);
+    border: 1px solid rgb(242 240 236 / 16%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
 }
 
 .card:hover {
-    border-color: var(--ink);
-    box-shadow: 0 0 0 1px rgba(255,255,255,.9), 0 22px 44px -26px rgba(14,14,14,.34);
+    border-color: rgb(242 240 236 / 40%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%), 0 26px 50px -28px #000;
 }
 
-/* the inner hairline reads as a mount inside the frame */
 .card-media::after {
     content: "";
     position: absolute;
     inset: 9px;
     z-index: 2;
-    border: 1px solid rgba(14,14,14,.14);
+    border: 1px solid rgb(242 240 236 / 13%);
     pointer-events: none;
     transition: inset .55s var(--ease), border-color .4s var(--ease);
 }
 
-.card:hover .card-media::after { inset: 6px; border-color: rgba(14,14,14,.28); }
+.card:hover .card-media::after { inset: 6px; border-color: rgb(242 240 236 / 26%); }
+.card-media { border-bottom: 1px solid rgb(242 240 236 / 12%); }
 
-/* the media keeps its own line so the frame closes on all four sides */
-.card-media { border-bottom: 1px solid rgba(14,14,14,.12); }
+@media (prefers-reduced-motion: reduce) {
+    .card, .card-media, .card-media::after { transition: none; }
+}
