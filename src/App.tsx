@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ShopProvider, useShop } from "./lib/shop";
 import { useSmoothScroll } from "./lib/motion";
 
+import Backdrop from "./components/Backdrop";
 import Preloader from "./components/Preloader";
 import Cursor from "./components/Cursor";
 import Progress from "./components/Progress";
@@ -30,6 +31,7 @@ function Shell() {
 
   return (
     <>
+      <Backdrop />
       <Preloader onDone={() => setReady(true)} />
       <Progress />
       <Cursor />
