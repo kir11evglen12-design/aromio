@@ -405,7 +405,6 @@
 
   .rot-btn:hover { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); transform: scale(1.08); }
 
-  .rot-hint { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-muted); }
 }
 
 @keyframes bfloat {
@@ -1037,7 +1036,6 @@ html:not(.anim) .manifest-text .w { opacity: 1; }
 .card .viewer { --bw: 78px; --bh: 138px; --bd: 32px; }
 .card .rot-btn { width: 27px; height: 27px; }
 .card .rot-btn svg { width: 12px; height: 12px; }
-.card .rot-hint { display: none; }
 
 .card-tag {
     position: absolute;
@@ -2360,3 +2358,89 @@ html.anim [data-reveal="fade"] { transform: none; }
 
 .house-side { display: grid; gap: 14px; }
 .house-story { font-size: 13px; line-height: 1.7; color: #5c5850; max-width: 46ch; }
+
+
+/* ── Плавающий фон: чёрно-белая клетка и волнистые линии ─────────────── */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* the check itself: a 64px board drifting diagonally, kept faint so type
+   stays the loudest thing on the page */
+.bd-check {
+    position: absolute;
+    inset: -70px;
+    background:
+        repeating-conic-gradient(rgba(14,14,14,.055) 0 25%, transparent 0 50%)
+        0 0 / 64px 64px;
+    mask-image: radial-gradient(120% 90% at 50% 0%, #000 15%, rgba(0,0,0,.35) 62%, transparent 92%);
+    animation: bd-drift 46s linear infinite;
+}
+
+.bd-waves {
+    position: absolute;
+    left: -8%;
+    top: 12%;
+    width: 116%;
+    height: 76%;
+    fill: none;
+    stroke: rgba(14,14,14,.16);
+    stroke-width: 1.1;
+    mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+}
+
+.bd-waves path {
+    animation: bd-wave 18s ease-in-out infinite alternate;
+    animation-delay: calc(var(--i) * -1.6s);
+    opacity: .55;
+}
+
+@keyframes bd-drift {
+    to { transform: translate3d(64px, 64px, 0); }
+}
+
+@keyframes bd-wave {
+    from { transform: translate3d(-26px, 0, 0); }
+    to   { transform: translate3d(26px, -14px, 0); }
+}
+
+/* a dark section paints over the backdrop, so the light ones must stay
+   see-through for it to read at all */
+.section:not(.section--dark) { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+    .bd-check, .bd-waves path { animation: none; }
+}
+
+/* ── Рамка карточки товара ───────────────────────────────────────────── */
+
+.card {
+    border: 1px solid rgba(14,14,14,.16);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.9);
+}
+
+.card:hover {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.9), 0 22px 44px -26px rgba(14,14,14,.34);
+}
+
+/* the inner hairline reads as a mount inside the frame */
+.card-media::after {
+    content: "";
+    position: absolute;
+    inset: 9px;
+    z-index: 2;
+    border: 1px solid rgba(14,14,14,.14);
+    pointer-events: none;
+    transition: inset .55s var(--ease), border-color .4s var(--ease);
+}
+
+.card:hover .card-media::after { inset: 6px; border-color: rgba(14,14,14,.28); }
+
+/* the media keeps its own line so the frame closes on all four sides */
+.card-media { border-bottom: 1px solid rgba(14,14,14,.12); }

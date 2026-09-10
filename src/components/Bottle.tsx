@@ -6,7 +6,6 @@ interface Props {
   product: Product;
   /** rotation controls: hidden, shown on hover, or always visible */
   controls?: "none" | "hover" | "static";
-  hint?: boolean;
   /** css sizing overrides, e.g. { "--bw": "150px" } */
   style?: React.CSSProperties;
   className?: string;
@@ -16,7 +15,7 @@ interface Props {
  * A perfume bottle built from four CSS 3D faces. It costs a few kilobytes
  * where a WebGL scene would cost hundreds, and it can be tinted per scent.
  */
-export default function Bottle({ product, controls = "hover", hint, style, className }: Props) {
+export default function Bottle({ product, controls = "hover", style, className }: Props) {
   const [rot, setRot] = useState(0);
 
   if (product.photo) {
@@ -54,7 +53,6 @@ export default function Bottle({ product, controls = "hover", hint, style, class
           >
             <ChevronLeft size={15} strokeWidth={1.5} />
           </button>
-          {hint && <span className="rot-hint">360°</span>}
           <button
             className="rot-btn"
             onClick={e => { e.stopPropagation(); setRot(r => r + 90); }}
