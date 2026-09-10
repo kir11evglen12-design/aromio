@@ -586,6 +586,7 @@ h2.display { font-size: clamp(38px, 7vw, 104px); }
 }
 
 .b-label {
+    transition: opacity .38s var(--ease);
     position: absolute;
     left: 12%; right: 12%;
     top: 46%;
@@ -1291,6 +1292,189 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
 .pp-name { margin: 14px 0 18px; font-size: clamp(28px, 2.7vw, 44px); }
 
 /* ============================================================
+   SCENT PICKER — scroll-driven colour scene
+   ============================================================ */
+
+/* registered property so the tint can animate inside gradients */
+@property --tint {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: #b98d4e;
+}
+
+.picker {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(80px, 11vh, 140px) var(--gutter);
+    background: var(--ink);
+    color: var(--paper);
+    --tint: #c98f47;
+    transition: --tint 1s var(--ease);
+}
+
+.picker::before {
+    content: "";
+    position: absolute;
+    inset: -25%;
+    background:
+        radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--tint) 50%, transparent), transparent 46%),
+        radial-gradient(circle at 22% 74%, color-mix(in srgb, var(--tint) 26%, transparent), transparent 52%);
+    filter: blur(46px);
+    animation: preDrift 14s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+.picker-ghost {
+    position: absolute;
+    top: 46%; left: 50%;
+    transform: translate(-50%,-50%);
+    font-family: var(--font-display);
+    font-size: clamp(64px, 16vw, 240px);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: .04em;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--tint) 30%, transparent);
+    pointer-events: none;
+}
+
+.picker-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    align-items: center;
+    gap: clamp(30px, 5vw, 70px);
+}
+
+.picker-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: min(62vh, 560px);
+}
+
+.picker-stage .viewer { --bw: 128px; --bh: 226px; --bd: 52px; }
+
+/* ring of selectable scents */
+.orbit { position: absolute; inset: 0; pointer-events: none; }
+
+.orbit-dot {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 46px; height: 46px;
+    margin: -23px 0 0 -23px;
+    border-radius: 50%;
+    pointer-events: auto;
+    border: 1px solid rgba(243,241,237,.22);
+    background: var(--dot);
+    box-shadow: 0 8px 20px -8px rgba(0,0,0,.8);
+    transform: var(--pos);
+    transition: transform .55s var(--ease), border-color .4s;
+    display: grid;
+    place-items: center;
+    font-size: 9px;
+    letter-spacing: .06em;
+    color: rgba(14,14,14,.72);
+    font-weight: 600;
+}
+
+.orbit-dot::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border-radius: 50%;
+    border: 1px solid var(--paper);
+    opacity: 0;
+    transition: opacity .45s var(--ease);
+}
+
+.orbit-dot:hover { transform: var(--pos) scale(1.16); }
+.orbit-dot.is-on { transform: var(--pos) scale(1.22); }
+.orbit-dot.is-on::after { opacity: 1; }
+
+.picker-info { position: relative; z-index: 2; max-width: 460px; }
+.picker-line { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: color-mix(in srgb, var(--tint) 72%, #ffffff); }
+.picker-name { font-family: var(--font-display); font-size: clamp(32px, 4.2vw, 58px); font-weight: 300; line-height: 1.05; margin: 14px 0 18px; }
+.picker-desc { color: #a8a49b; font-size: 15px; line-height: 1.75; min-height: 82px; }
+
+.picker-notes { display: flex; gap: 10px; flex-wrap: wrap; margin: 24px 0 30px; }
+
+.picker-chip {
+    padding: 8px 15px;
+    border: 1px solid var(--line-dark);
+    border-radius: 100px;
+    font-size: 11px;
+    letter-spacing: .08em;
+    color: #cfcac1;
+}
+
+.picker-swap { transition: opacity .4s var(--ease), transform .4s var(--ease); }
+.picker-swap.is-swapping { opacity: 0; transform: translateY(12px); }
+
+@media (max-width: 980px) {
+    .picker-grid { grid-template-columns: 1fr; }
+    .picker-stage { min-height: 52vh; order: -1; }
+    .picker-info { max-width: none; }
+}
+
+@media (max-width: 620px) {
+    .orbit-dot { width: 38px; height: 38px; margin: -19px 0 0 -19px; font-size: 8px; }
+    .picker-stage .viewer { --bw: 92px; --bh: 164px; --bd: 40px; }
+    .picker-stage { min-height: 58vh; }
+}
+
+/* ============================================================
+   STICKY CHAPTERS
+   ============================================================ */
+
+.chapters { position: relative; padding: 0 var(--gutter) clamp(60px, 9vh, 120px); }
+.chapters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 5vw, 80px); align-items: start; }
+
+.chapters-visual {
+    position: sticky;
+    top: 18vh;
+    height: 64vh;
+    display: grid;
+    place-items: center;
+}
+
+.chapters-visual .viewer { --bw: 132px; --bh: 234px; --bd: 54px; }
+
+.chapter {
+    min-height: 68vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: .3;
+    transition: opacity .7s var(--ease);
+}
+
+.chapter.is-live { opacity: 1; }
+.chapter-num { font-family: var(--font-display); font-size: 15px; color: var(--sand); letter-spacing: .1em; }
+.chapter h3 { font-family: var(--font-display); font-size: clamp(28px, 3.6vw, 50px); font-weight: 300; line-height: 1.08; margin: 12px 0 18px; }
+.chapter p { color: #4a4740; font-size: 15px; line-height: 1.8; max-width: 42ch; }
+
+@media (max-width: 980px) {
+    .chapters-grid { grid-template-columns: 1fr; }
+    .chapters-visual { height: 40vh; top: 11vh; }
+    .chapter { min-height: 44vh; }
+}
+
+/* scroll progress + hero particles */
+
+.progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--ink);
+    z-index: 910;
+}
+
+#heroParticles { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+
+/* ============================================================
    NOTE PYRAMID
    ============================================================ */
 
@@ -1812,6 +1996,7 @@ html.anim [data-reveal="fade"] { transform: none; }
 
 <body>
 
+<div class="progress" id="progress" aria-hidden="true"></div>
 <div class="cursor" id="cursor" aria-hidden="true"></div>
 <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
 
@@ -1955,6 +2140,70 @@ html.anim [data-reveal="fade"] { transform: none; }
 
         <div class="grid" id="grid"></div>
 
+    </section>
+
+    <!-- SCENT PICKER -->
+    <section class="picker" id="picker">
+        <div class="picker-ghost" id="pickerGhost" aria-hidden="true">AMBRE</div>
+
+        <div class="picker-grid">
+
+            <div class="picker-stage">
+                <div id="pickerBottle"></div>
+                <div class="orbit" id="orbit" role="radiogroup" aria-label="Выбор аромата"></div>
+            </div>
+
+            <div class="picker-info">
+                <div class="eyebrow" data-reveal>Выберите свой аромат</div>
+                <div class="picker-swap" id="pickerSwap">
+                    <div class="picker-line" id="pickerLine">AROMIO — AMBRE</div>
+                    <h2 class="picker-name" id="pickerName">AROMIO No. 03</h2>
+                    <p class="picker-desc" id="pickerDesc"></p>
+                    <div class="picker-notes" id="pickerNotes"></div>
+                </div>
+                <button class="btn btn--light" id="pickerOpen">
+                    Смотреть аромат
+                    <svg class="btn__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- STICKY CHAPTERS -->
+    <section class="section chapters" id="chapters" style="padding-top:clamp(70px,9vh,120px)">
+        <div class="section-head">
+            <div>
+                <div class="eyebrow" data-reveal>Как раскрывается аромат</div>
+                <h2 class="display" data-reveal style="--d:.06s">Три акта<br><em>на коже</em></h2>
+            </div>
+        </div>
+
+        <div class="chapters-grid">
+            <div class="chapters-visual">
+                <div id="chapterBottle" data-rotate="1"></div>
+            </div>
+            <div>
+                <article class="chapter">
+                    <span class="chapter-num">01 — 0:00</span>
+                    <h3>Верхние ноты</h3>
+                    <p>Первые пятнадцать минут. Самые летучие молекулы уходят первыми — цитрус,
+                       зелень, специи. Это приветствие, а не сам аромат.</p>
+                </article>
+                <article class="chapter">
+                    <span class="chapter-num">02 — 0:30</span>
+                    <h3>Сердце</h3>
+                    <p>Через полчаса раскрывается характер: цветы, смолы, древесная тёплая середина.
+                       Именно эту фазу окружающие запоминают как «ваш запах».</p>
+                </article>
+                <article class="chapter">
+                    <span class="chapter-num">03 — 4:00</span>
+                    <h3>База</h3>
+                    <p>Шлейф держится до суток. Мускус, амбра и древесные остаются на коже и ткани,
+                       меняясь вместе с вашей температурой.</p>
+                </article>
+            </div>
+        </div>
     </section>
 
     <!-- SHOWCASE -->
@@ -2256,7 +2505,7 @@ const scrubIO = new IntersectionObserver((entries) => {
 
 function registerScrub(root = document) {
     if (reduced) return;
-    root.querySelectorAll("[data-scrub],[data-words]").forEach(el => {
+    root.querySelectorAll("[data-scrub],[data-words],[data-rotate]").forEach(el => {
         if (el.dataset.words && !el.dataset.split) splitWords(el);
         scrubIO.observe(el);
     });
@@ -2298,6 +2547,14 @@ function tick() {
                 ? 1 + centered * parseFloat(el.dataset.scrubScale)
                 : 1;
             el.style.transform = "translate3d(0," + y.toFixed(2) + "px,0) scale(" + sc.toFixed(4) + ")";
+        }
+
+        if (el.dataset.rotate) {
+            const stage = el.querySelector(".b-stage");
+            if (stage) {
+                const p = Math.min(1, Math.max(0, (vh - r.top) / (r.height + vh)));
+                stage.style.setProperty("--rot", (p * 320).toFixed(1));
+            }
         }
 
         if (el.dataset.words) {
@@ -2423,8 +2680,95 @@ document.getElementById("filters").addEventListener("click", (e) => {
    SHOWCASE + LINES + SPLIT
    ============================================================ */
 
+/* ============================================================
+   SCENT PICKER
+   ============================================================ */
+
+const house = products.filter(p => p.brand === "AROMIO");
+let pickerId = 3;
+
+function renderPicker() {
+    const orbit = document.getElementById("orbit");
+    const R = window.innerWidth < 620 ? 132 : 168;
+
+    orbit.innerHTML = house.map((p, i) => {
+        const a = (i / house.length) * 360 - 90;
+        return `<button class="orbit-dot ${p.id === pickerId ? "is-on" : ""}"
+                    data-pick="${p.id}" role="radio" aria-checked="${p.id === pickerId}"
+                    aria-label="${esc(p.name)} — ${esc(p.line)}"
+                    style="--dot:${p.tint}; --pos:rotate(${a}deg) translate(${R}px) rotate(${-a}deg)">
+                    ${esc(p.line.slice(0, 3))}
+                </button>`;
+    }).join("");
+
+    document.getElementById("pickerBottle").innerHTML =
+        bottleHTML(byId(pickerId), { controls: false });
+
+    paintPicker(byId(pickerId));
+}
+
+const byId = id => products.find(p => p.id === id);
+
+function paintPicker(p) {
+    document.getElementById("picker").style.setProperty("--tint", p.tint);
+    document.getElementById("pickerGhost").textContent = p.line;
+    document.getElementById("pickerLine").textContent = p.brand + " — " + p.line;
+    document.getElementById("pickerName").textContent = p.name;
+    document.getElementById("pickerDesc").textContent = p.desc;
+    document.getElementById("pickerNotes").innerHTML =
+        [p.notes.top, p.notes.heart, p.notes.base]
+            .join(", ").split(",").slice(0, 5)
+            .map(n => `<span class="picker-chip">${esc(n.trim())}</span>`).join("");
+}
+
+function pickScent(id) {
+    if (id === pickerId) return;
+    pickerId = id;
+    const p = byId(id);
+    const swap = document.getElementById("pickerSwap");
+
+    document.querySelectorAll("[data-pick]").forEach(d => {
+        const on = +d.dataset.pick === id;
+        d.classList.toggle("is-on", on);
+        d.setAttribute("aria-checked", String(on));
+    });
+
+    /* bottle + scene tint cross-fade, copy swaps at the midpoint */
+    document.querySelector("#pickerBottle .viewer").style.setProperty("--tint", p.tint);
+    document.getElementById("picker").style.setProperty("--tint", p.tint);
+
+    const label = document.querySelector("#pickerBottle .b-label");
+    if (label) {
+        label.style.opacity = "0";
+        setTimeout(() => { label.textContent = p.line; label.style.opacity = ""; }, 380);
+    }
+
+    swap.classList.add("is-swapping");
+    setTimeout(() => { paintPicker(p); swap.classList.remove("is-swapping"); }, 380);
+}
+
+document.getElementById("orbit").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-pick]");
+    if (b) pickScent(+b.dataset.pick);
+});
+
+document.getElementById("pickerOpen").addEventListener("click", () => openProduct(pickerId));
+
+/* sticky chapters: bottle turns with scroll, live chapter lights up */
+
+function initChapters() {
+    document.getElementById("chapterBottle").innerHTML =
+        bottleHTML(byId(2), { controls: false });
+
+    const chapters = [...document.querySelectorAll(".chapter")];
+    const liveIO = new IntersectionObserver((entries) => {
+        entries.forEach(en => en.target.classList.toggle("is-live", en.isIntersecting));
+    }, { rootMargin: "-42% 0px -42% 0px" });
+
+    chapters.forEach(c => liveIO.observe(c));
+}
+
 function renderShowcase() {
-    const byId = id => products.find(p => p.id === id);
     const picks = [byId(9), byId(4)];   // Valentino Born In Roma, AROMIO OUD
 
     document.getElementById("showcase").innerHTML = picks.map((p, i) => `
@@ -3204,16 +3548,89 @@ document.addEventListener("click", (e) => {
     }
 });
 
-/* header state */
+/* header state + reading progress */
 
 const header = document.getElementById("header");
+const progressBar = document.getElementById("progress");
 let lastScroll = -1;
 
 addEventListener("scroll", () => {
     const y = window.scrollY;
     if ((y > 40) !== (lastScroll > 40)) header.classList.toggle("is-compact", y > 40);
     lastScroll = y;
+
+    const max = document.documentElement.scrollHeight - innerHeight;
+    progressBar.style.width = (max > 0 ? (y / max) * 100 : 0) + "%";
 }, { passive: true });
+
+/* ============================================================
+   HERO PARTICLES — drifting scent motes
+   ============================================================ */
+
+function initParticles() {
+    if (reduced) return;
+
+    const stage = document.querySelector(".hero-stage");
+    if (!stage) return;
+
+    const cv = document.createElement("canvas");
+    cv.id = "heroParticles";
+    stage.appendChild(cv);
+
+    const ctx = cv.getContext("2d");
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    let w = 0, h = 0, motes = [], raf = null, live = false;
+
+    function size() {
+        const r = stage.getBoundingClientRect();
+        w = r.width; h = r.height;
+        cv.width = w * dpr; cv.height = h * dpr;
+        cv.style.width = w + "px"; cv.style.height = h + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function seed() {
+        motes = Array.from({ length: 26 }, () => ({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            r: 0.7 + Math.random() * 1.9,
+            v: 0.12 + Math.random() * 0.34,
+            drift: (Math.random() - .5) * 0.22,
+            a: 0.12 + Math.random() * 0.4,
+            phase: Math.random() * Math.PI * 2
+        }));
+    }
+
+    function frame(t) {
+        ctx.clearRect(0, 0, w, h);
+        motes.forEach(m => {
+            m.y -= m.v;
+            m.x += m.drift + Math.sin((t / 1400) + m.phase) * 0.16;
+            if (m.y < -6) { m.y = h + 6; m.x = Math.random() * w; }
+
+            const twinkle = .65 + Math.sin((t / 900) + m.phase) * .35;
+            ctx.beginPath();
+            ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(164,140,108,${(m.a * twinkle).toFixed(3)})`;
+            ctx.fill();
+        });
+        raf = live ? requestAnimationFrame(frame) : null;
+    }
+
+    size();
+    seed();
+
+    new IntersectionObserver(([en]) => {
+        live = en.isIntersecting;
+        if (live && !raf) raf = requestAnimationFrame(frame);
+    }, { threshold: 0 }).observe(stage);
+
+    let rt;
+    addEventListener("resize", () => {
+        clearTimeout(rt);
+        rt = setTimeout(() => { size(); seed(); }, 180);
+    }, { passive: true });
+}
 
 /* ============================================================
    TOAST
@@ -3267,6 +3684,9 @@ document.getElementById("heroBottle").innerHTML =
 renderTickers();
 restoreSession();
 renderGrid("all");
+renderPicker();
+initChapters();
+initParticles();
 renderShowcase();
 renderLines();
 renderSplit();
