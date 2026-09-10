@@ -1,6 +1,6 @@
 import { byId } from "../data/products";
 import { gsap, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
-import Bottle from "./Bottle";
+import Plate from "./Plate";
 
 const ACTS = [
   ["01 — 0:00", "Верхние ноты", "Первые пятнадцать минут. Самые летучие молекулы уходят первыми — цитрус, зелень, специи. Это приветствие, а не сам аромат."],
@@ -15,7 +15,7 @@ export default function Chapters() {
     if (prefersReducedMotion()) return;
 
     /* the bottle drifts up through the chapters instead of spinning */
-    gsap.to(".chapters .b-float", {
+    gsap.to(".chapters .plate", {
       y: -34, ease: "none",
       scrollTrigger: { trigger: ".chapters-grid", start: "top 70%", end: "bottom bottom", scrub: 0.8 }
     });
@@ -39,7 +39,7 @@ export default function Chapters() {
 
       <div className="chapters-grid">
         <div className="chapters-visual">
-          <Bottle product={byId(6)}
+          <Plate product={byId(6)}
                   style={{ ["--bw" as string]: "132px", ["--bh" as string]: "234px" }} />
         </div>
         <div>

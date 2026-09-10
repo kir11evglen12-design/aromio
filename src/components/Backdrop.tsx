@@ -46,7 +46,7 @@ export default function Backdrop() {
     const ctx = cv.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    const still = prefersReducedMotion();
+    const still = prefersReducedMotion() || document.documentElement.classList.contains("calm");
     let w = 0, h = 0, raf = 0, t = 0, last = 0, sy = 0;
 
     const size = () => {
@@ -143,8 +143,10 @@ export default function Backdrop() {
 
   return (
     <div className="backdrop" aria-hidden>
+      <div className="bd-aurora" />
       <canvas ref={canvas} className="bd-mesh" />
       <div className="bd-veil" />
+      <div className="bd-grain" />
     </div>
   );
 }

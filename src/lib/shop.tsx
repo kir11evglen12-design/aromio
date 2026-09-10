@@ -7,7 +7,7 @@ import type { House, Product } from "../data/products";
 import {
   loadUsers, readSession, upsertUser, writeSession
 } from "./auth";
-import type { Order, User } from "./auth";
+import type { Order, Reminder, ShelfItem, User } from "./auth";
 
 type Drawer = "cart" | "search" | "auth" | null;
 
@@ -18,6 +18,14 @@ export interface CartLine {
   price: number;
 }
 export type Filter = "all" | Product["category"] | House;
+export type Sort = "house" | "price-asc" | "price-desc" | "name";
+
+export const SORT_LABEL: Record<Sort, string> = {
+  house: "По дому",
+  "price-asc": "Сначала дешевле",
+  "price-desc": "Сначала дороже",
+  name: "По названию"
+};
 
 interface ShopValue {
   cart: CartLine[];
@@ -52,6 +60,35 @@ interface ShopValue {
 
   category: Filter;
   setCategory: (c: Filter) => void;
+  sort: Sort;
+  setSort: (s: Sort) => void;
+  noteQuery: string;
+  setNoteQuery: (q: string) => void;
+
+  /** side-by-side comparison, three bottles at most */
+  compare: number[];
+  toggleCompare: (id: number) => void;
+  clearCompare: () => void;
+  compareOpen: boolean;
+  setCompareOpen: (v: boolean) => void;
+
+  /** the last products opened, newest first */
+  recent: number[];
+
+  /** bottles the visitor says they own */
+  shelf: ShelfItem[];
+  addToShelf: (id: number, ml: number) => void;
+  removeFromShelf: (id: number) => void;
+  onShelf: (id: number) => boolean;
+
+  /** self-set reminders */
+  reminders: Reminder[];
+  addReminder: (text: string, due: string) => void;
+  toggleReminder: (id: string) => void;
+  removeReminder: (id: string) => void;
+
+  paletteOpen: boolean;
+  setPaletteOpen: (v: boolean) => void;
 
   toast: (msg: string) => void;
   toastMsg: string;
@@ -66,6 +103,7 @@ export const useShop = (): ShopValue => {
 };
 
 const CART_KEY = "aromioCart";
+const RECENT_KEY = "aromioRecent";
 
 export function ShopProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartLine[]>(() => {
@@ -83,12 +121,27 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   });
 
   const [user, setUserState] = useState<User | null>(null);
+  /* openProfile is called right after sign-in, before the memo that captured
+     `user` has re-run, so it reads the account through a ref instead */
+  const userRef = useRef<User | null>(null);
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [authIntro, setAuthIntro] = useState("Войдите, чтобы видеть историю заказов и избранные ароматы.");
   const [productId, setProductId] = useState<number | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [category, setCategory] = useState<Filter>("all");
+  const [sort, setSort] = useState<Sort>("house");
+  const [noteQuery, setNoteQuery] = useState("");
+  const [compare, setCompare] = useState<number[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [recent, setRecent] = useState<number[]>(() => {
+    try {
+      return (JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]") as number[]).slice(0, 8);
+    } catch {
+      return [];
+    }
+  });
   const [toastMsg, setToastMsg] = useState("");
   const toastTimer = useRef<number>(0);
 
@@ -97,7 +150,17 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const email = readSession();
     if (!email) return;
     const found = loadUsers().find(u => u.email === email);
-    if (found) setUserState({ ...found, orders: found.orders ?? [], favorites: found.favorites ?? [] });
+    if (found) {
+      const restored = {
+        ...found,
+        orders: found.orders ?? [],
+        favorites: found.favorites ?? [],
+        shelf: found.shelf ?? [],
+        reminders: found.reminders ?? []
+      };
+      userRef.current = restored;
+      setUserState(restored);
+    }
   }, []);
 
   useEffect(() => {
@@ -114,6 +177,10 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     document.body.classList.toggle("is-locked", locked);
   }, [drawer, productId, profileOpen]);
 
+  useEffect(() => {
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch { /* ignore */ }
+  }, [recent]);
+
   const toast = useCallback((msg: string) => {
     setToastMsg(msg);
     clearTimeout(toastTimer.current);
@@ -121,6 +188,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setUser = useCallback((u: User | null) => {
+    userRef.current = u;
     setUserState(u);
     writeSession(u ? u.email : null);
     if (u) upsertUser(u);
@@ -186,6 +254,47 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     toast(has ? "Удалено из избранного" : "Добавлено в избранное");
   }, [user, setUser, toast, openAuth]);
 
+  const toggleCompare = useCallback((id: number) => {
+    setCompare(c => {
+      if (c.includes(id)) return c.filter(x => x !== id);
+      if (c.length >= 3) { toast("В сравнении уже три аромата"); return c; }
+      return [...c, id];
+    });
+  }, [toast]);
+
+  const shelf = useMemo<ShelfItem[]>(() => user?.shelf ?? [], [user]);
+
+  const addToShelf = useCallback((id: number, ml: number) => {
+    if (!user) { openAuth("register", "Заведите аккаунт, чтобы вести свою полку."); return; }
+    if (shelf.some(s => s.id === id)) { toast("Уже на полке"); return; }
+    setUser({ ...user, shelf: [...shelf, { id, ml, opened: new Date().toISOString() }] });
+    toast("Добавлено на полку");
+  }, [user, shelf, setUser, toast, openAuth]);
+
+  const removeFromShelf = useCallback((id: number) => {
+    if (!user) return;
+    setUser({ ...user, shelf: shelf.filter(s => s.id !== id) });
+  }, [user, shelf, setUser]);
+
+  const reminders = useMemo<Reminder[]>(() => user?.reminders ?? [], [user]);
+
+  const addReminder = useCallback((text: string, due: string) => {
+    if (!user) { openAuth("register", "Напоминания хранятся в вашем аккаунте."); return; }
+    const next: Reminder = { id: "r" + Date.now(), text, due, done: false };
+    setUser({ ...user, reminders: [next, ...reminders] });
+    toast("Напоминание сохранено");
+  }, [user, reminders, setUser, toast, openAuth]);
+
+  const toggleReminder = useCallback((id: string) => {
+    if (!user) return;
+    setUser({ ...user, reminders: reminders.map(r => r.id === id ? { ...r, done: !r.done } : r) });
+  }, [user, reminders, setUser]);
+
+  const removeReminder = useCallback((id: string) => {
+    if (!user) return;
+    setUser({ ...user, reminders: reminders.filter(r => r.id !== id) });
+  }, [user, reminders, setUser]);
+
   const saveProfile = useCallback((patch: Partial<User>) => {
     if (!user) return;
     setUser({ ...user, ...patch });
@@ -229,29 +338,76 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     openAuth,
     authMode,
     setAuthMode,
-    openProduct: (id: number) => { setDrawer(null); setProductId(id); },
+    openProduct: (id: number) => {
+      setDrawer(null);
+      setProductId(id);
+      setRecent(r => [id, ...r.filter(x => x !== id)].slice(0, 8));
+    },
     closeProduct: () => setProductId(null),
     productId,
     profileOpen,
-    openProfile: () => (user ? setProfileOpen(true) : openAuth("login")),
+    openProfile: () => (userRef.current ? setProfileOpen(true) : openAuth("login")),
     closeProfile: () => setProfileOpen(false),
     category,
     setCategory,
+    sort,
+    setSort,
+    noteQuery,
+    setNoteQuery,
+    compare,
+    toggleCompare,
+    clearCompare: () => setCompare([]),
+    compareOpen,
+    setCompareOpen,
+    recent,
+    shelf,
+    addToShelf,
+    removeFromShelf,
+    onShelf: (id: number) => shelf.some(s => s.id === id),
+    reminders,
+    addReminder,
+    toggleReminder,
+    removeReminder,
+    paletteOpen,
+    setPaletteOpen,
     toast,
     toastMsg
   }), [
     cart, addToCart, removeFromCart, checkout, user, setUser, signOut, saveProfile,
     isFavorite, toggleFavorite, drawer, authIntro, openAuth, authMode, productId,
-    profileOpen, category, toast, toastMsg
+    profileOpen, category, sort, noteQuery, compare, toggleCompare, compareOpen,
+    recent, shelf, addToShelf, removeFromShelf, reminders, addReminder,
+    toggleReminder, removeReminder, paletteOpen, toast, toastMsg
   ]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-export const visibleProducts = (filter: Filter): Product[] => {
-  if (filter === "all") return products;
-  if ((HOUSES as readonly string[]).includes(filter)) {
-    return products.filter(p => p.brand === filter);
+export const visibleProducts = (
+  filter: Filter,
+  sort: Sort = "house",
+  noteQuery = ""
+): Product[] => {
+  let list = products;
+
+  if (filter !== "all") {
+    list = (HOUSES as readonly string[]).includes(filter)
+      ? list.filter(p => p.brand === filter)
+      : list.filter(p => p.category === filter);
   }
-  return products.filter(p => p.category === filter);
+
+  const q = noteQuery.trim().toLowerCase();
+  if (q) {
+    list = list.filter(p =>
+      (p.notes.top + p.notes.heart + p.notes.base).toLowerCase().includes(q));
+  }
+
+  const priced = (p: Product) => Math.min(...p.variants.map(v => v.price));
+
+  switch (sort) {
+    case "price-asc":  return [...list].sort((a, b) => priced(a) - priced(b));
+    case "price-desc": return [...list].sort((a, b) => priced(b) - priced(a));
+    case "name":       return [...list].sort((a, b) => a.name.localeCompare(b.name, "ru"));
+    default:           return list;
+  }
 };

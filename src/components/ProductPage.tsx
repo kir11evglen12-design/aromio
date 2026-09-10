@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, Heart, X } from "lucide-react";
-import { byId, CATEGORY_LABEL, money, variantOf } from "../data/products";
-import { PRODUCT_STORIES } from "../data/facts";
+import { ArrowRight, Check, Heart, Layers, X } from "lucide-react";
+import { byId, CATEGORY_LABEL, fromPrice, money, products, variantOf } from "../data/products";
+import { HOUSE_STORIES, PRODUCT_STORIES } from "../data/facts";
+import { plural } from "../lib/auth";
 import { useShop } from "../lib/shop";
-import Bottle from "./Bottle";
+import Plate from "./Plate";
 import Pyramid from "./Pyramid";
 
 export default function ProductPage() {
-  const { productId, closeProduct, addToCart, isFavorite, toggleFavorite } = useShop();
+  const {
+    productId, closeProduct, addToCart, isFavorite, toggleFavorite,
+    compare, toggleCompare, addToShelf, onShelf, openProduct
+  } = useShop();
   const open = productId !== null;
   const p = byId(productId ?? 1);
 
@@ -17,6 +21,26 @@ export default function ProductPage() {
 
   const variant = variantOf(p, ml);
   const story = PRODUCT_STORIES[p.id];
+  const house = HOUSE_STORIES[p.brand];
+
+  /* how long a bottle lasts: one press of a sprayer is about 0.1 ml */
+  const [sprays, setSprays] = useState(3);
+  const days = Math.round(variant.ml / (sprays * 0.1));
+  const months = Math.max(1, Math.round(days / 30));
+  const perWear = Math.round(variant.price / Math.max(1, days));
+
+  /* neighbours by shared notes — computed, not curated */
+  const noteSet = (x: typeof p) =>
+    (x.notes.top + "," + x.notes.heart + "," + x.notes.base)
+      .toLowerCase().split(",").map(n => n.trim()).filter(Boolean);
+
+  const mine = new Set(noteSet(p));
+  const similar = products
+    .filter(x => x.id !== p.id)
+    .map(x => ({ x, score: noteSet(x).filter(n => mine.has(n)).length }))
+    .filter(r => r.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4);
 
   return (
     <div className={"product-page" + (open ? " is-open" : "")} role="dialog" aria-modal="true"
@@ -28,7 +52,7 @@ export default function ProductPage() {
       {open && (
         <div className="pp-inner">
           <div className={"pp-visual pp-anim" + (p.photo ? " pp-visual--photo" : "")}>
-            <Bottle product={p}
+            <Plate product={p}
                     style={{ ["--bw" as string]: "150px", ["--bh" as string]: "266px" }} />
           </div>
 
@@ -88,7 +112,58 @@ export default function ProductPage() {
                       onClick={() => toggleFavorite(p.id)}>
                 <Heart size={17} strokeWidth={1.4} />
               </button>
+              <button className={"fav-btn" + (compare.includes(p.id) ? " is-on" : "")}
+                      aria-pressed={compare.includes(p.id)}
+                      aria-label="Добавить в сравнение"
+                      onClick={() => toggleCompare(p.id)}>
+                {compare.includes(p.id) ? <Check size={16} strokeWidth={2} /> : <Layers size={16} strokeWidth={1.5} />}
+              </button>
             </div>
+
+            <div className="pp-calc pp-anim">
+              <div className="pp-calc-head">
+                <span className="eyebrow">Насколько хватит</span>
+                <span className="pp-calc-val">
+                  {days} {plural(days, "день", "дня", "дней")} · около {months} {plural(months, "месяца", "месяцев", "месяцев")}
+                </span>
+              </div>
+              <label className="pp-calc-slider">
+                <span>{sprays} {plural(sprays, "нажатие", "нажатия", "нажатий")} в день</span>
+                <input type="range" min={1} max={8} value={sprays}
+                       onChange={e => setSprays(Number(e.target.value))}
+                       aria-label="Нажатий в день" />
+              </label>
+              <p className="pp-calc-note">
+                Одно нажатие пульверизатора расходует примерно 0,1 мл. При такой носке
+                флакон {variant.ml} мл обойдётся примерно в {money(perWear)} в день.
+              </p>
+              <button className="link-u" onClick={() => addToShelf(p.id, variant.ml)}>
+                {onShelf(p.id) ? "Уже на вашей полке" : "У меня есть этот флакон"}
+              </button>
+            </div>
+
+            {house && (
+              <aside className="house-story pp-anim">
+                <div className="story-meta"><span>{p.brand}</span><span>{house.founded} — {house.place}</span></div>
+                <p>{house.text}</p>
+              </aside>
+            )}
+
+            {similar.length > 0 && (
+              <div className="pp-similar pp-anim">
+                <div className="eyebrow">Рядом по нотам</div>
+                <div className="pp-similar-row">
+                  {similar.map(({ x, score }) => (
+                    <button className="pp-sim" key={x.id} onClick={() => openProduct(x.id)}>
+                      <i style={{ background: x.tint }} aria-hidden />
+                      <b>{x.name}</b>
+                      <span>{x.brand}</span>
+                      <em>{score} {plural(score, "общая нота", "общие ноты", "общих нот")} · от {money(fromPrice(x))}</em>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

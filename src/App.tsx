@@ -16,6 +16,11 @@ import Collection from "./components/Collection";
 import Showcase from "./components/Showcase";
 import SplitGender from "./components/SplitGender";
 import Lines from "./components/Lines";
+import Journal from "./components/Journal";
+import Lexicon from "./components/Lexicon";
+import Service from "./components/Service";
+import Compare from "./components/Compare";
+import CommandPalette from "./components/CommandPalette";
 import Footer from "./components/Footer";
 import ProductPage from "./components/ProductPage";
 import ProfilePage from "./components/ProfilePage";
@@ -45,15 +50,20 @@ function Shell() {
         <Chapters />
         <Collection />
         <Showcase />
+        <Journal />
         <SplitGender />
+        <Lexicon />
         <Ticker dark />
         <Lines />
+        <Service />
       </main>
 
       <Footer />
 
       <ProductPage />
       <ProfilePage />
+      <Compare />
+      <CommandPalette />
 
       <div className={"scrim" + (drawer ? " is-open" : "")} onClick={closeDrawer} />
       <CartDrawer />

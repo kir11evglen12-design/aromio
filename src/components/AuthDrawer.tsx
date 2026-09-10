@@ -54,7 +54,7 @@ export default function AuthDrawer() {
           hash: await derive(form.password, salt),
           createdAt: new Date().toISOString(),
           phone: "", city: "", address: "",
-          orders: [], favorites: []
+          orders: [], favorites: [], shelf: [], reminders: []
         };
         setUser(user);
         toast(`Добро пожаловать, ${user.name}!`);
@@ -63,7 +63,13 @@ export default function AuthDrawer() {
           setErrors({ password: "Неверный email или пароль" });
           return;
         }
-        setUser({ ...found, orders: found.orders ?? [], favorites: found.favorites ?? [] });
+        setUser({
+          ...found,
+          orders: found.orders ?? [],
+          favorites: found.favorites ?? [],
+          shelf: found.shelf ?? [],
+          reminders: found.reminders ?? []
+        });
         toast(`С возвращением, ${found.name}!`);
       }
 

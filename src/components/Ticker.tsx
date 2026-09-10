@@ -1,7 +1,25 @@
-const ITEMS = ["Eau de Parfum", "Нишевая парфюмерия", "Доставка по России", "Dior · Louis Vuitton · Valentino", "Оригинал 100%"];
+const ITEMS: [string, string][] = [
+  ["Eau de Parfum", "парфюмерная вода"],
+  ["Sillage", "шлейф"],
+  ["Dry-down", "высыхание"],
+  ["Nez", "парфюмер"],
+  ["Chypre", "шипр"],
+  ["Fougère", "фужер"],
+  ["Absolue", "абсолю"],
+  ["Flacon", "флакон"],
+  ["Macération", "мацерация"],
+  ["Grasse", "столица парфюмерии"]
+];
 
+/**
+ * The running line doubles as a lesson: every French term carries its
+ * Russian meaning, so the marquee is readable rather than decorative.
+ */
 export default function Ticker({ dark }: { dark?: boolean }) {
-  const row = ITEMS.map(t => <span key={t}>{t}<i /></span>);
+  const row = ITEMS.map(([fr, ru]) => (
+    <span key={fr}><b>{fr}</b><em>{ru}</em><i /></span>
+  ));
+
   return (
     <div className={"ticker" + (dark ? " ticker--dark" : "")}>
       <div className="ticker-row">

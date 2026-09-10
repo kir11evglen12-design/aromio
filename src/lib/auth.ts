@@ -16,6 +16,23 @@ export interface Order {
   status: string;
 }
 
+/** a shelf entry: a bottle the visitor says they own */
+export interface ShelfItem {
+  id: number;
+  ml: number;
+  /** ISO date the bottle was opened, so its age can be shown honestly */
+  opened: string;
+}
+
+/** a reminder the visitor set for themselves */
+export interface Reminder {
+  id: string;
+  text: string;
+  /** ISO date */
+  due: string;
+  done: boolean;
+}
+
 export interface User {
   email: string;
   name: string;
@@ -27,6 +44,10 @@ export interface User {
   address: string;
   orders: Order[];
   favorites: number[];
+  /** bottles the visitor marked as owned */
+  shelf?: ShelfItem[];
+  /** self-set reminders */
+  reminders?: Reminder[];
 }
 
 const USERS_KEY = "aromio_users";

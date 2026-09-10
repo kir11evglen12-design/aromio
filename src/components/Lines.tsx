@@ -11,7 +11,7 @@ export default function Lines() {
   const scope = useGsap(() => { revealFrom(".house-row", { y: 26, stagger: 0.08 }); }, []);
 
   return (
-    <section className="section" id="lines" ref={scope}>
+    <section className="section" id="houses" ref={scope}>
       <div className="section-head">
         <div>
           <div className="eyebrow">Дома</div>
