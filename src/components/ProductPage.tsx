@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { ArrowRight, Heart, X } from "lucide-react";
-import { byId, CATEGORY_LABEL, money } from "../data/products";
+import { byId, CATEGORY_LABEL, money, variantOf } from "../data/products";
 import { useShop } from "../lib/shop";
 import Bottle from "./Bottle";
 import Pyramid from "./Pyramid";
@@ -8,6 +9,12 @@ export default function ProductPage() {
   const { productId, closeProduct, addToCart, isFavorite, toggleFavorite } = useShop();
   const open = productId !== null;
   const p = byId(productId ?? 1);
+
+  /* default to the 100 ml bottle where a house offers one */
+  const [ml, setMl] = useState(() => variantOf(p, 100).ml);
+  useEffect(() => { setMl(variantOf(p, 100).ml); }, [p]);
+
+  const variant = variantOf(p, ml);
 
   return (
     <div className={"product-page" + (open ? " is-open" : "")} role="dialog" aria-modal="true"
@@ -30,17 +37,37 @@ export default function ProductPage() {
 
             <div className="pp-anim"><Pyramid product={p} /></div>
 
+            <div className="sizes pp-anim" role="radiogroup" aria-label="Объём флакона">
+              <div className="sizes-head">
+                <span className="eyebrow">Объём</span>
+                <span className="sizes-hint">{variant.ml} мл — {money(variant.price)}</span>
+              </div>
+              <div className="sizes-row">
+                {p.variants.map(v => (
+                  <button
+                    key={v.ml}
+                    role="radio"
+                    aria-checked={v.ml === ml}
+                    className={"size" + (v.ml === ml ? " is-on" : "")}
+                    onClick={() => setMl(v.ml)}
+                  >
+                    <b>{v.ml}<i>мл</i></b>
+                    <span>{money(v.price)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="pp-meta pp-anim">
-              <div><span>Объём</span><b>{p.volume}</b></div>
               <div><span>Концентрация</span><b>{p.type}</b></div>
               <div><span>Категория</span><b>{CATEGORY_LABEL[p.category]}</b></div>
               <div><span>Наличие</span><b className="pp-stock"><i />В наличии</b></div>
             </div>
 
             <div className="pp-buy pp-anim">
-              <span className="pp-price">{money(p.price)}</span>
-              <button className="btn btn--solid" onClick={() => addToCart(p.id)}>
-                В корзину
+              <span className="pp-price">{money(variant.price)}</span>
+              <button className="btn btn--solid" onClick={() => addToCart(p.id, ml)}>
+                В корзину — {variant.ml} мл
                 <ArrowRight className="btn__arrow" size={14} strokeWidth={1.4} />
               </button>
               <button className={"fav-btn" + (isFavorite(p.id) ? " is-on" : "")}

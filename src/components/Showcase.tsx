@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import { byId, money } from "../data/products";
+import { byId, fromPrice, money } from "../data/products";
 import { useShop } from "../lib/shop";
 import { gsap, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
 import Bottle from "./Bottle";
@@ -49,11 +49,11 @@ export default function Showcase() {
                 <div><span>Верхние ноты</span><b>{p.notes.top}</b></div>
                 <div><span>Сердце</span><b>{p.notes.heart}</b></div>
                 <div><span>База</span><b>{p.notes.base}</b></div>
-                <div><span>Объём</span><b>{p.volume}</b></div>
+                <div><span>Объёмы</span><b>{p.variants.map(v => v.ml).join(" / ")} мл</b></div>
               </div>
 
               <div className="showcase-foot">
-                <span className="showcase-price">{money(p.price)}</span>
+                <span className="showcase-price">от {money(fromPrice(p))}</span>
                 <button className={"btn" + (dark ? " btn--light" : "")} onClick={() => openProduct(p.id)}>
                   Смотреть аромат
                   <ArrowRight className="btn__arrow" size={14} strokeWidth={1.4} />

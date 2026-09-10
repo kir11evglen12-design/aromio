@@ -1,5 +1,5 @@
 import { Heart, Plus } from "lucide-react";
-import { CATEGORY_LABEL, HOUSES, money, products } from "../data/products";
+import { CATEGORY_LABEL, fromPrice, HOUSES, money, products } from "../data/products";
 import type { Category as ProductCategory } from "../data/products";
 import { useShop, visibleProducts } from "../lib/shop";
 import { gsap, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
@@ -76,11 +76,11 @@ export default function Collection() {
 
             <div className="card-body">
               <div>
-                <div className="card-line">{p.brand} — {p.volume}</div>
+                <div className="card-line">{p.brand} — {p.variants.map(v => v.ml).join(" / ")} мл</div>
                 <h3 className="card-name">{p.name}</h3>
                 <div className="card-notes">{p.notes.heart}</div>
               </div>
-              <div className="card-price">{money(p.price)}</div>
+              <div className="card-price"><i>от</i> {money(fromPrice(p))}</div>
             </div>
 
             <button className="card-add" aria-label={`Добавить ${p.name} в корзину`}

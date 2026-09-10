@@ -2,7 +2,7 @@ import {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState
 } from "react";
 import type { ReactNode } from "react";
-import { byId, HOUSES, products } from "../data/products";
+import { byId, HOUSES, products, variantOf } from "../data/products";
 import type { House, Product } from "../data/products";
 import {
   loadUsers, readSession, upsertUser, writeSession
@@ -10,12 +10,19 @@ import {
 import type { Order, User } from "./auth";
 
 type Drawer = "cart" | "search" | "auth" | null;
+
+/** a chosen bottle: the fragrance plus the volume the shopper picked */
+export interface CartLine {
+  product: Product;
+  ml: number;
+  price: number;
+}
 export type Filter = "all" | Product["category"] | House;
 
 interface ShopValue {
-  cart: Product[];
+  cart: CartLine[];
   cartTotal: number;
-  addToCart: (id: number) => void;
+  addToCart: (id: number, ml?: number) => void;
   removeFromCart: (index: number) => void;
   checkout: () => void;
 
@@ -61,11 +68,15 @@ export const useShop = (): ShopValue => {
 const CART_KEY = "aromioCart";
 
 export function ShopProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<Product[]>(() => {
+  const [cart, setCart] = useState<CartLine[]>(() => {
     try {
-      const raw = JSON.parse(localStorage.getItem(CART_KEY) ?? "[]") as Product[];
-      /* ids are the source of truth — prices and copy may have changed */
-      return raw.map(p => byId(p.id)).filter(Boolean);
+      const raw = JSON.parse(localStorage.getItem(CART_KEY) ?? "[]") as { id: number; ml?: number }[];
+      /* ids and volumes are stored; prices are re-read so they never go stale */
+      return raw.map(({ id, ml }) => {
+        const product = byId(id);
+        const variant = variantOf(product, ml ?? product.variants[0].ml);
+        return { product, ml: variant.ml, price: variant.price };
+      });
     } catch {
       return [];
     }
@@ -91,7 +102,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(CART_KEY, JSON.stringify(cart.map(p => ({ id: p.id }))));
+      localStorage.setItem(CART_KEY, JSON.stringify(cart.map(l => ({ id: l.product.id, ml: l.ml }))));
     } catch {
       /* ignore */
     }
@@ -115,10 +126,11 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     if (u) upsertUser(u);
   }, []);
 
-  const addToCart = useCallback((id: number) => {
-    const p = byId(id);
-    setCart(c => [...c, p]);
-    toast(`${p.name} — добавлен в корзину`);
+  const addToCart = useCallback((id: number, ml?: number) => {
+    const product = byId(id);
+    const variant = variantOf(product, ml ?? 100);
+    setCart(c => [...c, { product, ml: variant.ml, price: variant.price }]);
+    toast(`${product.brand} ${product.name}, ${variant.ml} мл — в корзине`);
   }, [toast]);
 
   const removeFromCart = useCallback((index: number) => {
@@ -142,8 +154,10 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const order: Order = {
       id: "ARO-" + Math.floor(Math.random() * 90000 + 10000),
       date: new Date().toISOString(),
-      items: cart.map(p => ({ name: p.name, brand: p.brand, price: p.price, volume: p.volume })),
-      total: cart.reduce((s, p) => s + p.price, 0),
+      items: cart.map(l => ({
+        name: l.product.name, brand: l.product.brand, price: l.price, volume: `${l.ml} мл`
+      })),
+      total: cart.reduce((sum, l) => sum + l.price, 0),
       status: "Принят"
     };
 
@@ -198,7 +212,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<ShopValue>(() => ({
     cart,
-    cartTotal: cart.reduce((s, p) => s + p.price, 0),
+    cartTotal: cart.reduce((sum, l) => sum + l.price, 0),
     addToCart,
     removeFromCart,
     checkout,

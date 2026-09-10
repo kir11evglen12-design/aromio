@@ -18,11 +18,13 @@ export default function CartDrawer() {
       <div className="drawer-body">
         {cart.length === 0
           ? <p className="empty">Пока пусто. Выберите аромат из коллекции.</p>
-          : cart.map((p, i) => (
-              <div className="row" key={`${p.id}-${i}`}>
+          : cart.map((line, i) => (
+              <div className="row" key={`${line.product.id}-${line.ml}-${i}`}>
                 <div>
-                  <div className="row-name">{p.name}</div>
-                  <div className="row-sub">{p.line} — {p.volume} — {money(p.price)}</div>
+                  <div className="row-name">{line.product.name}</div>
+                  <div className="row-sub">
+                    {line.product.brand} — {line.ml} мл — {money(line.price)}
+                  </div>
                 </div>
                 <button onClick={() => removeFromCart(i)}>Удалить</button>
               </div>

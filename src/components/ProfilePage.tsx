@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { money, products } from "../data/products";
+import { fromPrice, money, products } from "../data/products";
 import { useShop } from "../lib/shop";
 import { formatOrderDate, initials, memberSince } from "../lib/auth";
 import { scrollToId } from "./Header";
@@ -110,9 +110,9 @@ export default function ProfilePage() {
                   {favs.map(p => (
                     <button className="fav-card" key={p.id}
                             onClick={() => { closeProfile(); openProduct(p.id); }}>
-                      <span>{p.brand} — {p.volume}</span>
+                      <span>{p.brand}</span>
                       <b>{p.name}</b>
-                      <em>{money(p.price)}</em>
+                      <em>от {money(fromPrice(p))}</em>
                     </button>
                   ))}
                 </div>
