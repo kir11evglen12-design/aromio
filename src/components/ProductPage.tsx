@@ -28,8 +28,8 @@ export default function ProductPage() {
       {open && (
         <div className="pp-inner">
           <div className={"pp-visual pp-anim" + (p.photo ? " pp-visual--photo" : "")}>
-            <Bottle product={p} controls="static"
-                    style={{ ["--bw" as string]: "150px", ["--bh" as string]: "266px", ["--bd" as string]: "60px" }} />
+            <Bottle product={p}
+                    style={{ ["--bw" as string]: "150px", ["--bh" as string]: "266px" }} />
           </div>
 
           <div className="pp-copy">

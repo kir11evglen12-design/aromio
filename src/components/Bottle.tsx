@@ -1,23 +1,18 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "../data/products";
 
 interface Props {
   product: Product;
-  /** rotation controls: hidden, shown on hover, or always visible */
-  controls?: "none" | "hover" | "static";
   /** css sizing overrides, e.g. { "--bw": "150px" } */
   style?: React.CSSProperties;
   className?: string;
 }
 
 /**
- * A perfume bottle built from four CSS 3D faces. It costs a few kilobytes
- * where a WebGL scene would cost hundreds, and it can be tinted per scent.
+ * A flat bottle: one glass face, a cap and a coloured halo in the scent's
+ * own tint. No 3D transforms and no perspective — the page composites in
+ * two dimensions, which is what keeps a grid of twelve of these cheap.
  */
-export default function Bottle({ product, controls = "hover", style, className }: Props) {
-  const [rot, setRot] = useState(0);
-
+export default function Bottle({ product, style, className }: Props) {
   if (product.photo) {
     return (
       <div className={"photo " + (className ?? "")} style={style}>
@@ -31,37 +26,17 @@ export default function Bottle({ product, controls = "hover", style, className }
       className={"viewer " + (className ?? "")}
       style={{ ...style, ["--tint" as string]: product.tint }}
     >
+      <div className="b-halo" aria-hidden />
       <div className="b-float">
-        <div className="b-stage" style={{ ["--rot" as string]: rot }}>
-          <div className="b-face b-front"><span className="b-label">{product.line}</span></div>
-          <div className="b-face b-back" />
-          <div className="b-face b-side b-right" />
-          <div className="b-face b-side b-left" />
-          <div className="b-neck" />
-          <div className="b-cap" />
+        <div className="b-body">
+          <span className="b-liquid" aria-hidden />
+          <span className="b-gloss" aria-hidden />
+          <span className="b-label">{product.line}</span>
         </div>
+        <span className="b-neck" aria-hidden />
+        <span className="b-cap" aria-hidden />
       </div>
-
       <div className="b-shadow" aria-hidden />
-
-      {controls !== "none" && (
-        <div className={"rotate-ui" + (controls === "static" ? " is-static" : "")}>
-          <button
-            className="rot-btn"
-            onClick={e => { e.stopPropagation(); setRot(r => r - 90); }}
-            aria-label={`Повернуть ${product.name} влево`}
-          >
-            <ChevronLeft size={15} strokeWidth={1.5} />
-          </button>
-          <button
-            className="rot-btn"
-            onClick={e => { e.stopPropagation(); setRot(r => r + 90); }}
-            aria-label={`Повернуть ${product.name} вправо`}
-          >
-            <ChevronRight size={15} strokeWidth={1.5} />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

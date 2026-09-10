@@ -14,8 +14,9 @@ export default function Chapters() {
     revealFrom(".chapters .section-head > div > *", { stagger: 0.08 });
     if (prefersReducedMotion()) return;
 
-    gsap.to(".chapters .b-stage", {
-      ["--rot" as string]: 320, ease: "none",
+    /* the bottle drifts up through the chapters instead of spinning */
+    gsap.to(".chapters .b-float", {
+      y: -34, ease: "none",
       scrollTrigger: { trigger: ".chapters-grid", start: "top 70%", end: "bottom bottom", scrub: 0.8 }
     });
 
@@ -38,8 +39,8 @@ export default function Chapters() {
 
       <div className="chapters-grid">
         <div className="chapters-visual">
-          <Bottle product={byId(6)} controls="none"
-                  style={{ ["--bw" as string]: "132px", ["--bh" as string]: "234px", ["--bd" as string]: "54px" }} />
+          <Bottle product={byId(6)}
+                  style={{ ["--bw" as string]: "132px", ["--bh" as string]: "234px" }} />
         </div>
         <div>
           {ACTS.map(([num, title, body]) => (

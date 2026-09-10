@@ -44,8 +44,8 @@ export default function Picker() {
           <Bottle
             key={active.id}
             product={active}
-            controls="none"
-            style={{ ["--bw" as string]: "128px", ["--bh" as string]: "226px", ["--bd" as string]: "52px" }}
+           
+            style={{ ["--bw" as string]: "128px", ["--bh" as string]: "226px" }}
           />
 
           <div className="orbit" role="radiogroup" aria-label="Выбор аромата">

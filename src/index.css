@@ -14,9 +14,9 @@
   --color-paper-2: #121214;
   --color-ink:     #f2f0ec;
   --color-graphite:#141416;
-  --color-muted:   #8c8880;
-  --color-muted-d: #6e6a64;
-  --color-sand:    #c2a173;
+  --color-muted:   #b4afa6;
+  --color-muted-d: #8d887f;
+  --color-sand:    #e0bb7f;
   --color-line:    rgb(242 240 236 / 13%);
   --color-line-d:  rgb(11 11 12 / 18%);
 
@@ -101,7 +101,7 @@
     font-size: clamp(15px, 1.15vw, 17px);
     font-weight: 300;
     line-height: 1.75;
-    color: #4a4740;
+    color: #cec9c0;
     max-width: 46ch;
   }
 
@@ -225,7 +225,7 @@
 }
 
 /* ============================================================
-   CSS BOTTLE — a lightweight stand-in for a 3D render
+   FLAT BOTTLE — one face, one halo, no 3D
    ============================================================ */
 
 @layer components {
@@ -233,74 +233,63 @@
     position: relative;
     display: grid;
     place-items: center;
-    perspective: 1200px;
     padding-top: calc(var(--bh) * 0.26);
     padding-bottom: calc(var(--bh) * 0.26);
     --bw: 108px;
     --bh: 190px;
-    --bd: 44px;
     --tint: #b98d4e;
     transition: --tint 1s var(--ease);
   }
 
-  .b-float {
-    width: var(--bw);
-    height: var(--bh);
-    transform-style: preserve-3d;
-    animation: bfloat 7s ease-in-out infinite;
+  /* the scent's colour, thrown on the wall behind the glass */
+  .b-halo {
+    position: absolute;
+    width: calc(var(--bw) * 2.6);
+    height: calc(var(--bw) * 2.6);
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--tint) 0%, rgb(0 0 0 / 0%) 62%);
+    opacity: .38;
+    filter: blur(6px);
+    transition: opacity .6s var(--ease), transform .6s var(--ease);
   }
 
-  .b-stage {
+  .card:hover .b-halo { opacity: .62; transform: scale(1.08); }
+
+  .b-float {
     position: relative;
     width: var(--bw);
     height: var(--bh);
-    transform-style: preserve-3d;
-    transform: rotateX(-6deg) rotateY(calc(var(--rot, 0) * 1deg));
-    transition: transform 0.9s var(--ease);
+    animation: bfloat 7s ease-in-out infinite;
+    will-change: transform;
   }
 
-  .b-face {
+  .b-body {
     position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    border-radius: 4px 4px 16px 16px;
+    inset: 0;
+    border-radius: 5px 5px 17px 17px;
     overflow: hidden;
-  }
-
-  .b-front, .b-back {
-    width: var(--bw);
-    transform: translateZ(calc(var(--bd) / 2));
-    background:
-      linear-gradient(100deg,
-        rgb(255 255 255 / 30%) 0 5%,
-        rgb(255 255 255 / 0%) 11% 21%,
-        rgb(255 255 255 / 15%) 25% 29%,
-        rgb(255 255 255 / 0%) 34%),
-      linear-gradient(90deg, #0b0b0b, #45443f 24%, #1c1c1a 52%, #3d3c37 78%, #0b0b0b);
+    background: linear-gradient(92deg, #0b0b0b, #3f3e3a 26%, #1a1a18 54%, #383733 80%, #0b0b0b);
     box-shadow: inset 0 -30px 40px rgb(0 0 0 / 50%);
   }
 
-  .b-back { transform: rotateY(180deg) translateZ(calc(var(--bd) / 2)); }
-
-  .b-side {
-    width: var(--bd);
-    left: calc((var(--bw) - var(--bd)) / 2);
-    background: linear-gradient(90deg, #060606, #2e2d29 55%, #060606);
-    box-shadow: inset 0 -24px 34px rgb(0 0 0 / 55%);
+  /* the juice, in the scent's own colour */
+  .b-liquid {
+    position: absolute;
+    inset: 42% 0 0 0;
+    background: linear-gradient(180deg, transparent, var(--tint) 24%, var(--tint));
+    opacity: .78;
   }
 
-  .b-right { transform: rotateY(90deg) translateZ(calc(var(--bw) / 2)); }
-  .b-left  { transform: rotateY(-90deg) translateZ(calc(var(--bw) / 2)); }
-
-  .b-face::after {
-    content: "";
+  /* a single specular streak reads as glass */
+  .b-gloss {
     position: absolute;
-    inset: auto 0 0 0;
-    height: 58%;
-    background: linear-gradient(180deg, transparent, var(--tint) 26%, var(--tint));
-    opacity: 0.5;
-    mix-blend-mode: screen;
+    inset: 0;
+    background:
+      linear-gradient(100deg,
+        rgb(255 255 255 / 34%) 0 5%,
+        rgb(255 255 255 / 0%) 11% 22%,
+        rgb(255 255 255 / 16%) 26% 30%,
+        rgb(255 255 255 / 0%) 35%);
   }
 
   .b-label {
@@ -312,13 +301,12 @@
     padding: 7px 0;
     text-align: center;
     font-size: 8px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.3em;
     text-indent: 0.3em;
-    color: rgb(243 241 237 / 86%);
-    border-top: 1px solid rgb(243 241 237 / 32%);
-    border-bottom: 1px solid rgb(243 241 237 / 32%);
-    transition: opacity 0.38s var(--ease);
+    color: rgb(255 255 255 / 94%);
+    border-top: 1px solid rgb(255 255 255 / 42%);
+    border-bottom: 1px solid rgb(255 255 255 / 42%);
   }
 
   .b-neck {
@@ -346,28 +334,25 @@
   .b-shadow {
     position: absolute;
     bottom: 6%;
-    left: 50%;
     width: calc(var(--bw) * 1.5);
     height: calc(var(--bw) * 0.3);
-    margin-left: calc(var(--bw) * -0.75);
-    background: radial-gradient(ellipse at center, rgb(14 14 14 / 30%), transparent 68%);
+    background: radial-gradient(ellipse at center, rgb(0 0 0 / 62%), transparent 68%);
     filter: blur(7px);
     animation: bshadow 7s ease-in-out infinite;
   }
 
-  .section--dark .b-shadow,
-  .picker .b-shadow {
-    background: radial-gradient(ellipse at center, rgb(0 0 0 / 60%), transparent 68%);
-  }
-
-  /* photographed products */
+  /* photographed products ship on a white studio sweep, so they sit on a
+     light panel rather than being blended into the dark page */
   .photo {
     position: absolute;
-    inset: 0;
+    inset: 8%;
     display: grid;
     place-items: center;
-    padding: 3%;
+    padding: 6%;
+    border-radius: 3px;
+    background: linear-gradient(170deg, #fbfaf8, #ece9e3);
     animation: bfloat 8s ease-in-out infinite;
+    will-change: transform;
   }
 
   .photo img {
@@ -376,40 +361,8 @@
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    /* the shots ship on a white studio sweep */
     mix-blend-mode: multiply;
   }
-
-  .rotate-ui {
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 3;
-    opacity: 0;
-    transition: opacity 0.45s var(--ease);
-  }
-
-  .card:hover .rotate-ui, .rotate-ui.is-static { opacity: 1; }
-  @media (hover: none) { .rotate-ui { opacity: 1; } }
-
-  .rot-btn {
-    width: 34px;
-    height: 34px;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--color-line);
-    border-radius: 50%;
-    background: rgb(255 255 255 / 70%);
-    backdrop-filter: blur(6px);
-    transition: background 0.3s, transform 0.3s var(--ease), color 0.3s;
-  }
-
-  .rot-btn:hover { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); transform: scale(1.08); }
-
 }
 
 @keyframes bfloat {
@@ -844,7 +797,7 @@ html:not(.anim) .line > span { transform: none; }
     min-height: 46vh;
 }
 
-.hero-stage .viewer { --bw: 150px; --bh: 268px; --bd: 62px; }
+.hero-stage .viewer { --bw: 150px; --bh: 268px; }
 
 .hero-side {
     position: absolute;
@@ -997,7 +950,7 @@ html:not(.anim) .manifest-text .w { opacity: 1; }
     font-weight: 500;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: #55524c;
+    color: #c6c1b8;
     transition: background .4s var(--ease), color .4s var(--ease), border-color .4s var(--ease);
 }
 
@@ -1042,9 +995,7 @@ html:not(.anim) .manifest-text .w { opacity: 1; }
 .card:hover .card-media { transform: scale(1.03); }
 
 /* the bottle scales down for the dense grid */
-.card .viewer { --bw: 78px; --bh: 138px; --bd: 32px; }
-.card .rot-btn { width: 27px; height: 27px; }
-.card .rot-btn svg { width: 12px; height: 12px; }
+.card .viewer { --bw: 78px; --bh: 138px; }
 
 .card-tag {
     position: absolute;
@@ -1142,7 +1093,7 @@ html:not(.anim) .manifest-text .w { opacity: 1; }
     min-height: 54vh;
 }
 
-.showcase-visual .viewer { --bw: 138px; --bh: 246px; --bd: 56px; }
+.showcase-visual .viewer { --bw: 138px; --bh: 246px; }
 
 .showcase-visual--photo .showcase-holder {
     position: relative;
@@ -1230,7 +1181,7 @@ html:not(.anim) .manifest-text .w { opacity: 1; }
 
 .split-panel:hover .split-word { transform: translateY(-6px); }
 
-.split-panel .viewer { --bw: 74px; --bh: 132px; --bd: 30px; opacity: .92; }
+.split-panel .viewer { --bw: 74px; --bh: 132px; opacity: .92; }
 
 .split-count { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
 .split-panel--dark .split-count { color: var(--muted-dark); }
@@ -1355,7 +1306,7 @@ html:not(.anim) .manifest-text .w { opacity: 1; }
     padding: 40px;
 }
 
-.pp-visual .viewer { --bw: 150px; --bh: 266px; --bd: 60px; }
+.pp-visual .viewer { --bw: 150px; --bh: 266px; }
 
 .pp-anim { opacity: 0; transform: translateY(26px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
 .is-open .pp-anim { opacity: 1; transform: none; }
@@ -1430,7 +1381,7 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
     min-height: min(62vh, 560px);
 }
 
-.picker-stage .viewer { --bw: 128px; --bh: 226px; --bd: 52px; }
+.picker-stage .viewer { --bw: 128px; --bh: 226px; }
 
 /* ring of selectable scents */
 .orbit { position: absolute; inset: 0; pointer-events: none; }
@@ -1496,7 +1447,7 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
 
 @media (max-width: 620px) {
     .orbit-dot { width: 38px; height: 38px; margin: -19px 0 0 -19px; font-size: 8px; }
-    .picker-stage .viewer { --bw: 92px; --bh: 164px; --bd: 40px; }
+    .picker-stage .viewer { --bw: 92px; --bh: 164px; }
     .picker-stage { min-height: 58vh; }
 }
 
@@ -1515,7 +1466,7 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
     place-items: center;
 }
 
-.chapters-visual .viewer { --bw: 132px; --bh: 234px; --bd: 54px; }
+.chapters-visual .viewer { --bw: 132px; --bh: 234px; }
 
 .chapter {
     min-height: 68vh;
@@ -1529,7 +1480,7 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
 .chapter.is-live { opacity: 1; }
 .chapter-num { font-family: var(--font-display); font-size: 15px; color: var(--sand); letter-spacing: .1em; }
 .chapter h3 { font-family: var(--font-display); font-size: clamp(28px, 3.6vw, 50px); font-weight: 300; line-height: 1.08; margin: 12px 0 18px; }
-.chapter p { color: #4a4740; font-size: 15px; line-height: 1.8; max-width: 42ch; }
+.chapter p { color: #cec9c0; font-size: 15px; line-height: 1.8; max-width: 42ch; }
 
 @media (max-width: 980px) {
     .chapters-grid { grid-template-columns: 1fr; }
@@ -1925,7 +1876,7 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
 
 .order-id { font-family: var(--font-display); font-size: 20px; }
 .order-date { font-size: 11px; letter-spacing: .08em; color: var(--muted); }
-.order-items { font-size: 13px; color: #5c5850; line-height: 1.6; }
+.order-items { font-size: 13px; color: #c9c4bb; line-height: 1.6; }
 .order-foot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; gap: 16px; }
 .order-sum { font-weight: 500; }
 
@@ -2035,14 +1986,14 @@ html.anim [data-reveal="fade"] { transform: none; }
     }
 
     .hero-stage { order: 2; min-height: 40vh; margin-top: 46px; }
-    .hero-stage .viewer { --bw: 118px; --bh: 208px; --bd: 48px; }
+    .hero-stage .viewer { --bw: 118px; --bh: 208px; }
     .hero-side, .scroll-cue { display: none; }
 
     .showcase, .pp-inner { grid-template-columns: 1fr; }
     .showcase--alt .showcase-visual { order: 0; }
     .showcase-visual { min-height: 40vh; }
     .pp-visual { min-height: 42vh; padding: 24px; }
-    .pp-inner .viewer { --bw: 116px; --bh: 206px; --bd: 48px; }
+    .pp-inner .viewer { --bw: 116px; --bh: 206px; }
     .split { grid-template-columns: 1fr; }
     .split-panel { min-height: 52vh; border-right: 0; border-bottom: 1px solid var(--line); }
     .stats { grid-template-columns: 1fr; gap: 34px; text-align: center; }
@@ -2087,7 +2038,7 @@ html.anim [data-reveal="fade"] { transform: none; }
 }
 
 /* base tier reads heaviest, top tier lightest */
-.tier[data-tier="1"] .note b { color: #6e6a63; }
+.tier[data-tier="1"] .note b { color: #b9b4ab; }
 .tier[data-tier="3"] .note b { font-weight: 500; }
 
 /* ============================================================
@@ -2217,7 +2168,7 @@ html.anim [data-reveal="fade"] { transform: none; }
   font-size: 11px;
   line-height: 1.35;
   text-align: center;
-  color: #55524c;
+  color: #c6c1b8;
 }
 
 .p-legend {
@@ -2231,7 +2182,7 @@ html.anim [data-reveal="fade"] { transform: none; }
 }
 
 .p-step { font-family: var(--font-display); font-size: 13px; letter-spacing: 0; color: var(--sand); }
-.p-legend b { font-weight: 500; color: #55524c; }
+.p-legend b { font-weight: 500; color: #c6c1b8; }
 .p-legend i { font-style: normal; letter-spacing: 0.1em; opacity: 0.75; }
 
 /* the apex row reads strongest */
@@ -2321,7 +2272,7 @@ html.anim [data-reveal="fade"] { transform: none; }
   text-align: left;
 }
 
-.p-fact p { margin-top: 8px; font-size: 14px; line-height: 1.7; color: #4a4740; }
+.p-fact p { margin-top: 8px; font-size: 14px; line-height: 1.7; color: #cec9c0; }
 
 .p-fact-close {
   position: absolute;
@@ -2363,10 +2314,10 @@ html.anim [data-reveal="fade"] { transform: none; }
   margin-bottom: 10px;
 }
 
-.story p { font-size: 14px; line-height: 1.75; color: #4a4740; }
+.story p { font-size: 14px; line-height: 1.75; color: #cec9c0; }
 
 .house-side { display: grid; gap: 14px; }
-.house-story { font-size: 13px; line-height: 1.7; color: #5c5850; max-width: 46ch; }
+.house-story { font-size: 13px; line-height: 1.7; color: #c9c4bb; max-width: 46ch; }
 
 
 /* ── Фон: живая деформированная сетка ───────────────────────────────── */
@@ -2420,8 +2371,6 @@ html.anim [data-reveal="fade"] { transform: none; }
         linear-gradient(170deg, #1b1b1f, #0e0e10);
 }
 
-.rot-btn { background: rgb(255 255 255 / 8%); border-color: var(--line); color: var(--ink); }
-.rot-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
 .header { background: rgb(11 11 12 / 82%); }
 
@@ -2453,3 +2402,95 @@ html.anim [data-reveal="fade"] { transform: none; }
 @media (prefers-reduced-motion: reduce) {
     .card, .card-media, .card-media::after { transition: none; }
 }
+
+
+/* ── Цвет: у каждого дома и каждой категории свой ──────────────────────── */
+
+:root {
+    --c-dior:      #7fb2e8;
+    --c-lv:        #e2c079;
+    --c-valentino: #e08aa8;
+    --c-women:     #e08aa8;
+    --c-men:       #7fb2e8;
+    --c-unisex:    #8fd6b4;
+    --c-niche:     #c9a2f0;
+}
+
+/* house chips carry the house colour, and light up when chosen */
+.filter--house { position: relative; }
+.filter--house::before {
+    content: "";
+    display: inline-block;
+    width: 7px; height: 7px;
+    margin-right: 9px;
+    border-radius: 50%;
+    background: var(--chip, var(--sand));
+    vertical-align: middle;
+}
+.filters.houses .filter--house:nth-child(1) { --chip: var(--c-dior); }
+.filters.houses .filter--house:nth-child(2) { --chip: var(--c-lv); }
+.filters.houses .filter--house:nth-child(3) { --chip: var(--c-valentino); }
+.filter--house:hover { border-color: var(--chip); color: var(--ink); }
+.filter--house.is-active { background: var(--chip); border-color: var(--chip); color: #0b0b0c; }
+.filter--house.is-active::before { background: #0b0b0c; }
+
+/* category filters, same idea */
+.filters:not(.houses) .filter:nth-child(2).is-active { background: var(--c-women); border-color: var(--c-women); color: #0b0b0c; }
+.filters:not(.houses) .filter:nth-child(3).is-active { background: var(--c-men); border-color: var(--c-men); color: #0b0b0c; }
+.filters:not(.houses) .filter:nth-child(4).is-active { background: var(--c-unisex); border-color: var(--c-unisex); color: #0b0b0c; }
+.filters:not(.houses) .filter:nth-child(5).is-active { background: var(--c-niche); border-color: var(--c-niche); color: #0b0b0c; }
+
+/* the tag on a card takes the category colour */
+.card-tag { color: var(--cat, var(--sand)); font-weight: 600; }
+.card-tag::before {
+    content: "";
+    display: inline-block;
+    width: 5px; height: 5px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    vertical-align: middle;
+}
+.card-tag[data-cat="women"] { --cat: var(--c-women); }
+.card-tag[data-cat="men"]    { --cat: var(--c-men); }
+.card-tag[data-cat="unisex"] { --cat: var(--c-unisex); }
+.card-tag[data-cat="niche"]  { --cat: var(--c-niche); }
+
+/* the eyebrow and section numerals warm up */
+.eyebrow { color: var(--sand); }
+.p-step { color: var(--sand); }
+
+/* type contrast: secondary copy was too quiet on the dark ground */
+.lead { color: #d6d2ca; }
+.card-name { color: var(--ink); }
+.card-line { color: #cfcac1; }
+.card-price { color: var(--ink); }
+.p-note figcaption { color: #d6d2ca; }
+.spec div b { color: var(--ink); }
+.muted, .order-items, .profile-mail { color: #c3beb5; }
+
+/* the card glows in the scent's colour on hover */
+.card:hover { border-color: rgb(242 240 236 / 46%); }
+
+/* ── Больше цвета в крупных сценах ────────────────────────────────────── */
+
+.pp-visual .b-halo,
+.showcase-holder .b-halo,
+.hero-stage .b-halo { opacity: .5; filter: blur(10px); }
+
+.pp-visual .viewer, .showcase-holder .viewer, .hero-stage .viewer { --tint-strength: 1; }
+
+/* ярусы пирамиды получают свой цвет */
+.p-tier[data-tier="1"] { --tier: #8fd6b4; }
+.p-tier[data-tier="2"] { --tier: #e28aa6; }
+.p-tier[data-tier="3"] { --tier: #e2c079; }
+.p-tier .p-step { color: var(--tier); }
+.p-tier .p-tile { border: 1px solid color-mix(in srgb, var(--tier) 34%, transparent); }
+.p-tier .p-tile:hover:not(:disabled),
+.p-tier .p-tile.is-open { border-color: var(--tier); }
+.p-fact { border-left: 2px solid var(--sand); }
+
+/* цена и акценты */
+.card-price i { color: var(--muted); }
+.pp-price, .price { color: var(--ink); }
+.p-legend b { color: var(--ink); }

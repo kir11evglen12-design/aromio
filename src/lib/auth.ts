@@ -117,3 +117,16 @@ export function formatOrderDate(iso: string): string {
     day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
   });
 }
+
+/**
+ * Russian counts need three forms: 1 аромат, 2 аромата, 5 ароматов.
+ * Teens are the exception — 11–14 always take the last form.
+ */
+export const plural = (n: number, one: string, few: string, many: string): string => {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 14) return many;
+  const mod10 = n % 10;
+  if (mod10 === 1) return one;
+  if (mod10 >= 2 && mod10 <= 4) return few;
+  return many;
+};

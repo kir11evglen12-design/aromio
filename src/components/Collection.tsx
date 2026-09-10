@@ -34,7 +34,7 @@ export default function Collection() {
           <h2 className="display">Ароматы<br /><em>витрины</em></h2>
         </div>
         <p className="lead">
-          Три дома в одной витрине. Флаконы без фотографии можно рассмотреть со всех сторон — стрелками под флаконом.
+          Три дома в одной витрине. У каждого аромата свой цвет — он же цвет жидкости во флаконе и свечения за ним.
         </p>
       </div>
 
@@ -72,7 +72,7 @@ export default function Collection() {
             }}
           >
             <div className={"card-media" + (p.photo ? " media--photo" : "")}>
-              <span className="card-tag">{CATEGORY_LABEL[p.category]}</span>
+              <span className="card-tag" data-cat={p.category}>{CATEGORY_LABEL[p.category]}</span>
 
               <button
                 className={"fav-btn" + (isFavorite(p.id) ? " is-on" : "")}
