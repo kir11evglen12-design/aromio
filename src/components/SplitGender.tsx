@@ -1,7 +1,7 @@
 import { plural } from "../lib/auth";
 import { byId, products } from "../data/products";
 import { useShop } from "../lib/shop";
-import Bottle from "./Bottle";
+import Plate from "./Plate";
 import { scrollToId } from "./Header";
 
 const PANELS = [
@@ -31,7 +31,7 @@ export default function SplitGender() {
             <div className="split-bg" aria-hidden />
             <div className="split-inner">
               <div className="eyebrow">{p.eyebrow}</div>
-              <Bottle product={byId(p.bottle)}
+              <Plate product={byId(p.bottle)}
                       style={{ ["--bw" as string]: "74px", ["--bh" as string]: "132px" }} />
               <div className="split-word">{p.label}</div>
               <div className="split-count">{count} {plural(count, "аромат", "аромата", "ароматов")}</div>

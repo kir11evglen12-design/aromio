@@ -2,21 +2,31 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { fromPrice, money, products } from "../data/products";
 import { useShop } from "../lib/shop";
-import { formatOrderDate, initials, memberSince } from "../lib/auth";
+import { formatOrderDate, initials, memberSince, plural } from "../lib/auth";
 import { scrollToId } from "./Header";
 
-type Tab = "orders" | "favorites" | "data";
+type Tab = "orders" | "favorites" | "shelf" | "reminders" | "data";
 
 const TABS: [Tab, string][] = [
   ["orders", "Заказы"],
   ["favorites", "Избранное"],
+  ["shelf", "Моя полка"],
+  ["reminders", "Напоминания"],
   ["data", "Данные"]
 ];
 
+/** how long a bottle has been open, in whole days */
+const daysOpen = (iso: string): number =>
+  Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
+
 export default function ProfilePage() {
-  const { profileOpen, closeProfile, user, saveProfile, signOut, openProduct, toast } = useShop();
+  const {
+    profileOpen, closeProfile, user, saveProfile, signOut, openProduct, toast,
+    shelf, removeFromShelf, reminders, addReminder, toggleReminder, removeReminder
+  } = useShop();
   const [tab, setTab] = useState<Tab>("orders");
   const [form, setForm] = useState({ name: "", phone: "", city: "", address: "" });
+  const [rem, setRem] = useState({ text: "", due: "" });
 
   useEffect(() => {
     if (user) setForm({ name: user.name, phone: user.phone, city: user.city, address: user.address });
@@ -116,6 +126,86 @@ export default function ProfilePage() {
                     </button>
                   ))}
                 </div>
+          )}
+
+          {tab === "shelf" && (
+            shelf.length === 0
+              ? <p className="empty">
+                  Полка пуста. Отметьте на карточке аромата, что флакон у вас есть —
+                  и здесь появится, сколько дней он открыт.
+                </p>
+              : <div className="shelf-list">
+                  {shelf.map(item => {
+                    const p = products.find(x => x.id === item.id);
+                    if (!p) return null;
+                    const d = daysOpen(item.opened);
+                    return (
+                      <div className="shelf-row" key={item.id}>
+                        <i className="shelf-dot" style={{ background: p.tint }} aria-hidden />
+                        <div className="shelf-main">
+                          <b>{p.brand} {p.name}</b>
+                          <span>{item.ml} мл · открыт {d} {plural(d, "день", "дня", "дней")}</span>
+                        </div>
+                        <button className="link-quiet" onClick={() => removeFromShelf(item.id)}>Убрать</button>
+                      </div>
+                    );
+                  })}
+                  <p className="shelf-note">
+                    Початый флакон стареет быстрее полного: кислород попадает внутрь при каждом
+                    нажатии. Дата открытия нужна, чтобы это было видно.
+                  </p>
+                </div>
+          )}
+
+          {tab === "reminders" && (
+            <div className="rem-wrap">
+              <form
+                className="rem-form"
+                onSubmit={e => {
+                  e.preventDefault();
+                  if (rem.text.trim().length < 3) { toast("Опишите напоминание"); return; }
+                  if (!rem.due) { toast("Выберите дату"); return; }
+                  addReminder(rem.text.trim(), rem.due);
+                  setRem({ text: "", due: "" });
+                }}
+              >
+                <div className="field">
+                  <label htmlFor="remText">Напомнить о чём</label>
+                  <input id="remText" value={rem.text} placeholder="Дозаказать Sauvage 100 мл"
+                         onChange={e => setRem(r => ({ ...r, text: e.target.value }))} />
+                </div>
+                <div className="field">
+                  <label htmlFor="remDue">Когда</label>
+                  <input id="remDue" type="date" value={rem.due}
+                         onChange={e => setRem(r => ({ ...r, due: e.target.value }))} />
+                </div>
+                <button className="btn btn--solid" type="submit">Сохранить</button>
+              </form>
+
+              {reminders.length === 0
+                ? <p className="empty">
+                    Напоминаний нет. Обычно их ставят на дозаказ флакона или на то,
+                    чтобы вернуться к образцу через неделю носки.
+                  </p>
+                : <ul className="rem-list">
+                    {reminders.map(r => {
+                      const late = !r.done && new Date(r.due) < new Date(new Date().toDateString());
+                      return (
+                        <li className={"rem-item" + (r.done ? " is-done" : "") + (late ? " is-late" : "")} key={r.id}>
+                          <button className="rem-check" onClick={() => toggleReminder(r.id)}
+                                  aria-pressed={r.done} aria-label="Отметить выполненным">
+                            {r.done ? "✓" : ""}
+                          </button>
+                          <div className="rem-main">
+                            <b>{r.text}</b>
+                            <span>{new Date(r.due).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}{late ? " · срок прошёл" : ""}</span>
+                          </div>
+                          <button className="link-quiet" onClick={() => removeReminder(r.id)}>Удалить</button>
+                        </li>
+                      );
+                    })}
+                  </ul>}
+            </div>
           )}
 
           {tab === "data" && (

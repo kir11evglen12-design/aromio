@@ -1,4 +1,14 @@
 import { gsap, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
+import { HOUSES, products } from "../data/products";
+import { LEXICON } from "../data/lexicon";
+import { GUIDES } from "../data/guides";
+import { NOTE_FACTS } from "../data/facts";
+
+/** every distinct note named across the catalogue */
+const NOTE_COUNT = new Set(
+  products.flatMap(p => `${p.notes.top},${p.notes.heart},${p.notes.base}`
+    .split(",").map(n => n.trim().toLowerCase()).filter(Boolean))
+).size;
 
 const TEXT = "Мы не создаём запахи. Мы создаём память, которая остаётся с вами дольше, чем вечер.";
 
@@ -27,10 +37,14 @@ export default function Manifest() {
         ))}
       </p>
 
+      {/* всё, что здесь посчитано, посчитано по самому каталогу */}
       <div className="stats">
-        <div className="stat"><b>12</b><span>Ароматов в витрине</span></div>
-        <div className="stat"><b>24</b><span>Часа стойкости</span></div>
-        <div className="stat"><b>100%</b><span>Оригинальность</span></div>
+        <div className="stat"><b>{products.length}</b><span>Ароматов в витрине</span></div>
+        <div className="stat"><b>{HOUSES.length}</b><span>Дома на полке</span></div>
+        <div className="stat"><b>{NOTE_COUNT}</b><span>Нот в описаниях</span></div>
+        <div className="stat"><b>{NOTE_FACTS.length}</b><span>Историй о сырье</span></div>
+        <div className="stat"><b>{LEXICON.length}</b><span>Терминов в лексиконе</span></div>
+        <div className="stat"><b>{GUIDES.length}</b><span>Разборов в журнале</span></div>
       </div>
     </section>
   );

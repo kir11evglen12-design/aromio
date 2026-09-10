@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight } from "lucide-react";
-import { byId } from "../data/products";
+import { byId, products } from "../data/products";
+import { LEXICON } from "../data/lexicon";
 import { gsap, prefersReducedMotion, revealLines, useGsap } from "../lib/motion";
-import Bottle from "./Bottle";
+import Plate from "./Plate";
 import { scrollToId } from "./Header";
 
 /** Drifting motes, drawn only while the hero is on screen. */
@@ -73,6 +74,26 @@ function useParticles(host: React.RefObject<HTMLDivElement | null>) {
   }, [host]);
 }
 
+const QUICK: [string, string][] = [
+  ["Каталог", "collection"],
+  ["Журнал", "journal"],
+  ["Лексикон", "lexicon"],
+  ["Дома", "houses"]
+];
+
+/** counted from the catalogue itself, so the numbers cannot drift */
+const NOTE_COUNT = new Set(
+  products.flatMap(p => `${p.notes.top},${p.notes.heart},${p.notes.base}`
+    .split(",").map(n => n.trim().toLowerCase()).filter(Boolean))
+).size;
+
+const FACTS: [string, string][] = [
+  [String(products.length), "ароматов"],
+  ["3", "дома"],
+  [String(NOTE_COUNT), "нот"],
+  [String(LEXICON.length), "терминов"]
+];
+
 export default function Hero({ ready }: { ready: boolean }) {
   const stage = useRef<HTMLDivElement>(null);
   useParticles(stage);
@@ -113,6 +134,15 @@ export default function Hero({ ready }: { ready: boolean }) {
           Найдите тот, что станет вашей подписью.
         </p>
 
+        <div className="hero-quick hero-fade">
+          {QUICK.map(([label, target]) => (
+            <button key={label} className="hero-chip" onClick={() => scrollToId(target)}>{label}</button>
+          ))}
+          <span className="hero-kbd">
+            <kbd>Ctrl</kbd><kbd>K</kbd> — поиск по всему сайту
+          </span>
+        </div>
+
         <div className="hero-cta hero-fade">
           <button className="btn btn--solid" onClick={() => scrollToId("collection")}>
             Смотреть коллекцию
@@ -123,7 +153,15 @@ export default function Hero({ ready }: { ready: boolean }) {
       </div>
 
       <div className="hero-stage" ref={stage}>
-        <Bottle product={byId(1)} style={{ ["--bw" as string]: "150px", ["--bh" as string]: "268px" }} />
+        <Plate product={byId(1)} style={{ ["--bw" as string]: "150px", ["--bh" as string]: "268px" }} />
+      </div>
+
+      <div className="hero-facts hero-fade">
+        {FACTS.map(([n, label]) => (
+          <div className="hero-fact" key={label}>
+            <b>{n}</b><span>{label}</span>
+          </div>
+        ))}
       </div>
 
       <div className="hero-side">Eau de Parfum — Made in France</div>

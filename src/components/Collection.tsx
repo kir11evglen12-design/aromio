@@ -1,15 +1,20 @@
-import { Heart, Plus } from "lucide-react";
-import { CATEGORY_LABEL, fromPrice, HOUSES, money, products } from "../data/products";
+import { Check, Heart, Layers, Plus } from "lucide-react";
+import { byId, CATEGORY_LABEL, fromPrice, HOUSES, money, products } from "../data/products";
+import { plural } from "../lib/auth";
 import type { Category as ProductCategory } from "../data/products";
-import { useShop, visibleProducts } from "../lib/shop";
+import { SORT_LABEL, useShop, visibleProducts } from "../lib/shop";
+import type { Sort } from "../lib/shop";
 import { gsap, parallax, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
-import Bottle from "./Bottle";
+import Plate from "./Plate";
 
 const FILTERS: (ProductCategory | "all")[] = ["all", "women", "men", "unisex", "niche"];
 
 export default function Collection() {
-  const { category, setCategory, addToCart, openProduct, isFavorite, toggleFavorite } = useShop();
-  const list = visibleProducts(category);
+  const {
+    category, setCategory, addToCart, openProduct, isFavorite, toggleFavorite,
+    sort, setSort, noteQuery, setNoteQuery, compare, toggleCompare, recent
+  } = useShop();
+  const list = visibleProducts(category, sort, noteQuery);
 
   const scope = useGsap(() => {
     revealFrom(".collection .section-head > div > *, .filters", { stagger: 0.07 });
@@ -34,7 +39,7 @@ export default function Collection() {
           <h2 className="display">Ароматы<br /><em>витрины</em></h2>
         </div>
         <p className="lead">
-          Три дома в одной витрине. У каждого аромата свой цвет — он же цвет жидкости во флаконе и свечения за ним.
+          Три дома, двенадцать ароматов. Фотография стоит там, где её дал магазин; остальные позиции — цветные карточки, где цвет закреплён за ароматом. Сравните до трёх сразу, отфильтруйте по ноте или отсортируйте по цене.
         </p>
       </div>
 
@@ -58,6 +63,28 @@ export default function Collection() {
         ))}
       </div>
 
+      <div className="cl-tools">
+        <label className="cl-note">
+          <span className="sr-only">Фильтр по ноте</span>
+          <input value={noteQuery} onChange={e => setNoteQuery(e.target.value)}
+                 placeholder="Фильтр по ноте: уд, ирис, кофе…" />
+          {noteQuery && (
+            <button className="cl-clear" onClick={() => setNoteQuery("")} aria-label="Сбросить фильтр по ноте">×</button>
+          )}
+        </label>
+
+        <div className="cl-sort" role="group" aria-label="Сортировка">
+          {(Object.keys(SORT_LABEL) as Sort[]).map(k => (
+            <button key={k} className={"cl-sort-btn" + (sort === k ? " is-on" : "")}
+                    onClick={() => setSort(k)}>{SORT_LABEL[k]}</button>
+          ))}
+        </div>
+
+        <div className="cl-count" aria-live="polite">
+          {list.length} {plural(list.length, "аромат", "аромата", "ароматов")}
+        </div>
+      </div>
+
       <div className="grid">
         {list.map(p => (
           <article
@@ -75,6 +102,17 @@ export default function Collection() {
               <span className="card-tag" data-cat={p.category}>{CATEGORY_LABEL[p.category]}</span>
 
               <button
+                className={"cmp-btn" + (compare.includes(p.id) ? " is-on" : "")}
+                aria-pressed={compare.includes(p.id)}
+                aria-label={`${compare.includes(p.id) ? "Убрать" : "Добавить"} ${p.name} в сравнение`}
+                onClick={e => { e.stopPropagation(); toggleCompare(p.id); }}
+              >
+                {compare.includes(p.id)
+                  ? <Check size={15} strokeWidth={2} />
+                  : <Layers size={15} strokeWidth={1.5} />}
+              </button>
+
+              <button
                 className={"fav-btn" + (isFavorite(p.id) ? " is-on" : "")}
                 aria-pressed={isFavorite(p.id)}
                 aria-label={`${isFavorite(p.id) ? "Убрать" : "Добавить"} ${p.name} в избранное`}
@@ -83,7 +121,7 @@ export default function Collection() {
                 <Heart size={17} strokeWidth={1.4} />
               </button>
 
-              <Bottle product={p} />
+              <Plate product={p} />
             </div>
 
             <div className="card-body">
@@ -102,6 +140,30 @@ export default function Collection() {
           </article>
         ))}
       </div>
+
+      {list.length === 0 && (
+        <p className="empty cl-empty">
+          По этой ноте ничего не нашлось. Попробуйте «ваниль», «уд» или сбросьте фильтр.
+        </p>
+      )}
+
+      {recent.length > 1 && (
+        <div className="cl-recent">
+          <div className="eyebrow">Вы смотрели</div>
+          <div className="cl-recent-row">
+            {recent.map(id => {
+              const p = byId(id);
+              return (
+                <button className="cl-recent-chip" key={id} onClick={() => openProduct(id)}>
+                  <i style={{ background: p.tint }} aria-hidden />
+                  <span>{p.name}</span>
+                  <em>от {money(fromPrice(p))}</em>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

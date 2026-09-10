@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { pickerProducts } from "../data/products";
 import { useShop } from "../lib/shop";
 import { revealFrom, useGsap } from "../lib/motion";
-import Bottle from "./Bottle";
+import Plate from "./Plate";
 
 /**
  * Choose-a-scent scene: picking a composition repaints the whole stage —
@@ -17,7 +17,7 @@ export default function Picker() {
   const [radius, setRadius] = useState(168);
 
   useEffect(() => {
-    const measure = () => setRadius(innerWidth < 620 ? 132 : 168);
+    const measure = () => setRadius(innerWidth < 620 ? 148 : 178);
     measure();
     addEventListener("resize", measure, { passive: true });
     return () => removeEventListener("resize", measure);
@@ -41,7 +41,7 @@ export default function Picker() {
 
       <div className="picker-grid">
         <div className="picker-stage">
-          <Bottle
+          <Plate
             key={active.id}
             product={active}
            

@@ -4,11 +4,11 @@ import { useShop } from "../lib/shop";
 import type { Filter } from "../lib/shop";
 import { initials } from "../lib/auth";
 
-const NAV: [string, Filter | "lines"][] = [
+const NAV: [string, Filter | "houses"][] = [
   ["Каталог", "all"],
   ["Мужские", "men"],
   ["Женские", "women"],
-  ["Дома", "lines"]
+  ["Дома", "houses"]
 ];
 
 export function scrollToId(id: string) {
@@ -33,9 +33,9 @@ export default function Header() {
     document.body.classList.toggle("menu-open", menu);
   }, [menu]);
 
-  const go = (target: Filter | "lines") => {
+  const go = (target: Filter | "houses") => {
     setMenu(false);
-    if (target === "lines") scrollToId("lines");
+    if (target === "houses") scrollToId("houses");
     else { setCategory(target); scrollToId("collection"); }
   };
 

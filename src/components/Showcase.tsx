@@ -1,12 +1,20 @@
 import { ArrowRight } from "lucide-react";
 import { byId, fromPrice, money } from "../data/products";
+import { PRODUCT_STORIES } from "../data/facts";
 import { useShop } from "../lib/shop";
 import { gsap, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
-import Bottle from "./Bottle";
+import Plate from "./Plate";
 
 const PICKS = [9, 6];
 
 /** Full-width product acts; visual and copy drift against each other. */
+/** the same three phases every fragrance goes through, in plain time */
+const TIMELINE: [string, "top" | "heart" | "base", string][] = [
+  ["0–15 мин", "top", "Старт"],
+  ["30 мин – 3 ч", "heart", "Сердце"],
+  ["3 ч – сутки", "base", "База"]
+];
+
 export default function Showcase() {
   const { openProduct } = useShop();
 
@@ -32,11 +40,12 @@ export default function Showcase() {
       {PICKS.map((id, i) => {
         const p = byId(id);
         const dark = i % 2 === 1;
+        const story = PRODUCT_STORIES[p.id];
         return (
           <section className={"showcase" + (dark ? " showcase--alt section--dark" : "")} key={id}>
             <div className={"showcase-visual" + (p.photo ? " showcase-visual--photo" : "")}>
               <div className="showcase-ghost" aria-hidden>{p.line}</div>
-              <div className="showcase-holder"><Bottle product={p}
+              <div className="showcase-holder"><Plate product={p}
                      style={{ ["--bw" as string]: "138px", ["--bh" as string]: "246px" }} /></div>
             </div>
 
@@ -50,6 +59,23 @@ export default function Showcase() {
                 <div><span>Сердце</span><b>{p.notes.heart}</b></div>
                 <div><span>База</span><b>{p.notes.base}</b></div>
                 <div><span>Объёмы</span><b>{p.variants.map(v => v.ml).join(" / ")} мл</b></div>
+              </div>
+
+              {story && (
+                <p className="showcase-story">
+                  <span>{story.year}{story.nose ? ` · ${story.nose}` : ""}</span>
+                  {story.text}
+                </p>
+              )}
+
+              <div className="showcase-time">
+                {TIMELINE.map(([when, key, note]) => (
+                  <div className="sc-step" key={key}>
+                    <b>{when}</b>
+                    <span>{note}</span>
+                    <em>{p.notes[key]}</em>
+                  </div>
+                ))}
               </div>
 
               <div className="showcase-foot">
