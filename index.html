@@ -48,23 +48,23 @@ body {
 }
 
 .cursor-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--accent-light);
+    width: 5px;
+    height: 5px;
+    background: var(--text);
+    mix-blend-mode: difference;
 }
 
 .cursor-ring {
-    width: 34px;
-    height: 34px;
-    border: 1px solid rgba(255,255,255,.35);
-    transition: width .2s, height .2s, border-color .2s, background .2s;
+    width: 30px;
+    height: 30px;
+    border: 1.5px solid var(--text);
+    mix-blend-mode: difference;
+    transition: width .25s cubic-bezier(.2,.8,.2,1), height .25s cubic-bezier(.2,.8,.2,1);
 }
 
 .cursor-ring.active {
-    width: 60px;
-    height: 60px;
-    border-color: var(--accent-light);
-    background: rgba(141,38,53,.15);
+    width: 70px;
+    height: 70px;
 }
 
 @media (hover:none) {
@@ -72,6 +72,53 @@ body {
     .cursor-ring {
         display: none;
     }
+}
+
+/* FLOATING ACCENTS */
+
+.floater {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+    will-change: transform;
+    transition: transform .15s linear;
+}
+
+.float-inner {
+    display: inline-flex;
+    animation: floatY 6s ease-in-out infinite;
+}
+
+.pill .float-inner {
+    align-items: center;
+    padding: 9px 18px;
+    border-radius: 30px;
+    background: var(--card);
+    color: #222;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    box-shadow: 0 10px 25px rgba(0,0,0,.35);
+}
+
+.pill.alt .float-inner {
+    background: var(--accent);
+    color: white;
+}
+
+.sparkle .float-inner {
+    width: 22px;
+    height: 22px;
+    animation: floatY 4s ease-in-out infinite, spinSlow 9s linear infinite;
+}
+
+.bubble .float-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.9), rgba(179,58,75,.25) 70%);
+    animation: floatY 5s ease-in-out infinite;
 }
 
 @keyframes floatY {
@@ -226,6 +273,8 @@ nav button:hover {
 }
 
 .hero-content {
+    position: relative;
+    z-index: 1;
     max-width: 650px;
     animation: fadeUp .9s ease both;
 }
@@ -281,11 +330,29 @@ nav button:hover {
     height: 90px;
     animation: floatY 5s ease-in-out infinite, spinSlow 18s linear infinite;
     pointer-events: none;
+    z-index: 2;
 }
 
 .hero-badge svg {
     width: 100%;
     height: 100%;
+}
+
+.hero-smoke {
+    position: absolute;
+    inset: -20%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(141,38,53,.35), transparent 40%),
+        radial-gradient(circle at 70% 70%, rgba(141,38,53,.25), transparent 45%);
+    filter: blur(40px);
+    animation: smokeDrift 16s ease-in-out infinite alternate;
+}
+
+@keyframes smokeDrift {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(4%, -3%) scale(1.08); }
 }
 
 /* MARQUEE */
@@ -569,6 +636,10 @@ footer {
     .products {
         grid-template-columns: repeat(2,1fr);
     }
+
+    .floater {
+        display: none;
+    }
 }
 
 @media(max-width:550px) {
@@ -640,15 +711,45 @@ footer {
 </header>
 
 
-<section class="hero">
+<section class="hero" id="heroSection">
 
-    <div class="hero-badge" aria-hidden="true">
-        <svg viewBox="0 0 100 100">
-            <g fill="var(--accent-light)">
-                <circle cx="50" cy="50" r="7"/>
-                <g id="rays"></g>
-            </g>
-        </svg>
+    <div class="hero-smoke" aria-hidden="true"></div>
+
+    <div class="hero-badge floater" data-depth="0.6" aria-hidden="true">
+        <div class="float-inner">
+            <svg viewBox="0 0 100 100">
+                <g fill="var(--accent-light)">
+                    <circle cx="50" cy="50" r="7"/>
+                    <g id="rays"></g>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <div class="floater pill" style="top:34%; right:22%" data-depth="0.3" aria-hidden="true">
+        <div class="float-inner" style="animation-delay:.3s">ЛИМИТ. КОЛЛЕКЦИЯ</div>
+    </div>
+
+    <div class="floater pill alt" style="bottom:16%; right:8%" data-depth="0.5" aria-hidden="true">
+        <div class="float-inner" style="animation-delay:1s">100% ОРИГИНАЛ</div>
+    </div>
+
+    <div class="floater pill" style="top:14%; right:6%" data-depth="0.4" aria-hidden="true">
+        <div class="float-inner" style="animation-delay:.6s">NO. 1 В НИШЕ</div>
+    </div>
+
+    <div class="floater sparkle" style="bottom:36%; right:30%" data-depth="0.7" aria-hidden="true">
+        <svg class="float-inner" viewBox="0 0 24 24" fill="var(--accent-light)"><path d="M12 0 L14 10 L24 12 L14 14 L12 24 L10 14 L0 12 L10 10 Z"/></svg>
+    </div>
+
+    <div class="floater bubble" style="width:16px;height:16px; top:50%; right:14%" data-depth="0.25" aria-hidden="true">
+        <div class="float-inner"></div>
+    </div>
+    <div class="floater bubble" style="width:10px;height:10px; top:62%; right:34%" data-depth="0.45" aria-hidden="true">
+        <div class="float-inner"></div>
+    </div>
+    <div class="floater bubble" style="width:22px;height:22px; bottom:30%; right:20%" data-depth="0.2" aria-hidden="true">
+        <div class="float-inner"></div>
     </div>
 
     <div class="hero-content">
@@ -1180,6 +1281,35 @@ document.querySelectorAll("button, a, input")
         el.addEventListener("mouseenter", () => cursorRing.classList.add("active"));
         el.addEventListener("mouseleave", () => cursorRing.classList.remove("active"));
     });
+
+
+/* HERO PARALLAX FLOATERS */
+
+const heroSection = document.getElementById("heroSection");
+const floaters = document.querySelectorAll(".floater");
+
+if (heroSection) {
+
+    heroSection.addEventListener("mousemove", e => {
+
+        const rect = heroSection.getBoundingClientRect();
+        const relX = (e.clientX - rect.left - rect.width / 2) / rect.width;
+        const relY = (e.clientY - rect.top - rect.height / 2) / rect.height;
+
+        floaters.forEach(el => {
+            const depth = parseFloat(el.dataset.depth) || 0.3;
+            el.style.setProperty("--px", (relX * depth * 60) + "px");
+            el.style.setProperty("--py", (relY * depth * 60) + "px");
+            el.style.transform = `translate(var(--px), var(--py))`;
+        });
+
+    });
+
+    heroSection.addEventListener("mouseleave", () => {
+        floaters.forEach(el => { el.style.transform = ""; });
+    });
+
+}
 
 
 /* HERO STARBURST */
