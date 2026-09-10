@@ -58,7 +58,17 @@ export default function Collection() {
 
       <div className="grid">
         {list.map(p => (
-          <article className="card" key={p.id} onClick={() => openProduct(p.id)}>
+          <article
+            className="card"
+            key={p.id}
+            role="button"
+            tabIndex={0}
+            aria-label={`${p.brand} ${p.name} — открыть карточку`}
+            onClick={() => openProduct(p.id)}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openProduct(p.id); }
+            }}
+          >
             <div className={"card-media" + (p.photo ? " media--photo" : "")}>
               <span className="card-tag">{CATEGORY_LABEL[p.category]}</span>
 
@@ -75,18 +85,18 @@ export default function Collection() {
             </div>
 
             <div className="card-body">
-              <div>
-                <div className="card-line">{p.brand} — {p.variants.map(v => v.ml).join(" / ")} мл</div>
-                <h3 className="card-name">{p.name}</h3>
-                <div className="card-notes">{p.notes.heart}</div>
+              <div className="card-line">{p.brand}</div>
+              <h3 className="card-name" title={p.name}>{p.name}</h3>
+
+              <div className="card-foot">
+                <span className="card-price"><i>от</i> {money(fromPrice(p))}</span>
+                <button className="card-add" aria-label={`Добавить ${p.name} в корзину`}
+                        onClick={e => { e.stopPropagation(); addToCart(p.id); }}>
+                  <Plus size={14} strokeWidth={1.5} />
+                </button>
               </div>
-              <div className="card-price"><i>от</i> {money(fromPrice(p))}</div>
             </div>
 
-            <button className="card-add" aria-label={`Добавить ${p.name} в корзину`}
-                    onClick={e => { e.stopPropagation(); addToCart(p.id); }}>
-              <Plus size={16} strokeWidth={1.4} />
-            </button>
           </article>
         ))}
       </div>
