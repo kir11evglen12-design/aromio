@@ -243,30 +243,126 @@ h2.display { font-size: clamp(38px, 7vw, 104px); }
     z-index: 8000;
     background: var(--ink);
     color: var(--paper);
+    overflow: hidden;
     display: grid;
     place-items: center;
-    transition: transform 1s var(--ease), opacity .6s ease .4s;
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1.15s var(--ease);
+}
+
+/* atmospheric drift behind the wordmark */
+#preloader::before {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    background:
+        radial-gradient(circle at 32% 38%, rgba(164,140,108,.30), transparent 46%),
+        radial-gradient(circle at 68% 62%, rgba(164,140,108,.16), transparent 52%);
+    filter: blur(38px);
+    animation: preDrift 9s ease-in-out infinite alternate;
+}
+
+@keyframes preDrift {
+    0%   { transform: translate3d(-2%, 1%, 0) scale(1); }
+    100% { transform: translate3d(3%, -2%, 0) scale(1.12); }
 }
 
 #preloader.is-done {
-    transform: translateY(-101%);
-    opacity: 0;
+    clip-path: inset(0 0 100% 0);
     pointer-events: none;
 }
 
-.pre-inner { text-align: center; width: min(300px, 70vw); }
+#preloader.is-done .pre-inner { transform: translateY(-26px); opacity: 0; }
+
+.pre-inner {
+    position: relative;
+    z-index: 2;
+    width: min(560px, 82vw);
+    text-align: center;
+    transition: transform 1s var(--ease), opacity .7s var(--ease);
+}
+
+.pre-eyebrow {
+    font-size: 10px;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    color: rgba(243,241,237,.5);
+    opacity: 0;
+    animation: preFade .9s var(--ease) .15s forwards;
+}
 
 .pre-word {
     font-family: var(--font-display);
-    font-size: 40px;
-    letter-spacing: .34em;
-    text-indent: .34em;
+    font-size: clamp(46px, 11vw, 108px);
     font-weight: 300;
-    margin-bottom: 22px;
+    line-height: 1;
+    letter-spacing: .12em;
+    text-indent: .12em;
+    margin: 20px 0 30px;
+    display: flex;
+    justify-content: center;
 }
 
-.pre-bar { height: 1px; background: rgba(243,241,237,.2); overflow: hidden; }
-.pre-fill { height: 100%; width: 0; background: var(--paper); transition: width .25s linear; }
+.pre-word span {
+    display: inline-block;
+    transform: translateY(105%);
+    opacity: 0;
+    animation: preLetter 1.05s var(--ease) forwards;
+}
+
+@keyframes preLetter {
+    to { transform: none; opacity: 1; }
+}
+
+/* repeat visit in the same session — no staggered wait */
+#preloader.quick .pre-word span,
+#preloader.quick .pre-eyebrow,
+#preloader.quick .pre-meta,
+#preloader.quick .pre-bar {
+    animation-delay: 0s !important;
+    animation-duration: .4s !important;
+}
+
+@keyframes preFade {
+    to { opacity: 1; }
+}
+
+.pre-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    font-size: 10px;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: rgba(243,241,237,.45);
+    margin-bottom: 14px;
+    opacity: 0;
+    animation: preFade .8s var(--ease) .6s forwards;
+}
+
+.pre-count {
+    font-family: var(--font-display);
+    font-size: 26px;
+    letter-spacing: 0;
+    color: var(--paper);
+    font-variant-numeric: tabular-nums;
+}
+
+.pre-bar {
+    height: 1px;
+    background: rgba(243,241,237,.18);
+    overflow: hidden;
+    opacity: 0;
+    animation: preFade .8s var(--ease) .6s forwards;
+}
+
+.pre-fill {
+    height: 100%;
+    width: 0;
+    background: var(--paper);
+    transition: width .35s cubic-bezier(.33,1,.68,1);
+}
 
 /* ============================================================
    HEADER
@@ -1194,10 +1290,110 @@ html:not(.anim) .pp-anim { opacity: 1; transform: none; }
 
 .pp-name { margin: 14px 0 18px; font-size: clamp(28px, 2.7vw, 44px); }
 
-.pp-notes { display: grid; gap: 14px; margin: 30px 0; padding-top: 26px; border-top: 1px solid var(--line); }
-.pp-note { display: grid; grid-template-columns: 96px 1fr; gap: 18px; align-items: baseline; }
-.pp-note span { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
-.pp-note b { font-weight: 300; font-size: 15px; }
+/* ============================================================
+   NOTE PYRAMID
+   ============================================================ */
+
+.pyramid {
+    margin: 30px 0;
+    padding-top: 26px;
+    border-top: 1px solid var(--line);
+}
+
+.tier {
+    position: relative;
+    padding: 18px 0 18px 118px;
+}
+
+.tier + .tier { border-top: 1px solid var(--line); }
+
+.tier-label {
+    position: absolute;
+    left: 0; top: 24px;
+    width: 100px;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.tier-label i {
+    display: block;
+    font-style: normal;
+    font-family: var(--font-display);
+    font-size: 15px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink);
+    margin-top: 3px;
+}
+
+.notes-row { display: flex; flex-wrap: wrap; gap: 22px; }
+
+.note {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 88px;
+    text-align: center;
+}
+
+.note-img {
+    position: relative;
+    width: var(--r, 68px);
+    height: var(--r, 68px);
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 10px 24px -12px rgba(14,14,14,.5);
+    transition: transform .55s var(--ease), box-shadow .55s var(--ease);
+}
+
+.note:hover .note-img { transform: translateY(-4px) scale(1.06); box-shadow: 0 18px 30px -14px rgba(14,14,14,.6); }
+
+.note-img::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.45), transparent 46%);
+    mix-blend-mode: soft-light;
+}
+
+.note-img svg {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 46%; height: 46%;
+    fill: none;
+    stroke: rgba(255,255,255,.85);
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.note b { font-weight: 400; font-size: 12px; line-height: 1.35; letter-spacing: .01em; }
+
+/* ingredient families */
+.n-citrus  { background: linear-gradient(150deg,#f6d264,#d99a2a 55%,#a4670f); }
+.n-fruit   { background: linear-gradient(150deg,#e8c9a6,#c98f6b 55%,#8f4f3c); }
+.n-floral  { background: linear-gradient(150deg,#f3dce6,#dba9c0 55%,#a4728d); }
+.n-spice   { background: linear-gradient(150deg,#e0a565,#b45f2a 55%,#6d2f12); }
+.n-wood    { background: linear-gradient(150deg,#b08b5f,#7b5731 55%,#3f2a15); }
+.n-leather { background: linear-gradient(150deg,#8a6a53,#5a3d2c 55%,#2a1a12); }
+.n-sweet   { background: linear-gradient(150deg,#f0dcbc,#d3ab74 55%,#8f6335); }
+.n-musk    { background: linear-gradient(150deg,#efe9e0,#cfc3b2 55%,#9b8d79); }
+.n-green   { background: linear-gradient(150deg,#cfe0b4,#8fae69 55%,#4f6d38); }
+.n-mineral { background: linear-gradient(150deg,#dfe8ea,#a9bfc6 55%,#63808a); }
+.n-smoke   { background: linear-gradient(150deg,#9c968c,#5f584f 55%,#2a2621); }
+
+@media (max-width: 620px) {
+    .tier { padding: 16px 0 16px 92px; }
+    .tier-label { width: 80px; }
+    .notes-row { gap: 16px; }
+    .note { width: 74px; }
+}
 
 .pp-meta { display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 30px; }
 .pp-meta div span { display: block; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
@@ -1596,7 +1792,6 @@ html.anim [data-reveal="fade"] { transform: none; }
     .card-media { aspect-ratio: 1 / .92; }
     .footer-top { flex-direction: column; }
     .pp-close { right: 20px; }
-    .pp-note { grid-template-columns: 84px 1fr; gap: 12px; }
 }
 
 /* ============================================================
@@ -1623,7 +1818,12 @@ html.anim [data-reveal="fade"] { transform: none; }
 <!-- PRELOADER -->
 <div id="preloader">
     <div class="pre-inner">
-        <div class="pre-word">AROMIO</div>
+        <div class="pre-eyebrow">Нишевая парфюмерия — Eau de Parfum</div>
+        <div class="pre-word" id="preWord" aria-label="AROMIO"></div>
+        <div class="pre-meta">
+            <span>Открываем коллекцию</span>
+            <span class="pre-count" id="preCount">0</span>
+        </div>
         <div class="pre-bar"><div class="pre-fill" id="preFill"></div></div>
     </div>
 </div>
@@ -2302,6 +2502,65 @@ function renderSplit() {
 }
 
 /* ============================================================
+   NOTE PYRAMID
+   ============================================================ */
+
+/* each ingredient family gets its own material + line icon */
+const NOTE_FAMILIES = [
+    { key:"citrus",  match:/бергамот|лимон|мандарин|грейпфрут|лайм|цитрус|нероли/i,
+      icon:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/>' },
+    { key:"fruit",   match:/груш|яблок|слив|кокос|ягод|персик|инжир/i,
+      icon:'<path d="M12 6.5c4 0 6.5 3 6.5 6.4 0 3.4-2.9 5.6-6.5 5.6s-6.5-2.2-6.5-5.6c0-3.4 2.5-6.4 6.5-6.4Z"/><path d="M12 6.5V4M12 4c1.6-.6 3-.2 3.6.8"/>' },
+    { key:"spice",   match:/перец|шафран|кардамон|имбир|кориандр|специ|гвоздик|корица/i,
+      icon:'<path d="M12 4.5c3.2 2.6 4.8 5 4.8 7.6A4.8 4.8 0 0 1 12 17a4.8 4.8 0 0 1-4.8-4.9c0-2.6 1.6-5 4.8-7.6Z"/><path d="M12 20v-3"/>' },
+    { key:"floral",  match:/жасмин|роз|пион|фиалк|ирис|лаванд|цвет|флёрдоранж|гардени/i,
+      icon:'<circle cx="12" cy="12" r="2.4"/><path d="M12 9.6c0-3 1-4.6 0-6.1M12 14.4c0 3-1 4.6 0 6.1M9.6 12c-3 0-4.6 1-6.1 0M14.4 12c3 0 4.6-1 6.1 0"/>' },
+    { key:"wood",    match:/кедр|сандал|^уд$|ветивер|пачул|древес|дерев|мирт|бук/i,
+      icon:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5.4"/><circle cx="12" cy="12" r="2.3"/>' },
+    { key:"leather", match:/кож|замш/i,
+      icon:'<rect x="4.5" y="6" width="15" height="12" rx="2.4"/><path d="M4.5 10.5h15M9.5 6v12"/>' },
+    { key:"sweet",   match:/ванил|тонка|джандуй|карамел|мёд|мед\b|шоколад|орех/i,
+      icon:'<path d="M8 5.5h8l-1.2 13a2.8 2.8 0 0 1-5.6 0Z"/><path d="M9.6 10.5h4.8"/>' },
+    { key:"musk",    match:/мускус|амбр|пудр|кашемир|белые|молоч/i,
+      icon:'<path d="M5 14.5c1.8-4 4.2-6 7-6s5.2 2 7 6"/><path d="M6.5 17.5c1.5-2 3.3-3 5.5-3s4 1 5.5 3"/>' },
+    { key:"green",   match:/лист|шалфей|чай|трав|зелён|зелен|мята|базилик/i,
+      icon:'<path d="M19 5c0 7-4.5 11.5-11 11.5C8 10 12.5 5 19 5Z"/><path d="M5 19c3-4.5 6-7 11-9.5"/>' },
+    { key:"mineral", match:/сол|минерал|морск|акватик|озон/i,
+      icon:'<path d="M12 3.5 20 12l-8 8.5L4 12Z"/><path d="M8 12h8"/>' },
+    { key:"smoke",   match:/ладан|лабданум|табак|дым|кофе|смол/i,
+      icon:'<path d="M8 20c-1-2.4-.4-4 1.4-5.6 2-1.8 2.4-3.4 1.2-5.6 3 .8 5 3 5 6.2 0 2-.7 3.7-2 5"/><path d="M12 20h4"/>' }
+];
+
+function noteFamily(name) {
+    return NOTE_FAMILIES.find(f => f.match.test(name)) || NOTE_FAMILIES[7];
+}
+
+function pyramidHTML(p) {
+    const tiers = [
+        ["Верхние", "Первое впечатление", p.notes.top, 58],
+        ["Сердце", "Характер аромата", p.notes.heart, 68],
+        ["База", "Шлейф на коже", p.notes.base, 78]
+    ];
+
+    return `<div class="pyramid">${tiers.map(([label, sub, list, size]) => `
+        <div class="tier">
+            <div class="tier-label">${label}<i>${sub}</i></div>
+            <div class="notes-row">
+                ${list.split(",").map(raw => {
+                    const note = raw.trim();
+                    const fam = noteFamily(note);
+                    return `<div class="note">
+                        <div class="note-img n-${fam.key}" style="--r:${size}px">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">${fam.icon}</svg>
+                        </div>
+                        <b>${esc(note)}</b>
+                    </div>`;
+                }).join("")}
+            </div>
+        </div>`).join("")}</div>`;
+}
+
+/* ============================================================
    PRODUCT PAGE
    ============================================================ */
 
@@ -2323,11 +2582,7 @@ function openProduct(id) {
             <h2 class="display pp-name pp-anim">${p.name}</h2>
             <p class="lead pp-anim">${p.desc}</p>
 
-            <div class="pp-notes pp-anim">
-                <div class="pp-note"><span>Верхние</span><b>${p.notes.top}</b></div>
-                <div class="pp-note"><span>Сердце</span><b>${p.notes.heart}</b></div>
-                <div class="pp-note"><span>База</span><b>${p.notes.base}</b></div>
-            </div>
+            <div class="pp-anim">${pyramidHTML(p)}</div>
 
             <div class="pp-meta pp-anim">
                 <div><span>Объём</span><b>${p.volume}</b></div>
@@ -3023,22 +3278,38 @@ registerScrub();
 
 const preloader = document.getElementById("preloader");
 const preFill = document.getElementById("preFill");
+const preCount = document.getElementById("preCount");
+
+document.getElementById("preWord").innerHTML = [..."AROMIO"]
+    .map((ch, i) => `<span style="animation-delay:${.18 + i * .075}s">${ch}</span>`).join("");
+
 let prog = 0;
 
 function finishIntro() {
     preloader.classList.add("is-done");
     document.getElementById("hero").classList.add("is-in");
-    setTimeout(() => preloader.remove(), 1400);
+    setTimeout(() => preloader.remove(), 1600);
 }
+
+/* the full intro plays once per browser session, not on every navigation */
+let introSeen = false;
+try { introSeen = sessionStorage.getItem("aromio_intro") === "1"; } catch (e) {}
 
 if (reduced) {
     finishIntro();
+} else if (introSeen) {
+    preloader.classList.add("quick");
+    preFill.style.width = "100%";
+    preCount.textContent = "100";
+    setTimeout(finishIntro, 420);
 } else {
+    try { sessionStorage.setItem("aromio_intro", "1"); } catch (e) {}
     const iv = setInterval(() => {
-        prog = Math.min(100, prog + 14 + Math.random() * 16);
+        prog = Math.min(100, prog + 6 + Math.random() * 10);
         preFill.style.width = prog + "%";
-        if (prog >= 100) { clearInterval(iv); setTimeout(finishIntro, 260); }
-    }, 110);
+        preCount.textContent = Math.round(prog);
+        if (prog >= 100) { clearInterval(iv); setTimeout(finishIntro, 520); }
+    }, 150);
 }
 </script>
 
