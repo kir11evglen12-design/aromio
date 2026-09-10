@@ -38,7 +38,7 @@ export default function Chapters() {
 
       <div className="chapters-grid">
         <div className="chapters-visual">
-          <Bottle product={byId(2)} controls="none"
+          <Bottle product={byId(6)} controls="none"
                   style={{ ["--bw" as string]: "132px", ["--bh" as string]: "234px", ["--bd" as string]: "54px" }} />
         </div>
         <div>

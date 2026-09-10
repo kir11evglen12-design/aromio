@@ -2034,3 +2034,92 @@ html.anim [data-reveal="fade"] { transform: none; }
     .pp-close { right: 20px; }
 }
 
+
+/* ============================================================
+   NOTE PYRAMID — photographed ingredients
+   ============================================================ */
+
+.pyramid .tier-label { display: flex; flex-direction: column; }
+
+.tier-index {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0;
+  color: var(--sand);
+  margin-bottom: 2px;
+}
+
+.note-img.has-photo {
+  background: var(--paper-2);
+  box-shadow: 0 12px 26px -14px rgb(14 14 14 / 55%);
+}
+
+.note-img.has-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.note-img.has-photo::after {
+  background: radial-gradient(circle at 32% 24%, rgb(255 255 255 / 30%), transparent 52%);
+}
+
+/* base tier reads heaviest, top tier lightest */
+.tier[data-tier="1"] .note b { color: #6e6a63; }
+.tier[data-tier="3"] .note b { font-weight: 500; }
+
+/* ============================================================
+   HOUSES
+   ============================================================ */
+
+.houses-list { border-top: 1px solid var(--line); }
+
+.house-row {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) 2fr;
+  gap: clamp(20px, 4vw, 60px);
+  padding: clamp(26px, 3vw, 40px) 0;
+  border-bottom: 1px solid var(--line);
+  align-items: start;
+}
+
+.house-title { text-align: left; }
+
+.house-title b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.4vw, 46px);
+  font-weight: 400;
+  line-height: 1.05;
+  transition: color 0.4s var(--ease);
+}
+
+.house-title:hover b { color: var(--sand); }
+.house-title span { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+
+.house-items { display: grid; gap: 2px; }
+
+.house-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  padding: 11px 14px;
+  text-align: left;
+  border-radius: 2px;
+  transition: background 0.4s var(--ease), padding-left 0.4s var(--ease);
+}
+
+.house-item:hover { background: var(--ink); color: var(--paper); padding-left: 22px; }
+.house-item span { font-size: 15px; font-weight: 300; }
+.house-item i { font-style: normal; font-size: 13px; opacity: 0.65; white-space: nowrap; }
+
+.filters.houses { margin-bottom: 14px; }
+
+.filter--house { display: inline-flex; align-items: center; gap: 9px; letter-spacing: 0.18em; }
+.filter--house i { font-style: normal; font-size: 10px; opacity: 0.55; }
+
+@media (max-width: 860px) {
+  .house-row { grid-template-columns: 1fr; gap: 14px; }
+}

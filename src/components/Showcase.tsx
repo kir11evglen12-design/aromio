@@ -4,7 +4,7 @@ import { useShop } from "../lib/shop";
 import { gsap, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
 import Bottle from "./Bottle";
 
-const PICKS = [9, 4];
+const PICKS = [9, 6];
 
 /** Full-width product acts; visual and copy drift against each other. */
 export default function Showcase() {

@@ -109,7 +109,7 @@ export default function Hero({ ready }: { ready: boolean }) {
         </h1>
 
         <p className="lead hero-fade">
-          Восемь авторских композиций и избранные линии парфюмерных домов.
+          Dior, Louis Vuitton и Valentino — отобранные ароматы трёх домов.
           Найдите тот, что станет вашей подписью.
         </p>
 
@@ -123,7 +123,7 @@ export default function Hero({ ready }: { ready: boolean }) {
       </div>
 
       <div className="hero-stage" ref={stage}>
-        <Bottle product={byId(3)} controls="static" hint style={{ ["--bw" as string]: "150px", ["--bh" as string]: "268px", ["--bd" as string]: "62px" }} />
+        <Bottle product={byId(1)} controls="static" hint style={{ ["--bw" as string]: "150px", ["--bh" as string]: "268px", ["--bd" as string]: "62px" }} />
       </div>
 
       <div className="hero-side">Eau de Parfum — Made in France</div>

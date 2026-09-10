@@ -2,15 +2,15 @@ import {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState
 } from "react";
 import type { ReactNode } from "react";
-import { byId, products } from "../data/products";
-import type { Product } from "../data/products";
+import { byId, HOUSES, products } from "../data/products";
+import type { House, Product } from "../data/products";
 import {
   loadUsers, readSession, upsertUser, writeSession
 } from "./auth";
 import type { Order, User } from "./auth";
 
 type Drawer = "cart" | "search" | "auth" | null;
-export type Category = "all" | Product["category"];
+export type Filter = "all" | Product["category"] | House;
 
 interface ShopValue {
   cart: Product[];
@@ -43,8 +43,8 @@ interface ShopValue {
   openProfile: () => void;
   closeProfile: () => void;
 
-  category: Category;
-  setCategory: (c: Category) => void;
+  category: Filter;
+  setCategory: (c: Filter) => void;
 
   toast: (msg: string) => void;
   toastMsg: string;
@@ -77,7 +77,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const [authIntro, setAuthIntro] = useState("Войдите, чтобы видеть историю заказов и избранные ароматы.");
   const [productId, setProductId] = useState<number | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [category, setCategory] = useState<Category>("all");
+  const [category, setCategory] = useState<Filter>("all");
   const [toastMsg, setToastMsg] = useState("");
   const toastTimer = useRef<number>(0);
 
@@ -234,5 +234,10 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-export const visibleProducts = (category: Category): Product[] =>
-  category === "all" ? products : products.filter(p => p.category === category);
+export const visibleProducts = (filter: Filter): Product[] => {
+  if (filter === "all") return products;
+  if ((HOUSES as readonly string[]).includes(filter)) {
+    return products.filter(p => p.brand === filter);
+  }
+  return products.filter(p => p.category === filter);
+};

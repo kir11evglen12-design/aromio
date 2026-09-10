@@ -1,4 +1,4 @@
-const ITEMS = ["Eau de Parfum", "Нишевая парфюмерия", "Доставка по России", "11 ароматов", "Оригинал 100%"];
+const ITEMS = ["Eau de Parfum", "Нишевая парфюмерия", "Доставка по России", "Dior · Louis Vuitton · Valentino", "Оригинал 100%"];
 
 export default function Ticker({ dark }: { dark?: boolean }) {
   const row = ITEMS.map(t => <span key={t}>{t}<i /></span>);

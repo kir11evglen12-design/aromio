@@ -16,7 +16,7 @@ export default function Footer() {
             <button className="link-u" onClick={() => go("all")}>Каталог</button>
             <button className="link-u" onClick={() => go("men")}>Мужские</button>
             <button className="link-u" onClick={() => go("women")}>Женские</button>
-            <button className="link-u" onClick={() => scrollToId("lines")}>Коллекции</button>
+            <button className="link-u" onClick={() => scrollToId("lines")}>Дома</button>
           </div>
           <div className="footer-col">
             <h4>Контакты</h4>

@@ -4,8 +4,8 @@ import Bottle from "./Bottle";
 import { scrollToId } from "./Header";
 
 const PANELS = [
-  { cat: "men" as const, label: "Мужские", eyebrow: "Для него", bottle: 2, dark: false },
-  { cat: "women" as const, label: "Женские", eyebrow: "Для неё", bottle: 5, dark: true }
+  { cat: "men" as const, label: "Мужские", eyebrow: "Для него", bottle: 1, dark: false },
+  { cat: "women" as const, label: "Женские", eyebrow: "Для неё", bottle: 3, dark: true }
 ];
 
 export default function SplitGender() {

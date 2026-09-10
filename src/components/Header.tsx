@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Search, ShoppingBag, User as UserIcon } from "lucide-react";
 import { useShop } from "../lib/shop";
-import type { Category } from "../lib/shop";
+import type { Filter } from "../lib/shop";
 import { initials } from "../lib/auth";
 
-const NAV: [string, Category | "lines"][] = [
+const NAV: [string, Filter | "lines"][] = [
   ["Каталог", "all"],
   ["Мужские", "men"],
   ["Женские", "women"],
-  ["Коллекции", "lines"]
+  ["Дома", "lines"]
 ];
 
 export function scrollToId(id: string) {
@@ -33,7 +33,7 @@ export default function Header() {
     document.body.classList.toggle("menu-open", menu);
   }, [menu]);
 
-  const go = (target: Category | "lines") => {
+  const go = (target: Filter | "lines") => {
     setMenu(false);
     if (target === "lines") scrollToId("lines");
     else { setCategory(target); scrollToId("collection"); }

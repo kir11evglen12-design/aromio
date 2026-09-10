@@ -12,10 +12,12 @@ export interface Notes {
 
 export interface Product {
   id: number;
+  /** shown as the product title; the house is carried in `brand` */
   name: string;
   brand: string;
   price: number;
   category: Category;
+  /** collection or line inside the house */
   line: string;
   /** liquid colour of the CSS bottle, and the scene tint in the picker */
   tint: string;
@@ -35,81 +37,147 @@ export const CATEGORY_LABEL: Record<Category | "all", string> = {
   niche: "Нишевая"
 };
 
+export const HOUSES = ["DIOR", "LOUIS VUITTON", "VALENTINO"] as const;
+export type House = (typeof HOUSES)[number];
+
 export const products: Product[] = [
+  /* ---------------- DIOR ---------------- */
   {
-    id: 1, name: "AROMIO No. 01", brand: "AROMIO", price: 4990, category: "women",
-    line: "BLANC", tint: "#d9c9a8", volume: "50 мл", type: "Eau de Parfum",
-    desc: "Прозрачный старт из бергамота, который через час раскрывается тёплым белым мускусом.",
-    notes: { top: "Бергамот, груша", heart: "Жасмин, пион", base: "Белый мускус, кедр" }
+    id: 1, name: "Sauvage", brand: "DIOR", price: 11490, category: "men",
+    line: "SAUVAGE", tint: "#6d7f8c", volume: "100 мл", type: "Eau de Parfum",
+    desc: "Пустынный минерализм: раскалённый бергамот на старте, лаванда в сердце и амброво-ванильный след.",
+    notes: {
+      top: "Бергамот, грейпфрут",
+      heart: "Лаванда, мускатный орех",
+      base: "Амбра, ваниль"
+    }
   },
   {
-    id: 2, name: "AROMIO No. 02", brand: "AROMIO", price: 5490, category: "men",
-    line: "NOIR", tint: "#4c5a63", volume: "100 мл", type: "Eau de Parfum",
-    desc: "Плотный древесный характер: дым, кожа и холодный ветивер в основе.",
-    notes: { top: "Чёрный перец, грейпфрут", heart: "Кожа, ирис", base: "Ветивер, кедр" }
+    id: 2, name: "Homme Intense", brand: "DIOR", price: 12990, category: "men",
+    line: "HOMME", tint: "#6a5a66", volume: "100 мл", type: "Eau de Parfum",
+    desc: "Пудровый ирис, вписанный в тёплую древесную оправу — самый «костюмный» аромат дома.",
+    notes: {
+      top: "Лаванда",
+      heart: "Ирис, пачули",
+      base: "Ваниль, сандал"
+    }
   },
   {
-    id: 3, name: "AROMIO No. 03", brand: "AROMIO", price: 5990, category: "unisex",
-    line: "AMBRE", tint: "#c98f47", volume: "75 мл", type: "Eau de Parfum",
-    desc: "Амбровая база с ладаном — тёплый, обволакивающий вечерний шлейф.",
-    notes: { top: "Мандарин, розовый перец", heart: "Ладан, лабданум", base: "Амбра, ваниль" }
+    id: 3, name: "Miss Dior", brand: "DIOR", price: 13490, category: "women",
+    line: "MISS DIOR", tint: "#d98fa0", volume: "100 мл", type: "Eau de Parfum",
+    desc: "Цветочный шипр нового поколения: роза центифолия, подсвеченная бергамотом и пачули.",
+    notes: {
+      top: "Бергамот",
+      heart: "Роза центифолия, пион",
+      base: "Белый мускус, пачули"
+    }
   },
   {
-    id: 4, name: "AROMIO No. 04", brand: "AROMIO", price: 6490, category: "niche",
-    line: "OUD", tint: "#7d3f34", volume: "50 мл", type: "Eau de Parfum",
-    desc: "Флагман нишевой линии: настоящий уд, смягчённый шафраном и дамасской розой.",
-    notes: { top: "Шафран, слива", heart: "Дамасская роза", base: "Уд, пачули" }
+    id: 4, name: "J’adore", brand: "DIOR", price: 13990, category: "women",
+    line: "J’ADORE", tint: "#d9b45a", volume: "100 мл", type: "Eau de Parfum",
+    desc: "Золотой цветочный букет: иланг-иланг, дамасская роза и жасмин самбак в одной ноте.",
+    notes: {
+      top: "Лимон, иланг-иланг",
+      heart: "Жасмин самбак, роза",
+      base: "Белый мускус, ваниль"
+    }
+  },
+
+  /* ---------------- LOUIS VUITTON ---------------- */
+  {
+    id: 5, name: "Imagination", brand: "LOUIS VUITTON", price: 33900, category: "men",
+    line: "LES PARFUMS", tint: "#d9a45c", volume: "100 мл", type: "Eau de Parfum",
+    desc: "Прозрачная цитрусовая акварель на чайной основе — лёгкий, но стойкий дневной аромат.",
+    notes: {
+      top: "Бергамот, лимон",
+      heart: "Чёрный чай, кардамон",
+      base: "Амбра, сандал"
+    }
   },
   {
-    id: 5, name: "AROMIO No. 05", brand: "AROMIO", price: 4590, category: "women",
-    line: "IRIS", tint: "#b9a6c4", volume: "50 мл", type: "Eau de Parfum",
-    desc: "Пудровый ирис с фиалкой — сдержанная элегантность на каждый день.",
-    notes: { top: "Фиалковый лист", heart: "Ирис, фиалка", base: "Пудра, сандал" }
+    id: 6, name: "Ombre Nomade", brand: "LOUIS VUITTON", price: 42900, category: "niche",
+    line: "LES PARFUMS", tint: "#6b2f2a", volume: "100 мл", type: "Eau de Parfum",
+    desc: "Плотный уд с розой и ладаном: самый узнаваемый ночной аромат дома, шлейф читается через комнату.",
+    notes: {
+      top: "Малина, шафран",
+      heart: "Роза, уд",
+      base: "Уд, сандал"
+    }
   },
   {
-    id: 6, name: "AROMIO No. 06", brand: "AROMIO", price: 5290, category: "men",
-    line: "CEDRE", tint: "#8a6b3f", volume: "100 мл", type: "Eau de Parfum",
-    desc: "Сухой кедр и табак с медовой сладостью бобов тонка.",
-    notes: { top: "Кардамон, лайм", heart: "Кедр, табак", base: "Бобы тонка, ваниль" }
+    id: 7, name: "Attrape-Rêves", brand: "LOUIS VUITTON", price: 33900, category: "women",
+    line: "LES PARFUMS", tint: "#8d5fa0", volume: "100 мл", type: "Eau de Parfum",
+    desc: "Пион и личи на пачулевой подушке — сладкий, но не приторный цветочный шлейф.",
+    notes: {
+      top: "Личи",
+      heart: "Пион, жасмин",
+      base: "Пачули, ваниль"
+    }
   },
   {
-    id: 7, name: "AROMIO No. 07", brand: "AROMIO", price: 6990, category: "unisex",
-    line: "MUSC", tint: "#a9b7ad", volume: "100 мл", type: "Eau de Parfum",
-    desc: "Минеральная свежесть: соль, белый чай и чистый мускус на коже.",
-    notes: { top: "Морская соль, лимон", heart: "Белый чай, шалфей", base: "Мускус, амброксан" }
+    id: 8, name: "Météore", brand: "LOUIS VUITTON", price: 33900, category: "men",
+    line: "LES PARFUMS", tint: "#7fa3b8", volume: "100 мл", type: "Eau de Parfum",
+    desc: "Холодный цитрус с мятной искрой и минеральной древесной базой — аромат ясного утра.",
+    notes: {
+      top: "Лимон, грейпфрут",
+      heart: "Мята, кардамон",
+      base: "Пачули, сандал"
+    }
   },
-  {
-    id: 8, name: "AROMIO No. 08", brand: "AROMIO", price: 7490, category: "niche",
-    line: "SANTAL", tint: "#c2a06a", volume: "75 мл", type: "Eau de Parfum",
-    desc: "Кремовый сандал с кашемировым древесным послевкусием.",
-    notes: { top: "Кокос, кориандр", heart: "Сандал, кашемир", base: "Пачули, ваниль" }
-  },
+
+  /* ---------------- VALENTINO ---------------- */
   {
     id: 9, name: "Uomo Born In Roma", brand: "VALENTINO", price: 9990, category: "men",
     line: "BORN IN ROMA", tint: "#3b3b40", volume: "100 мл", type: "Eau de Toilette",
     photo: uomoRoma,
     desc: "Контраст римской архитектуры и уличной культуры: пряный имбирь на старте и минеральный кожаный шлейф.",
-    notes: { top: "Имбирь, лист фиалки", heart: "Шалфей, лаванда", base: "Кожаный аккорд, ветивер, древесные" }
+    notes: {
+      top: "Имбирь, лист фиалки",
+      heart: "Шалфей, лаванда",
+      base: "Кожаный аккорд, ветивер"
+    }
   },
   {
     id: 10, name: "Uomo", brand: "VALENTINO", price: 10490, category: "men",
     line: "UOMO", tint: "#a4713a", volume: "100 мл", type: "Eau de Toilette",
     photo: uomo,
     desc: "Гурманская классика дома: обжаренный кофе и джандуйя на тёплой кожаной базе.",
-    notes: { top: "Бергамот, мирт", heart: "Обжаренный кофе, джандуйя", base: "Кожа, кедр" }
+    notes: {
+      top: "Бергамот, мирт",
+      heart: "Кофе, джандуйя",
+      base: "Кожа, сандал"
+    }
   },
   {
     id: 11, name: "Donna Born In Roma Green Stravaganza", brand: "VALENTINO", price: 11490,
-    category: "women", line: "GREEN STRAVAGANZA", tint: "#a9c94f", volume: "100 мл",
+    category: "women", line: "BORN IN ROMA", tint: "#a9c94f", volume: "100 мл",
     type: "Eau de Parfum", photo: donnaGreen,
     desc: "Зелёная цитрусовая версия Born In Roma: сочный старт, жасминовое сердце и мягкий мускусный финал.",
-    notes: { top: "Бергамот, зелёное яблоко", heart: "Жасмин грандифлорум", base: "Белый мускус, светлые древесные" }
+    notes: {
+      top: "Бергамот, зелёное яблоко",
+      heart: "Жасмин грандифлорум",
+      base: "Белый мускус, сандал"
+    }
+  },
+  {
+    id: 12, name: "Voce Viva", brand: "VALENTINO", price: 10990, category: "women",
+    line: "VOCE VIVA", tint: "#e0c46a", volume: "100 мл", type: "Eau de Parfum",
+    desc: "Светлый цветочно-гурманский аромат: апельсиновый цвет и ваниль с кристальным мускусом.",
+    notes: {
+      top: "Лимон, мандарин",
+      heart: "Апельсиновый цвет, жасмин",
+      base: "Ваниль, белый мускус"
+    }
   }
 ];
 
-export const houseProducts = products.filter(p => p.brand === "AROMIO");
+/** compositions rendered with the CSS bottle — the picker retints these live */
+export const pickerProducts = products.filter(p => !p.photo).slice(0, 8);
 
 export const byId = (id: number): Product =>
   products.find(p => p.id === id) ?? products[0];
+
+export const byHouse = (house: House): Product[] =>
+  products.filter(p => p.brand === house);
 
 export const money = (n: number): string => n.toLocaleString("ru-RU") + " ₽";

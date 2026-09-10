@@ -28,7 +28,7 @@ export default function Manifest() {
       </p>
 
       <div className="stats">
-        <div className="stat"><b>11</b><span>Ароматов в витрине</span></div>
+        <div className="stat"><b>12</b><span>Ароматов в витрине</span></div>
         <div className="stat"><b>24</b><span>Часа стойкости</span></div>
         <div className="stat"><b>100%</b><span>Оригинальность</span></div>
       </div>

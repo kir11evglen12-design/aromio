@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { houseProducts } from "../data/products";
+import { pickerProducts } from "../data/products";
 import { useShop } from "../lib/shop";
 import { revealFrom, useGsap } from "../lib/motion";
 import Bottle from "./Bottle";
@@ -11,8 +11,8 @@ import Bottle from "./Bottle";
  */
 export default function Picker() {
   const { openProduct } = useShop();
-  const [active, setActive] = useState(houseProducts[2]);
-  const [shown, setShown] = useState(houseProducts[2]);
+  const [active, setActive] = useState(pickerProducts[0]);
+  const [shown, setShown] = useState(pickerProducts[0]);
   const [swapping, setSwapping] = useState(false);
   const [radius, setRadius] = useState(168);
 
@@ -49,8 +49,8 @@ export default function Picker() {
           />
 
           <div className="orbit" role="radiogroup" aria-label="Выбор аромата">
-            {houseProducts.map((p, i) => {
-              const a = (i / houseProducts.length) * 360 - 90;
+            {pickerProducts.map((p, i) => {
+              const a = (i / pickerProducts.length) * 360 - 90;
               return (
                 <button
                   key={p.id}
@@ -64,7 +64,7 @@ export default function Picker() {
                     ["--pos" as string]: `rotate(${a}deg) translate(${radius}px) rotate(${-a}deg)`
                   }}
                 >
-                  {p.line.slice(0, 3)}
+                  {p.brand.slice(0, 3)}
                 </button>
               );
             })}

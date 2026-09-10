@@ -1,5 +1,5 @@
 import { Heart, Plus } from "lucide-react";
-import { CATEGORY_LABEL, money } from "../data/products";
+import { CATEGORY_LABEL, HOUSES, money, products } from "../data/products";
 import type { Category as ProductCategory } from "../data/products";
 import { useShop, visibleProducts } from "../lib/shop";
 import { gsap, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
@@ -32,8 +32,18 @@ export default function Collection() {
           <h2 className="display">Ароматы<br /><em>витрины</em></h2>
         </div>
         <p className="lead">
-          Каждый флакон можно рассмотреть со всех сторон — используйте стрелки под флаконом.
+          Три дома в одной витрине. Флаконы без фотографии можно рассмотреть со всех сторон — стрелками под флаконом.
         </p>
+      </div>
+
+      <div className="filters houses" role="group" aria-label="Фильтр по домам">
+        {HOUSES.map(h => (
+          <button key={h}
+                  className={"filter filter--house" + (category === h ? " is-active" : "")}
+                  onClick={() => setCategory(h)}>
+            {h}<i>{products.filter(p => p.brand === h).length}</i>
+          </button>
+        ))}
       </div>
 
       <div className="filters" role="group" aria-label="Фильтр по категориям">
