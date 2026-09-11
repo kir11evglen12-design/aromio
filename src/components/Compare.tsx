@@ -80,7 +80,7 @@ export default function Compare() {
               <div className="cmp-key">Купить</div>
               {items.map(p => (
                 <div className="cmp-val" key={"buy" + p.id}>
-                  <button className="btn btn--solid btn--sm" onClick={() => addToCart(p.id, 100)}>
+                  <button className="btn btn--solid btn--buy btn--sm" onClick={() => addToCart(p.id, 100)}>
                     100 мл — {money(p.variants.find(v => v.ml === 100)?.price ?? fromPrice(p))}
                   </button>
                 </div>

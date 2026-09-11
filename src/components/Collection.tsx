@@ -1,18 +1,17 @@
-import { Check, Heart, Layers, Plus } from "lucide-react";
 import { byId, CATEGORY_LABEL, fromPrice, HOUSES, money, products } from "../data/products";
 import { plural } from "../lib/auth";
 import type { Category as ProductCategory } from "../data/products";
 import { SORT_LABEL, useShop, visibleProducts } from "../lib/shop";
 import type { Sort } from "../lib/shop";
 import { gsap, parallax, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
-import Plate from "./Plate";
+import ProductCard from "./ProductCard";
 
 const FILTERS: (ProductCategory | "all")[] = ["all", "women", "men", "unisex", "niche"];
 
 export default function Collection() {
   const {
-    category, setCategory, addToCart, openProduct, isFavorite, toggleFavorite,
-    sort, setSort, noteQuery, setNoteQuery, compare, toggleCompare, recent
+    category, setCategory, openProduct,
+    sort, setSort, noteQuery, setNoteQuery, recent
   } = useShop();
   const list = visibleProducts(category, sort, noteQuery);
 
@@ -86,59 +85,7 @@ export default function Collection() {
       </div>
 
       <div className="grid">
-        {list.map(p => (
-          <article
-            className="card"
-            key={p.id}
-            role="button"
-            tabIndex={0}
-            aria-label={`${p.brand} ${p.name} — открыть карточку`}
-            onClick={() => openProduct(p.id)}
-            onKeyDown={e => {
-              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openProduct(p.id); }
-            }}
-          >
-            <div className={"card-media" + (p.photo ? " media--photo" : "")}>
-              <span className="card-tag" data-cat={p.category}>{CATEGORY_LABEL[p.category]}</span>
-
-              <button
-                className={"cmp-btn" + (compare.includes(p.id) ? " is-on" : "")}
-                aria-pressed={compare.includes(p.id)}
-                aria-label={`${compare.includes(p.id) ? "Убрать" : "Добавить"} ${p.name} в сравнение`}
-                onClick={e => { e.stopPropagation(); toggleCompare(p.id); }}
-              >
-                {compare.includes(p.id)
-                  ? <Check size={15} strokeWidth={2} />
-                  : <Layers size={15} strokeWidth={1.5} />}
-              </button>
-
-              <button
-                className={"fav-btn" + (isFavorite(p.id) ? " is-on" : "")}
-                aria-pressed={isFavorite(p.id)}
-                aria-label={`${isFavorite(p.id) ? "Убрать" : "Добавить"} ${p.name} в избранное`}
-                onClick={e => { e.stopPropagation(); toggleFavorite(p.id); }}
-              >
-                <Heart size={17} strokeWidth={1.4} />
-              </button>
-
-              <Plate product={p} />
-            </div>
-
-            <div className="card-body">
-              <div className="card-line">{p.brand}</div>
-              <h3 className="card-name" title={p.name}>{p.name}</h3>
-
-              <div className="card-foot">
-                <span className="card-price"><i>от</i> {money(fromPrice(p))}</span>
-                <button className="card-add" aria-label={`Добавить ${p.name} в корзину`}
-                        onClick={e => { e.stopPropagation(); addToCart(p.id); }}>
-                  <Plus size={14} strokeWidth={1.5} />
-                </button>
-              </div>
-            </div>
-
-          </article>
-        ))}
+        {list.map(p => <ProductCard product={p} key={p.id} />)}
       </div>
 
       {list.length === 0 && (

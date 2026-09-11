@@ -102,7 +102,7 @@ export default function ProductPage() {
 
             <div className="pp-buy pp-anim">
               <span className="pp-price">{money(variant.price)}</span>
-              <button className="btn btn--solid" onClick={() => addToCart(p.id, ml)}>
+              <button className="btn btn--solid btn--buy" onClick={() => addToCart(p.id, ml)}>
                 В корзину — {variant.ml} мл
                 <ArrowRight className="btn__arrow" size={14} strokeWidth={1.4} />
               </button>
