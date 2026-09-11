@@ -3205,12 +3205,11 @@ kbd {
     /* no filter: blur() here. A 70px blur over a viewport-sized layer costs
        ~100ms per frame because every transform step re-rasterises it; the
        gradients below are already soft, so the blur bought nothing. */
-    opacity: .14;
+    /* без цвета: строгий фон — это сетка на чёрном и ничего больше */
+    opacity: .5;
     background:
-        radial-gradient(30% 34% at 22% 28%, rgb(46 92 168 / 42%), transparent 70%),
-        radial-gradient(28% 30% at 78% 22%, rgb(178 96 54 / 34%), transparent 70%),
-        radial-gradient(34% 32% at 66% 74%, rgb(150 52 96 / 32%), transparent 70%),
-        radial-gradient(26% 28% at 30% 78%, rgb(38 122 104 / 30%), transparent 70%);
+        radial-gradient(60% 50% at 50% 28%, rgb(255 255 255 / 4%), transparent 72%),
+        radial-gradient(50% 44% at 50% 92%, rgb(255 255 255 / 3%), transparent 70%);
     /* still, like the mesh above it */
 }
 
@@ -3218,8 +3217,8 @@ kbd {
 .bd-grain {
     position: absolute;
     inset: 0;
-    opacity: .05;
-    background-image: radial-gradient(rgb(255 255 255 / 55%) 0.5px, transparent 0.5px);
+    opacity: .03;
+    background-image: radial-gradient(rgb(255 255 255 / 40%) 0.5px, transparent 0.5px);
     background-size: 3px 3px;
 }
 
@@ -3944,4 +3943,228 @@ html.calm .bd-veil { opacity: .9; }
     .picker-stage .plate .pl-meta,
     .chapters-visual .plate .pl-meta { display: none; }
     .chapters-visual .plate { width: min(58%, 150px); }
+}
+
+/* ============================================================
+   МОНОХРОМ
+   Буквы белые, кнопки чёрно-белые, цвет остаётся только у самих
+   флаконов и фотографий. Этот слой идёт последним и перекрывает
+   всё, что накопилось раньше.
+   ============================================================ */
+
+:root {
+    --w: #ffffff;
+    --w-2: rgb(255 255 255 / 78%);   /* второй план — тот же белый, тише */
+    --w-3: rgb(255 255 255 / 56%);   /* третий: подписи, единицы, счётчики */
+    --line-w: rgb(255 255 255 / 16%);
+}
+
+/* ── Текст ───────────────────────────────────────────────────────────── */
+
+body, .lead, .card-name, .card-desc, .card-line, .card-price b, .card-price span,
+.jr-lead, .jr-title, .jr-para, .jr-reader-lead, .jr-points li,
+.lx-fr, .lx-ru, .lx-what, .lx-say, .lx-group,
+.faq-text, .faq-a > p, .faq-num,
+.story p, .house-story p, .story-meta span,
+.p-legend b, .p-legend i, .p-note figcaption, .p-fact p, .p-missing p,
+.spec div b, .spec div span, .showcase-story, .showcase-story span,
+.sc-step b, .sc-step em, .sc-step span,
+.cmp-val, .cmp-key, .cmp-brand, .cmp-name,
+.cmd-label, .cmd-hint, .cmd-group,
+.footer-claim, .footer-note, .footer-col .link-u, .footer-col h4,
+.shelf-main b, .shelf-main span, .shelf-note, .rem-main b, .rem-main span,
+.eyebrow, .p-step, .card-tag, .hero-fact b, .hero-fact span, .hero-kbd,
+.picker-line, .picker-desc, .picker-name, .stat b, .stat span,
+.cl-count, .cl-sort-btn, .filter, .card-chip, .empty, .muted,
+.order-items, .profile-mail, .pp-calc-note, .pp-calc-val, .pp-sim b,
+.pp-sim span, .pp-sim em, .jr-kicker, .jr-meta, .lx-search input,
+.cl-note input, .card-size b, .card-size i, .pp-price, .price {
+    color: var(--w);
+}
+
+/* второй и третий план — всё тот же белый, только тише */
+.lead, .card-desc, .jr-lead, .jr-para, .jr-reader-lead, .lx-what,
+.faq-a > p, .story p, .house-story p, .footer-claim, .footer-note,
+.pp-calc-note, .shelf-note, .picker-desc, .cmd-hint { color: var(--w-2); }
+
+.card-price span, .card-line, .eyebrow, .p-step, .jr-kicker, .jr-meta,
+.lx-ru, .lx-say, .lx-group, .cl-count, .faq-num, .story-meta span,
+.sc-step span, .cmp-key, .cmp-brand, .cmd-group, .footer-col h4,
+.hero-fact span, .picker-line, .stat span, .shelf-main span,
+.rem-main span, .card-tag, .pp-sim span, .card-size i { color: var(--w-3); }
+
+::placeholder { color: var(--w-3) !important; }
+
+/* ── Кнопки: только чёрное и белое ───────────────────────────────────── */
+
+.btn--solid, .btn--buy, .card-buy, .card-add {
+    background: var(--w);
+    background-image: none;
+    border-color: var(--w);
+    color: #000;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.btn--solid::before, .btn--buy::before { background: rgb(255 255 255 / 88%); }
+
+.btn--solid:hover, .btn--buy:hover, .card-buy:hover, .card-add:hover {
+    background: #000;
+    color: var(--w);
+    border-color: var(--w);
+    box-shadow: none;
+}
+
+.btn--light { border-color: var(--w); color: var(--w); }
+.btn--light::before { background: var(--w); }
+.btn--light:hover { color: #000; }
+
+/* плашка концентрации — белая, а не цветная */
+.card-badge {
+    background: var(--w);
+    background-image: none;
+    color: #000;
+    box-shadow: none;
+    font-weight: 700;
+}
+
+/* выбранный объём — белая рамка, без свечения */
+.card-size.is-on,
+.size.is-on {
+    border-color: var(--w);
+    background: rgb(255 255 255 / 10%);
+    color: var(--w);
+    box-shadow: inset 0 0 0 1px var(--w);
+}
+
+.size.is-on span, .size.is-on b { color: var(--w); }
+
+.card-size, .size { border-color: var(--line-w); }
+.card-size:hover, .size:hover { border-color: var(--w); color: var(--w); }
+
+/* фильтры, чипы и круглые кнопки */
+.filter.is-active, .filter--house.is-active,
+.cl-sort-btn.is-on { background: var(--w); border-color: var(--w); color: #000; font-weight: 600; }
+.filter--house::before, .filter--house.is-active::before,
+.filters.houses .filter--house:nth-child(1),
+.filters.houses .filter--house:nth-child(2),
+.filters.houses .filter--house:nth-child(3) { --chip: var(--w); background-color: transparent; }
+.filter--house.is-active { background: var(--w); }
+.filter--house.is-active::before { background: #000; }
+
+.card-chip, .card-chip[data-cat] { color: var(--w-2); border-color: var(--line-w); }
+.card-tag::before { background: currentColor; }
+
+.card-cmp.is-on { background: var(--w); border-color: var(--w); color: #000; }
+.card-fav.is-on, .fav-btn.is-on { background: rgb(255 255 255 / 14%); border-color: var(--w); color: var(--w); }
+.card-fav.is-on svg, .fav-btn.is-on svg { fill: var(--w); stroke: var(--w); }
+.card:hover { border-color: rgb(255 255 255 / 42%); }
+
+/* ярусы пирамиды и прочие цветные акценты гаснут */
+.p-tier[data-tier="1"], .p-tier[data-tier="2"], .p-tier[data-tier="3"] { --tier: var(--w); }
+.p-fact, .story, .showcase-story { border-left-color: var(--w); }
+.rem-item.is-done .rem-check { background: var(--w); border-color: var(--w); color: #000; }
+.mbar-icon i { background: var(--w); color: #000; }
+.cart-count { background: var(--w); color: #000; }
+:focus-visible { outline: 2px solid var(--w); outline-offset: 3px; }
+
+/* ── Покупка в карточке товара: крупно и однозначно ──────────────────── */
+
+.pp-buy {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line-w);
+}
+
+.pp-buy .pp-price {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 3vw, 40px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+}
+
+.pp-buy .btn--solid {
+    flex: 1 1 260px;
+    justify-content: center;
+    min-height: 64px;
+    padding: 20px 34px;
+    font-size: 14px;
+    letter-spacing: .14em;
+}
+
+.pp-buy .fav-btn { width: 58px; height: 58px; border: 1px solid var(--line-w); }
+.pp-buy .fav-btn svg { width: 20px; height: 20px; }
+
+/* объёмы на странице товара тоже крупнее — их выбирают до кнопки */
+.sizes-row .size { min-height: 76px; padding: 14px 18px; }
+.size b { font-size: 21px; }
+
+@media (max-width: 720px) {
+    .pp-buy .pp-price { font-size: 22px; }
+    .pp-buy .btn--solid { min-height: 56px; padding: 16px 12px; }
+    .sizes-row .size { min-height: 66px; }
+}
+
+/* подпись кнопки не должна ломаться на строки */
+.pp-buy .btn--solid {
+    flex: 1 1 320px;
+    white-space: nowrap;
+    letter-spacing: .1em;
+}
+
+/* последние цветные мелочи */
+.pp-calc-slider input[type="range"] { accent-color: var(--w); }
+.pp-stock i { background: var(--w); }
+.pp-sim i { background: var(--w) !important; }
+.cl-recent-chip i { background: var(--w) !important; }
+.shelf-dot { background: var(--w) !important; }
+.p-tile.has-photo, .p-tile { border-color: var(--line-w); }
+.p-tile:hover:not(:disabled), .p-tile.is-open { border-color: var(--w); }
+
+/* чип «Найти аромат»: иконка и текст в одну строку, белая рамка */
+.hero-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    border-color: var(--line-w);
+    color: var(--w);
+}
+
+.hero-chip:hover { border-color: var(--w); background: rgb(255 255 255 / 8%); }
+.hero-chip--find { border-color: var(--w); }
+
+/* ── Исправления: текст, оставшийся цветом фона после перехода в тёмное ─ */
+
+/* тост и счётчик загрузки были тёмными буквами на тёмной подложке —
+   то есть невидимыми; обе поверхности тёмные, значит текст белый */
+.toast { color: var(--w); border: 1px solid var(--line-w); }
+.preloader { color: var(--w); }
+.pre-count { color: var(--w); }
+
+/* гигантские слова-подложки: одно из них было почти чёрным на чёрном */
+.showcase-ghost,
+.showcase:not(.section--dark) .showcase-ghost { color: rgb(255 255 255 / 5%); }
+.picker-ghost { color: rgb(255 255 255 / 6%); }
+
+/* круг подбора: те же чёрно-белые правила, что и у остальных кнопок */
+.orbit-dot {
+    background: rgb(255 255 255 / 6%);
+    border: 1px solid var(--line-w);
+    color: var(--w);
+}
+
+.orbit-dot:hover { border-color: var(--w); }
+.orbit-dot.is-on { background: var(--w); border-color: var(--w); color: #000; }
+.orbit-dot::after { border-color: var(--w); }
+
+/* цена, кнопка и два кружка держатся в одну строку */
+@media (min-width: 721px) {
+    .pp-buy { flex-wrap: nowrap; }
+    .pp-buy .btn--solid { flex: 1 1 200px; min-width: 0; }
+    .pp-buy .fav-btn { flex: none; }
 }

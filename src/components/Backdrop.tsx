@@ -84,7 +84,7 @@ export default function Backdrop() {
 
       /* one neutral grey, as thin as the display allows: the mesh is light
          on black and nothing else */
-      ctx.strokeStyle = "rgba(216,216,220,.30)";
+      ctx.strokeStyle = "rgba(226,226,230,.26)";
       ctx.lineWidth = Math.min(devicePixelRatio || 1, 2) > 1 ? 0.75 : 1;
       ctx.lineJoin = "round";
 
