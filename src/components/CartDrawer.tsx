@@ -33,7 +33,7 @@ export default function CartDrawer() {
 
       <div className="drawer-foot">
         <div className="total"><span>Итого</span><b>{money(cartTotal)}</b></div>
-        <button className="btn btn--solid" onClick={checkout}>Оформить заказ</button>
+        <button className="btn btn--solid btn--buy" onClick={checkout}>Оформить заказ</button>
       </div>
     </aside>
   );
