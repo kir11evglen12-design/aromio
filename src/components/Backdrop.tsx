@@ -1,15 +1,13 @@
 import { useEffect, useRef } from "react";
-import { prefersReducedMotion } from "../lib/motion";
 
 /**
- * A square mesh pushed around by a few layered sine fields — the same
- * "warped graph paper" as a wireframe render, but drawn live so the folds
- * travel instead of sitting still.
+ * A still wireframe surface: a square mesh displaced by a height field,
+ * drawn once and redrawn only when the window changes size.
  *
- * Canvas rather than SVG: 96 polylines redrawn per frame stay cheap here
- * and cost a layout pass each in the DOM. The field is sampled in
- * normalised space and only mapped to pixels at the end, so the drawing
- * survives a resize without re-deriving anything.
+ * Canvas rather than SVG: a hundred polylines cost a layout pass each in
+ * the DOM. The field is sampled in normalised space and mapped to pixels
+ * only at the end, so the drawing survives a resize without re-deriving
+ * anything.
  */
 
 /* a phone neither needs nor wants 64 columns of mesh */
@@ -45,6 +43,12 @@ const drift = (u: number, v: number, t: number): number =>
   + Math.sin(v * 2.6 + t * 0.21) * 0.018;
 
 /**
+ * The frozen phase of the field. The mesh is drawn once and left alone —
+ * a still backdrop, so nothing behind the type moves.
+ */
+const PHASE = 0;
+
+/**
  * Perspective: rows crowd towards the top of the frame the way a plane
  * recedes. A plain power curve is enough for a backdrop, and it is what
  * gives the picture its depth.
@@ -60,8 +64,7 @@ export default function Backdrop() {
     const ctx = cv.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    const still = prefersReducedMotion() || document.documentElement.classList.contains("calm");
-    let w = 0, h = 0, raf = 0, t = 0, last = 0, sy = 0, rows = 40;
+    let w = 0, h = 0, rows = 40;
 
     const size = () => {
       const dpr = Math.min(devicePixelRatio || 1, 2);
@@ -88,20 +91,16 @@ export default function Backdrop() {
       const sx = (1 + BLEED * 2) * w, ox = -BLEED * w;
       const syy = (1 + BLEED * 2) * h, oy = -BLEED * h;
 
-      /* the field is sampled further down the page as you scroll, so the
-         mesh parallaxes behind the content instead of sitting still */
-      const off = sy * 0.00016;
-
       for (let r = 0; r <= rows; r++) {
         const rowBase = r * (COLS + 1);
         /* the row's depth is taken before the warp, so the folds ride on
            top of the perspective instead of fighting it */
         const vRaw = r / rows;
-        const v0 = depth(vRaw) + off;
+        const v0 = depth(vRaw);
         for (let c = 0; c <= COLS; c++) {
           const u = c / COLS;
-          xs[rowBase + c] = (u + drift(u, v0, t)) * sx + ox;
-          ys[rowBase + c] = (v0 + height(u, v0, t)) * syy + oy;
+          xs[rowBase + c] = (u + drift(u, v0, PHASE)) * sx + ox;
+          ys[rowBase + c] = (v0 + height(u, v0, PHASE)) * syy + oy;
         }
       }
 
@@ -118,40 +117,15 @@ export default function Backdrop() {
       ctx.stroke();
     };
 
-    const loop = (now: number) => {
-      raf = requestAnimationFrame(loop);
-      /* advance by real time, so the field travels at the same speed on a
-         60Hz and a 120Hz display instead of running twice as fast */
-      const dt = last ? Math.min(now - last, 64) : 16;
-      last = now;
-      t += dt * 0.00055;
-      draw();
-    };
-
     size();
     draw();
-    if (!still) raf = requestAnimationFrame(loop);
 
+    /* the only reason to redraw is a new canvas size */
     const onResize = () => { size(); draw(); };
     addEventListener("resize", onResize);
 
-    /* reading scrollY here keeps the draw loop free of layout queries */
-    const onScroll = () => { sy = scrollY; if (still) draw(); };
-    addEventListener("scroll", onScroll, { passive: true });
 
-    /* a backgrounded tab should not animate */
-    const onVis = () => {
-      cancelAnimationFrame(raf);
-      if (!document.hidden && !still) raf = requestAnimationFrame(loop);
-    };
-    document.addEventListener("visibilitychange", onVis);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      removeEventListener("resize", onResize);
-      removeEventListener("scroll", onScroll);
-      document.removeEventListener("visibilitychange", onVis);
-    };
+    return () => removeEventListener("resize", onResize);
   }, []);
 
   return (
