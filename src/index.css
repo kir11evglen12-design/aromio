@@ -4259,3 +4259,75 @@ body, .lead, .card-name, .card-desc, .card-line, .card-price b, .card-price span
 
 /* строка не растягивается на всю витрину — читается как поле, а не как полоса */
 .sbar { max-width: 820px; }
+
+/* ============================================================
+   ЗАСТАВКА
+   Чёрный экран, белый знак по центру, тонкая полоса загрузки.
+   ============================================================ */
+
+.preloader {
+    background: #000;
+    color: var(--w);
+    display: grid;
+    place-items: center;
+}
+
+.pre-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(26px, 4vh, 44px);
+    padding: 0 24px;
+}
+
+.pre-mark {
+    width: min(62vw, 460px);
+    height: auto;
+    color: var(--w);
+    /* знак прорисовывается штрихом, а не выезжает */
+    stroke-dasharray: 1;
+    animation: mark-in .9s var(--ease) both;
+}
+
+@keyframes mark-in {
+    from { opacity: 0; transform: translateY(10px) scale(.985); }
+    to   { opacity: 1; transform: none; }
+}
+
+.pre-bar {
+    width: min(52vw, 300px);
+    height: 2px;
+    background: rgb(255 255 255 / 16%);
+    border-radius: 2px;
+    overflow: hidden;
+    opacity: 1;
+    animation: none;
+}
+
+.pre-fill {
+    height: 100%;
+    background: var(--w);
+    transition: width .3s var(--ease);
+}
+
+.preloader.quick .pre-mark { animation-duration: .4s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .pre-mark { animation: none; }
+}
+
+/* заставка чёрная: песочный подсвет от прежней версии убран */
+.preloader::before { background: none; }
+.preloader, .preloader.quick { background-color: #000; }
+
+/* знак в шапке и в подвале — тот же вектор, что на заставке */
+.brand { display: inline-flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.brand-mark { width: 132px; height: auto; color: var(--w); display: block; }
+.brand small { letter-spacing: .34em; font-size: 8px; color: var(--w-3); padding-left: 2px; }
+.header.is-compact .brand-mark { width: 112px; }
+.footer-mark { width: min(70%, 300px); height: auto; color: var(--w); display: block; }
+
+@media (max-width: 720px) {
+    .brand-mark { width: 112px; }
+    .brand small { font-size: 7px; letter-spacing: .3em; }
+}
