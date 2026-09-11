@@ -27,7 +27,7 @@
   const RAW_PRODUCTS = [
     {
       id: 1, code: "No. 01", name: "Nocturne", category: "women", gender: "women", family: "floral",
-      price50: 4990, oldPrice50: 5990, badges: ["bestseller"], rating: 4.8, reviews: 124,
+      price50: 4990, oldPrice50: 5990, badges: [], rating: 4.8, reviews: 124,
       intensity: 3, occasions: ["evening", "date"], color: "#b33a4b",
       notes: { top: ["Бергамот", "Розовый перец"], heart: ["Роза", "Пион"], base: ["Мускус", "Сандал"] },
       description: "Тёмно-розовый вечерний аромат: холодный вход бергамота раскрывается в бархатное сердце розы и пиона, а мускусно-сандаловый шлейф остаётся до утра.",
@@ -118,7 +118,7 @@
     },
     {
       id: 14, code: "No. 14", name: "Amber Noir", category: "men", gender: "men", family: "oriental",
-      price50: 6990, oldPrice50: null, badges: ["bestseller"], rating: 4.9, reviews: 143,
+      price50: 6990, oldPrice50: null, badges: [], rating: 4.9, reviews: 143,
       intensity: 5, occasions: ["evening", "special"], color: "#6b3e26",
       notes: { top: ["Корица", "Бергамот"], heart: ["Амбра", "Табак"], base: ["Пачули", "Ваниль"] },
       description: "Плотный амбрено-табачный аромат для холодных вечеров: пряная корица, тёплая амбра и ванильно-пачулиевое дно.",
@@ -181,7 +181,7 @@
     },
     {
       id: 23, code: "No. 23", name: "Cuoio Nero", category: "men", gender: "men", family: "woody",
-      price50: 6490, oldPrice50: null, badges: ["bestseller"], rating: 4.7, reviews: 132,
+      price50: 6490, oldPrice50: null, badges: [], rating: 4.7, reviews: 132,
       intensity: 4, occasions: ["evening", "office"], color: "#3a2a20",
       notes: { top: ["Бергамот", "Чёрный перец"], heart: ["Кожа", "Табак"], base: ["Пачули", "Ветивер"] },
       description: "Плотная чёрная кожа с табачным сердцем — уверенный аромат для вечерних переговоров.",
@@ -209,7 +209,7 @@
     },
     {
       id: 27, code: "No. 27", name: "Tabacco Reale", category: "men", gender: "men", family: "oriental",
-      price50: 8490, oldPrice50: null, badges: ["limited", "bestseller"], rating: 4.9, reviews: 149,
+      price50: 8490, oldPrice50: null, badges: ["limited"], rating: 4.9, reviews: 149,
       intensity: 5, occasions: ["evening", "special"], color: "#5a3418",
       notes: { top: ["Ром", "Корица"], heart: ["Табак", "Кожа"], base: ["Ваниль", "Пачули"] },
       description: "Ромовый табак с кожаным сердцем — плотный лимитированный аромат для особых вечеров.",
@@ -251,7 +251,7 @@
     },
     {
       id: 33, code: "No. 33", name: "Pietra Grigia", category: "unisex", gender: "unisex", family: "woody",
-      price50: 6790, oldPrice50: null, badges: ["bestseller"], rating: 4.6, reviews: 94,
+      price50: 6790, oldPrice50: null, badges: [], rating: 4.6, reviews: 94,
       intensity: 3, occasions: ["office", "casual"], color: "#6d6963",
       notes: { top: ["Перец", "Грейпфрут"], heart: ["Ветивер", "Ирис"], base: ["Кедр", "Мускус"] },
       description: "«Серый камень»: минеральный ветивер и пудровый ирис — сдержанный городской унисекс.",
