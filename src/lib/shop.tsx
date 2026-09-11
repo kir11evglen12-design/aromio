@@ -2,7 +2,7 @@ import {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState
 } from "react";
 import type { ReactNode } from "react";
-import { byId, HOUSES, products, variantOf } from "../data/products";
+import { byId, HOUSES, priceNow, products, variantOf } from "../data/products";
 import type { House, Product } from "../data/products";
 import {
   loadUsers, readSession, upsertUser, writeSession
@@ -118,7 +118,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       return raw.map(({ id, ml }) => {
         const product = byId(id);
         const variant = variantOf(product, ml ?? product.variants[0].ml);
-        return { product, ml: variant.ml, price: variant.price };
+        return { product, ml: variant.ml, price: priceNow(product, variant) };
       });
     } catch {
       return [];
@@ -203,7 +203,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const addToCart = useCallback((id: number, ml?: number) => {
     const product = byId(id);
     const variant = variantOf(product, ml ?? 100);
-    setCart(c => [...c, { product, ml: variant.ml, price: variant.price }]);
+    setCart(c => [...c, { product, ml: variant.ml, price: priceNow(product, variant) }]);
     toast(`${product.brand} ${product.name}, ${variant.ml} мл — в корзине`);
   }, [toast]);
 

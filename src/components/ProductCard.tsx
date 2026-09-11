@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, Heart, Layers, Maximize2, ShoppingBag, Truck } from "lucide-react";
-import { bottles, CATEGORY_LABEL, money, sprays, variantOf } from "../data/products";
+import { bottles, CATEGORY_LABEL, money, priceList, priceNow, sprays, variantOf } from "../data/products";
 import type { Product } from "../data/products";
 import { useShop } from "../lib/shop";
 import Plate from "./Plate";
@@ -23,6 +23,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
   const [ml, setMl] = useState(() => variantOf(p, 100).ml);
   const variant = variantOf(p, ml);
   const [sprayLo, sprayHi] = sprays(p);
+  const list = priceList(p, variant);
   const inCompare = compare.includes(p.id);
 
   const open = () => openProduct(p.id);
@@ -48,6 +49,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
         </button>
 
         <span className="card-badge">{SHORT_TYPE[p.type] ?? p.type}</span>
+        {p.sale && <span className="card-sale">−{p.sale}%</span>}
 
         <Plate product={p} />
 
@@ -98,8 +100,10 @@ export default function ProductCard({ product: p }: { product: Product }) {
 
         <div className="card-foot">
           <div className="card-price">
-            <b>{money(variant.price)}</b>
-            <span>{variant.ml} мл</span>
+            <b>{money(priceNow(p, variant))}</b>
+            {list !== undefined
+              ? <span><s>{money(list)}</s> · {variant.ml} мл</span>
+              : <span>{variant.ml} мл</span>}
           </div>
 
           <button className="card-round card-cart" aria-label={`Положить ${p.name} в корзину`}

@@ -4,6 +4,7 @@ import {
   bottles, CATEGORY_LABEL, fromPrice, HOUSES, money, products, sprays
 } from "../data/products";
 import type { Category, House, Product } from "../data/products";
+import { saleUntil } from "../data/products";
 import { plural } from "../lib/auth";
 import { useShop } from "../lib/shop";
 import Plate from "./Plate";
@@ -170,6 +171,7 @@ function Row({ product: p, onOpen, onBuy, fav, onFav }: {
   product: Product; onOpen: () => void; onBuy: () => void; fav: boolean; onFav: () => void;
 }) {
   const [lo, hi] = sprays(p);
+  const until = saleUntil();
   return (
     <article className="cw-item">
       <button className="cw-media" onClick={onOpen} aria-label={`Открыть ${p.name}`}>
@@ -186,11 +188,15 @@ function Row({ product: p, onOpen, onBuy, fav, onFav }: {
           <span className="card-chip">{lo}–{hi} {plural(hi, "пшик", "пшика", "пшиков")} на раз</span>
           <span className="card-chip">{bottles(p).map(v => v.ml).join(" / ")} мл</span>
           <span className="card-chip">пробники от 1 мл</span>
+          {p.sale ? <span className="card-chip cw-off">−{p.sale}% до {until}</span> : null}
         </div>
       </div>
 
       <div className="cw-buy">
-        <span className="cw-price">от {money(fromPrice(p))}</span>
+        <span className="cw-price">
+          от {money(fromPrice(p))}
+          {p.sale ? <s>{money(Math.min(...bottles(p).map(v => v.price)))}</s> : null}
+        </span>
         <button className="btn btn--solid cw-cta" onClick={onBuy}>Купить</button>
         <button className={"fav-btn" + (fav ? " is-on" : "")} onClick={onFav}
                 aria-pressed={fav} aria-label="В избранное">♥</button>
