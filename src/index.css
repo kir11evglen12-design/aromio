@@ -3211,13 +3211,7 @@ kbd {
         radial-gradient(28% 30% at 78% 22%, rgb(178 96 54 / 34%), transparent 70%),
         radial-gradient(34% 32% at 66% 74%, rgb(150 52 96 / 32%), transparent 70%),
         radial-gradient(26% 28% at 30% 78%, rgb(38 122 104 / 30%), transparent 70%);
-    animation: bd-aurora 44s ease-in-out infinite alternate;
-    will-change: transform;
-}
-
-@keyframes bd-aurora {
-    from { transform: translate3d(-2.5%, -2%, 0); }
-    to   { transform: translate3d(3.5%, 2.5%, 0); }
+    /* still, like the mesh above it */
 }
 
 /* мелкое зерно, чтобы плоскость не выглядела пластиковой */
@@ -3270,7 +3264,6 @@ kbd {
 :focus-visible { outline: 2px solid var(--c-unisex); outline-offset: 3px; }
 
 /* спокойный режим: фон замирает, движение уходит, читаемость остаётся */
-html.calm .bd-aurora,
 html.calm .plate,
 html.calm .photo,
 html.calm .ticker-row { animation: none !important; }

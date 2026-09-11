@@ -64,7 +64,7 @@ export default function CommandPalette() {
       { id: "a-profile", label: "Личный кабинет", hint: "Заказы, полка, напоминания", group: "Действия", run: () => { close(); openProfile(); } },
       { id: "a-compare", label: "Сравнение", hint: "До трёх ароматов рядом", group: "Действия", run: () => { close(); setCompareOpen(true); } },
       {
-        id: "a-calm", label: "Спокойный режим", hint: "Остановить фон и анимации",
+        id: "a-calm", label: "Спокойный режим", hint: "Остановить плавание карточек",
         group: "Действия",
         run: () => {
           close();
