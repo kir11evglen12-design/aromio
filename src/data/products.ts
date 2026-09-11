@@ -62,7 +62,7 @@ export const CATEGORY_LABEL: Record<Category | "all", string> = {
   niche: "Нишевая"
 };
 
-export const HOUSES = ["DIOR", "LOUIS VUITTON", "VALENTINO"] as const;
+export const HOUSES = ["DIOR", "LOUIS VUITTON", "VALENTINO", "JEAN PAUL GAULTIER", "LACOSTE"] as const;
 export type House = (typeof HOUSES)[number];
 
 export const products: Product[] = [
@@ -269,6 +269,42 @@ export const products: Product[] = [
     line: "BORN IN ROMA", tint: "#d8b63c", type: "Eau de Parfum",
     photo: shotDonnaYellow, photoDark: true,
     desc: "Золотисто-жёлтое стекло на серебряном цоколе — самый солнечный флакон линии.",
+    notes: { top: "", heart: "", base: "" }, notesUnknown: true
+  },
+
+  /* ---------------- JEAN PAUL GAULTIER ---------------- */
+  {
+    id: 20, name: "Le Male", brand: "JEAN PAUL GAULTIER", price: 8990, category: "men",
+    variants: [{ ml: 75, price: 6490 }, { ml: 125, price: 8990 }, { ml: 200, price: 12490 }],
+    line: "LE MALE", tint: "#5f8fd0", type: "Eau de Toilette",
+    desc: "Мята с лавандой поверх ванильно-тонкового тепла — аромат, который с 1995 года слышно в любой толпе.",
+    notes: {
+      top: "Мята, лаванда, бергамот",
+      heart: "Корица, тмин, апельсиновый цвет",
+      base: "Ваниль, бобы тонка, сандал, амбра"
+    }
+  },
+  {
+    id: 21, name: "Le Male Elixir", brand: "JEAN PAUL GAULTIER", price: 11490, category: "men",
+    variants: [{ ml: 75, price: 8290 }, { ml: 125, price: 11490 }],
+    line: "LE MALE", tint: "#8a6a3a", type: "Parfum",
+    desc: "Плотная версия классики: тот же силуэт флакона, но звучание гуще и слаще.",
+    notes: { top: "", heart: "", base: "" }, notesUnknown: true
+  },
+
+  /* ---------------- LACOSTE ---------------- */
+  {
+    id: 22, name: "L.12.12 Blanc", brand: "LACOSTE", price: 6990, category: "men",
+    variants: [{ ml: 50, price: 4990 }, { ml: 100, price: 6990 }, { ml: 175, price: 9990 }],
+    line: "L.12.12", tint: "#dfe3e7", type: "Eau de Toilette",
+    desc: "Белая поло-рубашка в парфюмерии: чистый, лёгкий и подчёркнуто повседневный аромат.",
+    notes: { top: "", heart: "", base: "" }, notesUnknown: true
+  },
+  {
+    id: 23, name: "L.12.12 Noir", brand: "LACOSTE", price: 6990, category: "men",
+    variants: [{ ml: 50, price: 4990 }, { ml: 100, price: 6990 }],
+    line: "L.12.12", tint: "#2b2f33", type: "Eau de Toilette",
+    desc: "Тёмная версия той же линии — плотнее и теплее белой, для вечера.",
     notes: { top: "", heart: "", base: "" }, notesUnknown: true
   }
 ];
