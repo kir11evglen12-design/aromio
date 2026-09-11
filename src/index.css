@@ -4831,3 +4831,100 @@ body { font-weight: 500; letter-spacing: -0.004em; }
     .cw-sorts { overflow-x: auto; flex-wrap: nowrap; margin-inline: -16px; padding: 0 16px 4px; }
     .cw-sorts .cl-sort-btn { flex: none; white-space: nowrap; }
 }
+
+/* ——— промо: старая цена, бейдж скидки ——— */
+.card-price s,
+.pp-price s,
+.cw-price s {
+  color: rgba(255, 255, 255, 0.42);
+  text-decoration-thickness: 1px;
+  font-weight: 700;
+}
+
+.card-sale {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 3;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b0b0c;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+.card-media { position: relative; }
+
+.cw-off {
+  background: #fff;
+  color: #0b0b0c;
+  border-color: #fff;
+  font-weight: 900;
+}
+
+.cw-price s { display: block; font-size: 13px; margin-top: 2px; }
+
+.pp-sale {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-w);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pp-sale-tag {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b0b0c;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.pp-sale > span {
+  display: block;
+  margin: 0;
+  color: var(--w-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.pp-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 0 0 auto;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.pp-price > s {
+  font-size: 0.42em;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* бейдж промо: тёмные буквы на белом — перекрываем общее «все буквы белые» */
+.pp-sale .pp-sale-tag,
+.card-media .card-sale,
+.cw-facts .card-chip.cw-off { color: #0b0b0c; }
+
+/* кнопка покупки не должна обрезать подпись объёма */
+.pp-buy .btn--solid {
+  padding-inline: 22px;
+  letter-spacing: .08em;
+  flex: 1 1 260px;
+  min-width: 240px;
+  white-space: nowrap;
+}
+
+.pp-buy-ml { white-space: nowrap; }

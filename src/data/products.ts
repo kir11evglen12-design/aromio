@@ -51,6 +51,12 @@ export interface Product {
   /** the nose, where the house has named one */
   nose?: string;
   /**
+   * A running promotion, in percent off the list price. The list price is
+   * what the shop charges outside the promo, and the cart charges the
+   * discounted one — the strike-through is not decoration.
+   */
+  sale?: number;
+  /**
    * The shop has not given us the composition of this bottle. We say so
    * rather than inventing a pyramid: an empty note list is honest, a
    * guessed one is not.
@@ -97,7 +103,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 3, name: "Miss Dior", brand: "DIOR", price: 13490, category: "women",
+    id: 3, name: "Miss Dior", brand: "DIOR", price: 13490, sale: 10, category: "women",
     variants: [{ ml: 50, price: 8390 }, { ml: 100, price: 13490 }, { ml: 125, price: 16490 }],
     line: "MISS DIOR", tint: "#d98fa0", type: "Eau de Parfum",
     desc: "Цветочный шипр нового поколения: роза центифолия, подсвеченная бергамотом и пачули.",
@@ -133,7 +139,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 6, name: "Ombre Nomade", brand: "LOUIS VUITTON", price: 42900, category: "niche",
+    id: 6, name: "Ombre Nomade", brand: "LOUIS VUITTON", price: 42900, sale: 15, category: "niche",
     variants: [{ ml: 100, price: 42890 }, { ml: 200, price: 66490 }],
     line: "LES PARFUMS", tint: "#6b2f2a", type: "Eau de Parfum",
     desc: "Плотный уд с розой и ладаном: самый узнаваемый ночной аромат дома, шлейф читается через комнату.",
@@ -180,7 +186,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 10, name: "Uomo", brand: "VALENTINO", price: 10490, category: "men",
+    id: 10, name: "Uomo", brand: "VALENTINO", price: 10490, sale: 10, category: "men",
     variants: [{ ml: 50, price: 6490 }, { ml: 100, price: 10490 }, { ml: 150, price: 14690 }],
     line: "UOMO", tint: "#c08a5a", type: "Eau de Toilette",
     photo: shotUomo, photoDark: true,
@@ -219,7 +225,7 @@ export const products: Product[] = [
      Фотографии предоставлены магазином. Там, где состав нам не передали,
      он не выдуман: карточка честно говорит, что нот пока нет.           */
   {
-    id: 13, name: "Fahrenheit", brand: "DIOR", price: 12490, category: "men",
+    id: 13, name: "Fahrenheit", brand: "DIOR", price: 12490, sale: 20, category: "men",
     variants: [{ ml: 50, price: 8290 }, { ml: 100, price: 12490 }, { ml: 200, price: 19890 }],
     line: "FAHRENHEIT", tint: "#b8522a", type: "Eau de Toilette",
     photo: shotFahrenheit, photoDark: true,
@@ -255,7 +261,7 @@ export const products: Product[] = [
     notes: { top: "", heart: "", base: "" }, notesUnknown: true
   },
   {
-    id: 17, name: "Donna Born In Roma", brand: "VALENTINO", price: 11690, category: "women",
+    id: 17, name: "Donna Born In Roma", brand: "VALENTINO", price: 11690, sale: 15, category: "women",
     variants: [{ ml: 50, price: 7290 }, { ml: 100, price: 11690 }, { ml: 150, price: 16290 }],
     line: "BORN IN ROMA", tint: "#e8398f", type: "Eau de Parfum",
     photo: shotDonnaRoma, photoDark: true,
@@ -301,7 +307,7 @@ export const products: Product[] = [
 
   /* ---------------- LACOSTE ---------------- */
   {
-    id: 22, name: "L.12.12 Blanc", brand: "LACOSTE", price: 6990, category: "men",
+    id: 22, name: "L.12.12 Blanc", brand: "LACOSTE", price: 6990, sale: 25, category: "men",
     variants: [{ ml: 50, price: 4990 }, { ml: 100, price: 6990 }, { ml: 175, price: 9990 }],
     line: "L.12.12", tint: "#dfe3e7", type: "Eau de Toilette",
     desc: "Белая поло-рубашка в парфюмерии: чистый, лёгкий и подчёркнуто повседневный аромат.",
@@ -341,7 +347,7 @@ export const products: Product[] = [
 
   /* ---------------- TOM FORD ---------------- */
   {
-    id: 26, name: "Tobacco Vanille", brand: "TOM FORD", price: 27900, category: "unisex",
+    id: 26, name: "Tobacco Vanille", brand: "TOM FORD", price: 27900, sale: 10, category: "unisex",
     variants: [{ ml: 50, price: 27900 }, { ml: 100, price: 39900 }],
     line: "PRIVATE BLEND", tint: "#7a4a22", type: "Eau de Parfum", nose: "Оливье Жилотен",
     desc: "Табачный лист с ванилью и сухофруктами — плотный, тёплый и очень зимний.",
@@ -389,7 +395,7 @@ export const products: Product[] = [
 
   /* ---------------- PACO RABANNE ---------------- */
   {
-    id: 30, name: "1 Million", brand: "PACO RABANNE", price: 9490, category: "men",
+    id: 30, name: "1 Million", brand: "PACO RABANNE", price: 9490, sale: 20, category: "men",
     variants: [{ ml: 50, price: 6990 }, { ml: 100, price: 9490 }, { ml: 200, price: 14490 }],
     line: "1 MILLION", tint: "#c2922f", type: "Eau de Toilette",
     nose: "Кристоф Рейно, Оливье Пешё и Мишель Жирар",
@@ -486,8 +492,26 @@ export const sprays = (p: Product): [number, number] => {
   return [4, 6];
 };
 
+/** what a bottle costs right now, with the promotion applied */
+export const priceNow = (p: Product, v: Variant): number =>
+  p.sale ? Math.round((v.price * (100 - p.sale)) / 100 / 10) * 10 : v.price;
+
+/** the list price, shown struck through only while a promo runs */
+export const priceList = (p: Product, v: Variant): number | undefined =>
+  p.sale ? v.price : undefined;
+
+/**
+ * The promo runs to the end of the current month — the shop's own window,
+ * shown in full so nobody has to guess how long "sale" means.
+ */
+export const saleUntil = (): string => {
+  const now = new Date();
+  const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return last.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+};
+
 export const fromPrice = (p: Product): number =>
-  Math.min(...p.variants.map(v => v.price));
+  Math.min(...p.variants.map(v => priceNow(p, v)));
 
 export const variantOf = (p: Product, ml: number): Variant =>
   p.variants.find(v => v.ml === ml) ?? samples(p).find(v => v.ml === ml) ?? p.variants[0];

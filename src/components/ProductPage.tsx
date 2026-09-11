@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Check, Heart, Layers, X } from "lucide-react";
-import { bottles, byId, CATEGORY_LABEL, fromPrice, money, products, samples, sprays, variantOf } from "../data/products";
+import { bottles, byId, CATEGORY_LABEL, fromPrice, money, priceList, priceNow, products, samples, saleUntil, sprays, variantOf } from "../data/products";
 import { HOUSE_STORIES, PRODUCT_STORIES } from "../data/facts";
 import { plural } from "../lib/auth";
 import { useShop } from "../lib/shop";
@@ -89,7 +89,7 @@ export default function ProductPage() {
                     onClick={() => setMl(v.ml)}
                   >
                     <b>{v.ml}<i>мл</i></b>
-                    <span>{money(v.price)}</span>
+                    <span>{money(priceNow(p, v))}</span>
                   </button>
                 ))}
               </div>
@@ -119,8 +119,21 @@ export default function ProductPage() {
               <div><span>Хватает</span><b>{sprayLo}–{sprayHi} {plural(sprayHi, "пшик", "пшика", "пшиков")}</b></div>
             </div>
 
+            {p.sale && (
+              <div className="pp-sale pp-anim">
+                <span className="pp-sale-tag">−{p.sale}%</span>
+                <span>
+                  Промо дома до {saleUntil()}: было {money(variant.price)},
+                  сейчас {money(priceNow(p, variant))}. В корзину уходит цена со скидкой.
+                </span>
+              </div>
+            )}
+
             <div className="pp-buy pp-anim">
-              <span className="pp-price">{money(variant.price)}</span>
+              <span className="pp-price">
+                {money(priceNow(p, variant))}
+                {priceList(p, variant) !== undefined && <s>{money(variant.price)}</s>}
+              </span>
               <button className="btn btn--solid btn--buy" onClick={() => addToCart(p.id, ml)}>
                 В корзину<span className="pp-buy-ml"> — {variant.ml} мл</span>
                 <ArrowRight className="btn__arrow" size={14} strokeWidth={1.4} />
