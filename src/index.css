@@ -313,8 +313,11 @@
     display: grid;
     place-items: center;
     padding: 6%;
-    border-radius: 3px;
-    background: linear-gradient(170deg, #fbfaf8, #ece9e3);
+    border-radius: 12px;
+    /* studio sweeps get a toned panel rather than a white hole: on a dark
+       shelf a paper-white tile reads as a hole punched in the card */
+    background: linear-gradient(168deg, #dcd8d1, #bdb8b0);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 22%), inset 0 -18px 30px -18px rgb(0 0 0 / 35%);
     animation: plate-breathe 9s ease-in-out infinite;
     will-change: transform;
   }
@@ -3576,9 +3579,26 @@ html.calm .bd-veil { opacity: .9; }
     mix-blend-mode: normal;
 }
 
-/* в карточке снимок заполняет поле, на странице товара — вписывается целиком */
+/* в карточке снимок заполняет поле целиком */
 .card .photo--dark { inset: 0; border-radius: 12px; }
 .card .photo--dark img { object-fit: cover; }
+
+/* на крупных сценах снимок держит собственные пропорции и занимает всю
+   рамку: так его тёмный фон и есть фон панели, без шва по краю */
+.pp-visual .photo--dark,
+.showcase-holder .photo--dark,
+.cmp-media .photo--dark {
+    position: relative;
+    inset: auto;
+    width: min(100%, 560px);
+    aspect-ratio: 520 / 595;
+    border-radius: 14px;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 7%);
+}
+
+.pp-visual .photo--dark img,
+.showcase-holder .photo--dark img,
+.cmp-media .photo--dark img { object-fit: cover; }
 
 /* честная замена пирамиде, когда состав не передан */
 .p-missing {
