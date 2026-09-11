@@ -44,13 +44,15 @@ function Shell() {
       <Header />
 
       <main id="top">
+        {/* витрина открывает страницу: товар виден в первом экране,
+            а манифест дома идёт следом */}
+        <Collection />
         <Hero ready={ready} />
         <Ticker />
-        <Manifest />
-        <Picker />
-        <Chapters />
-        <Collection />
         <Showcase />
+        <Picker />
+        <Manifest />
+        <Chapters />
         <Journal />
         <SplitGender />
         <Lexicon />

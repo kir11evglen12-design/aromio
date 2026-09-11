@@ -20,8 +20,10 @@
   --color-line:    rgb(242 240 236 / 13%);
   --color-line-d:  rgb(11 11 12 / 18%);
 
-  --font-display: "Cormorant", Georgia, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* one rounded family for everything, in the same spirit as the drawn
+     wordmark; the fallbacks are the roundest stock faces available */
+  --font-display: "Nunito", "Trebuchet MS", ui-rounded, system-ui, sans-serif;
+  --font-sans: "Nunito", "Trebuchet MS", ui-rounded, system-ui, sans-serif;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -4330,4 +4332,181 @@ body, .lead, .card-name, .card-desc, .card-line, .card-price b, .card-price span
 @media (max-width: 720px) {
     .brand-mark { width: 112px; }
     .brand small { font-size: 7px; letter-spacing: .3em; }
+}
+
+/* ============================================================
+   ТИПОГРАФИКА: ТОЛЩЕ И МЯГЧЕ
+   ============================================================ */
+
+body { font-weight: 500; letter-spacing: -0.004em; }
+
+.display, h1, h2, h3, .jr-title, .faq-text, .lx-fr, .cmp-title, .pre-mark + *,
+.picker-name, .showcase-name, .pp-name, .profile-name, .card-name, .cmp-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-style: normal;
+}
+
+.display em, .lead em, h2 em { font-style: normal; font-weight: 800; opacity: .72; }
+
+.lead { font-weight: 500; }
+.eyebrow, .card-line, .jr-kicker, .cl-count, .lx-ru, .p-legend b { font-weight: 700; }
+.card-name { font-weight: 800; }
+.card-price b, .pp-price, .price, .stat b, .hero-fact b, .sc-step b, .pp-calc-val { font-weight: 800; }
+.filter, .cl-sort-btn, .card-size b, .size b, .card-chip, .link-u, .mbar button { font-weight: 600; }
+
+/* ============================================================
+   КНОПКИ: КРУПНЕЕ И «НАДУТЫЕ»
+   ============================================================ */
+
+.btn {
+    padding: 20px 38px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .1em;
+}
+
+.btn--solid, .btn--buy, .card-buy, .card-add, .auth-submit {
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff, #e7e5e1);
+    color: #000;
+    box-shadow:
+        inset 0 1px 0 #ffffff,
+        inset 0 -2px 6px rgb(0 0 0 / 12%),
+        0 10px 22px -12px rgb(0 0 0 / 80%);
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), filter .25s;
+}
+
+.btn--solid:hover, .btn--buy:hover, .card-buy:hover, .card-add:hover {
+    background: linear-gradient(180deg, #ffffff, #f4f2ee);
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow:
+        inset 0 1px 0 #ffffff,
+        inset 0 -2px 6px rgb(0 0 0 / 10%),
+        0 16px 30px -12px rgb(0 0 0 / 85%);
+}
+
+.btn--solid:active, .btn--buy:active, .card-buy:active {
+    transform: translateY(1px) scale(.985);
+    box-shadow: inset 0 2px 6px rgb(0 0 0 / 22%);
+}
+
+/* второстепенные кнопки тоже пухлее */
+.btn--light, .filter, .cl-sort-btn, .hero-chip, .card-chip, .cmp-chip, .cl-recent-chip {
+    border-radius: 999px;
+    padding-block: 12px;
+}
+
+.filter, .cl-sort-btn { padding: 13px 20px; font-size: 12px; }
+.filter.is-active, .cl-sort-btn.is-on {
+    background: linear-gradient(180deg, #ffffff, #e9e7e3);
+    box-shadow: inset 0 1px 0 #fff, 0 8px 18px -12px rgb(0 0 0 / 80%);
+}
+
+.card-buy { padding: 15px 22px; font-size: 13px; border-radius: 16px; }
+.card-size, .size { border-radius: 14px; }
+.card-round, .sbar-btn { box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%); }
+
+.card-badge {
+    padding: 9px 15px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffffff, #eae8e4);
+    box-shadow: inset 0 1px 0 #fff, 0 8px 16px -10px rgb(0 0 0 / 80%);
+}
+
+.pp-buy .btn--solid { min-height: 72px; font-size: 15px; }
+.sizes-row .size { min-height: 82px; }
+
+@media (max-width: 720px) {
+    .btn { padding: 17px 26px; border-radius: 18px; }
+    .pp-buy .btn--solid { min-height: 60px; font-size: 13px; }
+    .filter, .cl-sort-btn { padding: 12px 16px; }
+}
+
+
+/* ============================================================
+   ГЕРОЙ КАК ШАПКА ВИТРИНЫ
+   Экран открывается на товаре: герой ужимается до полосы, и
+   первые карточки видны сразу.
+   ============================================================ */
+
+.hero {
+    min-height: auto;
+    padding-top: clamp(110px, 15vh, 170px);
+    padding-bottom: clamp(30px, 5vh, 60px);
+}
+
+.hero-title { font-size: clamp(40px, 6.6vw, 86px); }
+.hero-stage { transform: scale(.82); transform-origin: center right; }
+.hero-facts { position: static; margin-top: 26px; }
+.collection { padding-top: clamp(24px, 3vh, 40px); }
+
+@media (max-width: 980px) {
+    .hero-stage { display: none; }
+    .hero { padding-bottom: 18px; }
+}
+
+
+/* витрина стоит первой, поэтому её шапка компактна: заголовок и поиск
+   умещаются над сгибом, а карточки начинаются сразу под ними */
+.collection {
+    padding-top: clamp(96px, 13vh, 140px);
+}
+
+.collection .section-head {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.collection .display { font-size: clamp(30px, 4vw, 52px); line-height: 1.02; }
+.collection .lead { max-width: 68ch; font-size: clamp(14px, 1vw, 16px); }
+.collection .sbar { margin: 16px 0 12px; }
+.collection .filters { margin-bottom: 8px; }
+.collection .cl-tools { margin: 10px 0 16px; }
+
+/* герой — второй экран: манифест дома под витриной */
+.hero { padding-top: clamp(70px, 9vh, 110px); }
+
+@media (max-width: 720px) {
+    .collection { padding-top: 86px; }
+    .collection .display { font-size: clamp(26px, 8vw, 34px); }
+}
+
+/* «надутые» кнопки прибавили ширины, и в две колонки на телефоне карточка
+   снова перестала помещаться — на узких экранах она поджимается */
+@media (max-width: 720px) {
+    .card-buy { padding: 12px 10px; font-size: 12px; border-radius: 14px; min-width: 0; }
+    .card-foot { gap: 6px; }
+    .card-foot > * { min-width: 0; }
+    .card-price b { font-size: 14px; }
+    .card-size { padding: 8px 2px; border-radius: 11px; }
+    .card-sizes { gap: 4px; }
+    .card-badge { padding: 6px 10px; }
+    .card { padding: 6px 6px 10px; }
+}
+
+@media (max-width: 400px) {
+    .card-buy { padding: 11px 6px; letter-spacing: 0; }
+}
+
+/* на телефоне шапка витрины не должна съедать первый экран целиком */
+@media (max-width: 620px) {
+    .collection { padding-top: 78px; }
+    .collection .display { font-size: clamp(25px, 7.4vw, 31px); }
+    /* line-clamp здесь не срабатывает: display перебивается другим
+       правилом, поэтому высота ограничена ровно двумя строками */
+    .collection .lead {
+        font-size: 13.5px;
+        line-height: 1.5;
+        max-height: 3em;
+        overflow: hidden;
+    }
+    .collection .sbar { margin: 12px 0 10px; }
+    .collection .filters { margin-bottom: 6px; }
+    .collection .cl-tools { margin: 6px 0 12px; }
+    .cl-count { font-size: 11px; }
 }

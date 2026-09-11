@@ -35,10 +35,13 @@ export default function Collection() {
       <div className="section-head">
         <div>
           <div className="eyebrow">Коллекция</div>
-          <h2 className="display">Ароматы<br /><em>витрины</em></h2>
+          <h2 className="display">Ароматы <em>витрины</em></h2>
         </div>
         <p className="lead">
-          Три дома, {products.length} ароматов. Фотография стоит там, где её дал магазин; остальные позиции — цветные карточки. Ищите по названию, дому или ноте, сравнивайте до трёх сразу и сортируйте по цене.
+          {HOUSES.length} {plural(HOUSES.length, "дом", "дома", "домов")}, {products.length}{" "}
+          {plural(products.length, "аромат", "аромата", "ароматов")}. Фотография стоит там, где её дал
+          магазин; остальные позиции — цветные карточки. Ищите по названию, дому или ноте,
+          сравнивайте до трёх сразу и сортируйте по цене.
         </p>
       </div>
 
