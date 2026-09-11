@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Check, SlidersHorizontal, X } from "lucide-react";
 import {
   bottles, CATEGORY_LABEL, fromPrice, HOUSES, money, products, sprays
 } from "../data/products";
 import type { Category, House, Product } from "../data/products";
+import { flyToCart, setSharedOrigin, useFlip } from "../lib/motion";
 import { saleUntil } from "../data/products";
 import { plural } from "../lib/auth";
 import { useShop } from "../lib/shop";
@@ -42,6 +43,10 @@ export default function CatalogWindow() {
   const [samplesOnly, setSamplesOnly] = useState(false);
   const [sort, setSort] = useState<Sort>("house");
   const [rail, setRail] = useState(false);
+
+  /* the rows rearrange rather than repaint when a filter flips */
+  const grid = useRef<HTMLDivElement>(null);
+  useFlip(grid, [houses, cats, types, maxPrice, samplesOnly, sort]);
 
   const toggle = <T,>(list: T[], set: (v: T[]) => void, v: T) =>
     set(list.includes(v) ? list.filter(x => x !== v) : [...list, v]);
@@ -150,10 +155,10 @@ export default function CatalogWindow() {
             ))}
           </div>
 
-          <div className="cw-grid">
+          <div className="cw-grid" ref={grid}>
             {list.map(p => <Row key={p.id} product={p}
-                                onOpen={() => { closeCatalog(); openProduct(p.id); }}
-                                onBuy={() => addToCart(p.id, 100)}
+                                onOpen={el => { setSharedOrigin(el); closeCatalog(); openProduct(p.id); }}
+                                onBuy={e => { flyToCart(e.currentTarget); addToCart(p.id, 100); }}
                                 fav={isFavorite(p.id)}
                                 onFav={() => toggleFavorite(p.id)} />)}
           </div>
@@ -168,19 +173,25 @@ export default function CatalogWindow() {
 }
 
 function Row({ product: p, onOpen, onBuy, fav, onFav }: {
-  product: Product; onOpen: () => void; onBuy: () => void; fav: boolean; onFav: () => void;
+  product: Product;
+  onOpen: (plate: HTMLElement | null) => void;
+  onBuy: (e: React.MouseEvent) => void;
+  fav: boolean;
+  onFav: () => void;
 }) {
+  const media = useRef<HTMLButtonElement>(null);
   const [lo, hi] = sprays(p);
   const until = saleUntil();
   return (
-    <article className="cw-item">
-      <button className="cw-media" onClick={onOpen} aria-label={`Открыть ${p.name}`}>
+    <article className="cw-item" data-flip-id={p.id}>
+      <button className="cw-media" ref={media} onClick={() => onOpen(media.current)}
+                aria-label={`Открыть ${p.name}`}>
         <Plate product={p} style={{ ["--bw" as string]: "76px" }} />
       </button>
 
       <div className="cw-info">
         <div className="cw-line">{p.brand} · {p.type}</div>
-        <button className="cw-name" onClick={onOpen}>{p.name}</button>
+        <button className="cw-name" onClick={() => onOpen(media.current)}>{p.name}</button>
         <p className="cw-desc">{p.desc}</p>
 
         <div className="cw-facts">

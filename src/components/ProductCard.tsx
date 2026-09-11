@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check, Heart, Layers, Maximize2, ShoppingBag, Truck } from "lucide-react";
 import { bottles, CATEGORY_LABEL, money, priceList, priceNow, sprays, variantOf } from "../data/products";
 import type { Product } from "../data/products";
 import { useShop } from "../lib/shop";
+import { flyToCart, setSharedOrigin } from "../lib/motion";
 import Plate from "./Plate";
 
 /** short badge text: the concentration, which is what the label really says */
@@ -26,11 +27,21 @@ export default function ProductCard({ product: p }: { product: Product }) {
   const list = priceList(p, variant);
   const inCompare = compare.includes(p.id);
 
-  const open = () => openProduct(p.id);
+  const media = useRef<HTMLDivElement>(null);
+
+  /* the plate the visitor clicked is the one the product page grows out of */
+  const open = () => { setSharedOrigin(media.current); openProduct(p.id); };
+
+  const buy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    flyToCart(e.currentTarget);
+    addToCart(p.id, ml);
+  };
 
   return (
     <article
       className="card"
+      data-flip-id={p.id}
       style={{ ["--tint" as string]: p.tint }}
       role="button"
       tabIndex={0}
@@ -38,7 +49,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
       onClick={open}
       onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}
     >
-      <div className={"card-media" + (p.photo ? " media--photo" : "")}>
+      <div className={"card-media" + (p.photo ? " media--photo" : "")} ref={media}>
         <button
           className={"card-round card-cmp" + (inCompare ? " is-on" : "")}
           aria-pressed={inCompare}
@@ -107,11 +118,11 @@ export default function ProductCard({ product: p }: { product: Product }) {
           </div>
 
           <button className="card-round card-cart" aria-label={`Положить ${p.name} в корзину`}
-                  onClick={e => { e.stopPropagation(); addToCart(p.id, ml); }}>
+                  onClick={buy}>
             <ShoppingBag size={16} strokeWidth={1.5} />
           </button>
 
-          <button className="card-buy" onClick={e => { e.stopPropagation(); addToCart(p.id, ml); }}>
+          <button className="card-buy" onClick={buy}>
             Купить
           </button>
         </div>

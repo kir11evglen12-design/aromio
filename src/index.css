@@ -4928,3 +4928,106 @@ body { font-weight: 500; letter-spacing: -0.004em; }
 }
 
 .pp-buy-ml { white-space: nowrap; }
+
+/* ============================================================
+   ПЕРЕХОДЫ — один набор токенов на весь магазин
+   Вход 420 мс, выход 260 мс (≈62% от входа: уходить интерфейс должен
+   быстрее, чем приходит), микро-состояния 180 мс, одна кривая.
+   ============================================================ */
+
+:root {
+  --enter: 420ms;
+  --exit: 260ms;
+  --micro: 180ms;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-in: cubic-bezier(.5, 0, .75, 0);
+}
+
+/* точка, летящая в корзину по дуге */
+.fly-dot {
+  position: fixed;
+  z-index: 999;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--w);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 35%), 0 8px 20px rgb(0 0 0 / 45%);
+  pointer-events: none;
+}
+
+/* счётчик в шапке пружинит только после приземления точки */
+.cart-count, .mobile-bar i { transform-origin: 50% 50%; }
+
+.scrim { backdrop-filter: blur(5px); }
+
+/* строки корзины двигаются трансформом — без него FLIP нечего инвертировать */
+.drawer-body .row { will-change: transform; }
+
+/* ---------- тост с отменой ---------- */
+
+.toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  transition: opacity var(--enter) var(--ease-out), transform var(--enter) var(--ease-out);
+}
+
+.toast:not(.is-on) {
+  transition-duration: var(--exit);
+  transition-timing-function: var(--ease-in);
+}
+
+.toast--undo {
+  padding: 12px 12px 14px 22px;
+  pointer-events: auto;
+}
+
+.toast-text { text-transform: none; letter-spacing: .02em; font-size: 13px; }
+
+.toast-undo {
+  flex: none;
+  padding: 8px 15px;
+  min-height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--line-w);
+  background: transparent;
+  color: var(--w);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out);
+}
+
+.toast-undo:hover { background: rgb(255 255 255 / 12%); }
+
+.toast-bar {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 16%);
+  overflow: hidden;
+}
+
+.toast-bar i {
+  display: block;
+  height: 100%;
+  background: var(--w);
+  transform-origin: left;
+  animation: toast-countdown 4s linear forwards;
+}
+
+@keyframes toast-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* просили меньше движения — движение уходит, функции остаются */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .fly-dot { display: none; }
+}

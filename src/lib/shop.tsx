@@ -13,10 +13,15 @@ type Drawer = "cart" | "search" | "auth" | null;
 
 /** a chosen bottle: the fragrance plus the volume the shopper picked */
 export interface CartLine {
+  /** stable per line, so two identical bottles stay two separate rows */
+  uid: string;
   product: Product;
   ml: number;
   price: number;
 }
+
+let lineSeq = 0;
+const nextUid = (): string => `l${++lineSeq}`;
 export type Filter = "all" | Product["category"] | House;
 export type Sort = "house" | "price-asc" | "price-desc" | "name";
 
@@ -32,6 +37,7 @@ interface ShopValue {
   cartTotal: number;
   addToCart: (id: number, ml?: number) => void;
   removeFromCart: (index: number) => void;
+  restoreToCart: (index: number, line: CartLine) => void;
   checkout: () => void;
 
   user: User | null;
@@ -95,8 +101,11 @@ interface ShopValue {
   openCatalog: () => void;
   closeCatalog: () => void;
 
-  toast: (msg: string) => void;
+  /** the undo action is optional; when present the toast offers it for 4s */
+  toast: (msg: string, undo?: () => void) => void;
   toastMsg: string;
+  toastUndo: (() => void) | null;
+  runUndo: () => void;
 }
 
 const Ctx = createContext<ShopValue | null>(null);
@@ -118,7 +127,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       return raw.map(({ id, ml }) => {
         const product = byId(id);
         const variant = variantOf(product, ml ?? product.variants[0].ml);
-        return { product, ml: variant.ml, price: priceNow(product, variant) };
+        return { uid: nextUid(), product, ml: variant.ml, price: priceNow(product, variant) };
       });
     } catch {
       return [];
@@ -149,6 +158,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     }
   });
   const [toastMsg, setToastMsg] = useState("");
+  const [toastUndo, setToastUndo] = useState<(() => void) | null>(null);
   const toastTimer = useRef<number>(0);
 
   /* restore the session once on mount */
@@ -187,10 +197,22 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch { /* ignore */ }
   }, [recent]);
 
-  const toast = useCallback((msg: string) => {
+  const toast = useCallback((msg: string, undo?: () => void) => {
     setToastMsg(msg);
+    setToastUndo(() => undo ?? null);
     clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToastMsg(""), 2800);
+    /* an undoable action stays on screen for the full four seconds the
+       progress bar counts down; a plain notice leaves sooner */
+    toastTimer.current = window.setTimeout(() => {
+      setToastMsg("");
+      setToastUndo(null);
+    }, undo ? 4000 : 2800);
+  }, []);
+
+  const runUndo = useCallback(() => {
+    setToastUndo(current => { current?.(); return null; });
+    clearTimeout(toastTimer.current);
+    setToastMsg("");
   }, []);
 
   const setUser = useCallback((u: User | null) => {
@@ -203,12 +225,17 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const addToCart = useCallback((id: number, ml?: number) => {
     const product = byId(id);
     const variant = variantOf(product, ml ?? 100);
-    setCart(c => [...c, { product, ml: variant.ml, price: priceNow(product, variant) }]);
+    setCart(c => [...c, { uid: nextUid(), product, ml: variant.ml, price: priceNow(product, variant) }]);
     toast(`${product.brand} ${product.name}, ${variant.ml} мл — в корзине`);
   }, [toast]);
 
   const removeFromCart = useCallback((index: number) => {
     setCart(c => c.filter((_, i) => i !== index));
+  }, []);
+
+  /** put a removed line back exactly where it was — this is what undo does */
+  const restoreToCart = useCallback((index: number, line: CartLine) => {
+    setCart(c => [...c.slice(0, index), line, ...c.slice(index)]);
   }, []);
 
   const openAuth = useCallback((mode: "login" | "register", intro?: string) => {
@@ -331,6 +358,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     cartTotal: cart.reduce((sum, l) => sum + l.price, 0),
     addToCart,
     removeFromCart,
+    restoreToCart,
     checkout,
     user,
     setUser,
@@ -381,13 +409,16 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     openCatalog: () => setCatalogOpen(true),
     closeCatalog: () => setCatalogOpen(false),
     toast,
-    toastMsg
+    toastMsg,
+    toastUndo,
+    runUndo
   }), [
-    cart, addToCart, removeFromCart, checkout, user, setUser, signOut, saveProfile,
+    cart, addToCart, removeFromCart, restoreToCart, checkout, user, setUser, signOut, saveProfile,
     isFavorite, toggleFavorite, drawer, authIntro, openAuth, authMode, productId,
     profileOpen, category, sort, noteQuery, compare, toggleCompare, compareOpen,
     recent, shelf, addToShelf, removeFromShelf, reminders, addReminder,
-    toggleReminder, removeReminder, paletteOpen, catalogOpen, toast, toastMsg
+    toggleReminder, removeReminder, paletteOpen, catalogOpen, toast, toastMsg,
+    toastUndo, runUndo
   ]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
