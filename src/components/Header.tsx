@@ -67,9 +67,10 @@ export default function Header() {
             {user ? <span className="avatar">{initials(user)}</span> : <UserIcon size={19} strokeWidth={1.3} />}
           </button>
 
-          <button className="icon-btn" onClick={() => openDrawer("cart")} aria-label="Корзина">
+          <button className="icon-btn" onClick={() => openDrawer("cart")} aria-label="Корзина"
+                  data-cart-anchor>
             <ShoppingBag size={19} strokeWidth={1.3} />
-            <span className="cart-count">{cart.length}</span>
+            <span className="cart-count" data-cart-count>{cart.length}</span>
           </button>
 
           <button className="burger" onClick={() => setMenu(m => !m)}

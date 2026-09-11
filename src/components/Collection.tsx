@@ -1,9 +1,10 @@
+import { useRef } from "react";
 import { byId, CATEGORY_LABEL, fromPrice, HOUSES, money, products } from "../data/products";
 import { plural } from "../lib/auth";
 import type { Category as ProductCategory } from "../data/products";
 import { SORT_LABEL, useShop, visibleProducts } from "../lib/shop";
 import type { Sort } from "../lib/shop";
-import { gsap, parallax, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
+import { parallax, revealFrom, useFlip, useGsap } from "../lib/motion";
 import ProductCard from "./ProductCard";
 import SearchBar from "./SearchBar";
 
@@ -21,14 +22,10 @@ export default function Collection() {
     parallax(".collection .section-head > div", { y: -46, trigger: ".collection" });
   }, []);
 
-  /* re-animate the grid whenever the filter changes */
-  useGsap(() => {
-    if (prefersReducedMotion()) return;
-    gsap.fromTo(".card",
-      { opacity: 0, y: 26 },
-      { opacity: 1, y: 0, duration: 0.75, ease: "expo.out", stagger: 0.06, overwrite: true }
-    );
-  }, [category]);
+  /* filtering never repaints the grid: what stays travels from its old box
+     to the new one, what is new rises in behind it */
+  const grid = useRef<HTMLDivElement>(null);
+  useFlip(grid, [category, sort, noteQuery]);
 
   return (
     <section className="section collection" id="collection" ref={scope}>
@@ -80,7 +77,7 @@ export default function Collection() {
         </div>
       </div>
 
-      <div className="grid">
+      <div className="grid" ref={grid}>
         {list.map(p => <ProductCard product={p} key={p.id} />)}
       </div>
 
