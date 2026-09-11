@@ -21,7 +21,7 @@ const MONOGRAM: Record<string, string> = {
 export default function Plate({ product, style, className }: Props) {
   if (product.photo) {
     return (
-      <div className={"photo " + (className ?? "")} style={style}>
+      <div className={"photo " + (product.photoDark ? "photo--dark " : "") + (className ?? "")} style={style}>
         <img src={product.photo} alt={`${product.brand} ${product.name}`} loading="lazy" decoding="async" />
       </div>
     );

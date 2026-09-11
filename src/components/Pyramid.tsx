@@ -20,6 +20,21 @@ export default function Pyramid({ product }: { product: Product }) {
   const [open, setOpen] = useState<string | null>(null);
   const fact = open ? noteFact(open) : undefined;
 
+  /* the shop has not given us this composition; guessing one would be
+     the one thing a fragrance page must never do */
+  if (product.notesUnknown) {
+    return (
+      <aside className="p-missing">
+        <span className="eyebrow">Пирамида нот</span>
+        <p>
+          Состав этого флакона магазин пока не передал, и придумывать его мы не
+          станем. Как только карточка придёт от поставщика, ноты появятся здесь —
+          с фотографиями сырья, как у остальных ароматов.
+        </p>
+      </aside>
+    );
+  }
+
   return (
     <div className="pyramid">
       {TIERS.map(([label, sub, key, size], tier) => (

@@ -1,6 +1,16 @@
-import uomoRoma from "../../assets/opt/valentino-uomo-born-in-roma.webp";
-import uomo from "../../assets/opt/valentino-uomo.webp";
 import donnaGreen from "../../assets/opt/valentino-donna-green-stravaganza.webp";
+
+/* shots supplied on a black ground: they sit straight on the dark card */
+import shotFahrenheit from "../../assets/opt/dior-fahrenheit.webp";
+import shotEyes from "../../assets/opt/lv-eyes.webp";
+import shotImagination from "../../assets/opt/lv-imagination.webp";
+import shotUomo from "../../assets/opt/valentino-uomo.webp";
+import shotUomoRoma from "../../assets/opt/valentino-uomo-roma.webp";
+import shotUomoIntense from "../../assets/opt/valentino-uomo-intense.webp";
+import shotDonna from "../../assets/opt/valentino-donna.webp";
+import shotDonnaRoma from "../../assets/opt/valentino-donna-roma.webp";
+import shotDonnaPurple from "../../assets/opt/valentino-donna-purple.webp";
+import shotDonnaYellow from "../../assets/opt/valentino-donna-yellow.webp";
 
 export type Category = "women" | "men" | "unisex" | "niche";
 
@@ -34,6 +44,14 @@ export interface Product {
   notes: Notes;
   /** official brand shot, supplied by the store owner */
   photo?: string;
+  /** the shot is on a black ground rather than a white studio sweep */
+  photoDark?: boolean;
+  /**
+   * The shop has not given us the composition of this bottle. We say so
+   * rather than inventing a pyramid: an empty note list is honest, a
+   * guessed one is not.
+   */
+  notesUnknown?: boolean;
 }
 
 export const CATEGORY_LABEL: Record<Category | "all", string> = {
@@ -98,7 +116,8 @@ export const products: Product[] = [
   {
     id: 5, name: "Imagination", brand: "LOUIS VUITTON", price: 33900, category: "men",
     variants: [{ ml: 100, price: 33890 }, { ml: 200, price: 52490 }],
-    line: "LES PARFUMS", tint: "#d9a45c", type: "Eau de Parfum",
+    line: "LES PARFUMS", tint: "#6fcac0", type: "Eau de Parfum",
+    photo: shotImagination, photoDark: true,
     desc: "Прозрачная цитрусовая акварель на чайной основе — лёгкий, но стойкий дневной аромат.",
     notes: {
       top: "Бергамот, лимон",
@@ -144,8 +163,8 @@ export const products: Product[] = [
   {
     id: 9, name: "Uomo Born In Roma", brand: "VALENTINO", price: 9990, category: "men",
     variants: [{ ml: 50, price: 6190 }, { ml: 100, price: 9990 }, { ml: 150, price: 13990 }],
-    line: "BORN IN ROMA", tint: "#3b3b40", type: "Eau de Toilette",
-    photo: uomoRoma,
+    line: "BORN IN ROMA", tint: "#9fb050", type: "Eau de Toilette",
+    photo: shotUomoRoma, photoDark: true,
     desc: "Контраст римской архитектуры и уличной культуры: пряный имбирь на старте и минеральный кожаный шлейф.",
     notes: {
       top: "Имбирь, лист фиалки",
@@ -156,8 +175,8 @@ export const products: Product[] = [
   {
     id: 10, name: "Uomo", brand: "VALENTINO", price: 10490, category: "men",
     variants: [{ ml: 50, price: 6490 }, { ml: 100, price: 10490 }, { ml: 150, price: 14690 }],
-    line: "UOMO", tint: "#a4713a", type: "Eau de Toilette",
-    photo: uomo,
+    line: "UOMO", tint: "#c08a5a", type: "Eau de Toilette",
+    photo: shotUomo, photoDark: true,
     desc: "Гурманская классика дома: обжаренный кофе и джандуйя на тёплой кожаной базе.",
     notes: {
       top: "Бергамот, мирт",
@@ -187,6 +206,70 @@ export const products: Product[] = [
       heart: "Апельсиновый цвет, жасмин, ландыш",
       base: "Ваниль, белый мускус, амбра, сандал"
     }
+  },
+
+  /* ---------------- ПОСТУПИЛИ В ВИТРИНУ ----------------
+     Фотографии предоставлены магазином. Там, где состав нам не передали,
+     он не выдуман: карточка честно говорит, что нот пока нет.           */
+  {
+    id: 13, name: "Fahrenheit", brand: "DIOR", price: 12490, category: "men",
+    variants: [{ ml: 50, price: 8290 }, { ml: 100, price: 12490 }, { ml: 200, price: 19890 }],
+    line: "FAHRENHEIT", tint: "#b8522a", type: "Eau de Toilette",
+    photo: shotFahrenheit, photoDark: true,
+    desc: "Кожано-бензиновая классика 1988 года: аромат, который тогда никто не смог повторить, а сегодня узнают с первой секунды.",
+    notes: {
+      top: "Мандарин, боярышник, лаванда",
+      heart: "Лист фиалки, мускатный орех, жимолость",
+      base: "Кожа, ветивер, кедр, мускус"
+    }
+  },
+  {
+    id: 14, name: "Eyes", brand: "LOUIS VUITTON", price: 34900, category: "unisex",
+    variants: [{ ml: 100, price: 34890 }, { ml: 200, price: 53490 }],
+    line: "LES PARFUMS", tint: "#9a8ef0", type: "Eau de Parfum",
+    photo: shotEyes, photoDark: true,
+    desc: "Прозрачное сиреневое стекло с монограммой на крышке — линия Les Parfums.",
+    notes: { top: "", heart: "", base: "" }, notesUnknown: true
+  },
+  {
+    id: 15, name: "Uomo Intense", brand: "VALENTINO", price: 11990, category: "men",
+    variants: [{ ml: 50, price: 7490 }, { ml: 100, price: 11990 }, { ml: 150, price: 16490 }],
+    line: "UOMO", tint: "#2f2f34", type: "Eau de Parfum",
+    photo: shotUomoIntense, photoDark: true,
+    desc: "Чёрное гранёное стекло со стальными шипами по низу флакона и алой подписью дома.",
+    notes: { top: "", heart: "", base: "" }, notesUnknown: true
+  },
+  {
+    id: 16, name: "Donna", brand: "VALENTINO", price: 11290, category: "women",
+    variants: [{ ml: 50, price: 6990 }, { ml: 100, price: 11290 }, { ml: 150, price: 15790 }],
+    line: "DONNA", tint: "#d9c9a3", type: "Eau de Parfum",
+    photo: shotDonna, photoDark: true,
+    desc: "Кремовое гранёное стекло с золотой крышкой-бантом — самый светлый флакон витрины.",
+    notes: { top: "", heart: "", base: "" }, notesUnknown: true
+  },
+  {
+    id: 17, name: "Donna Born In Roma", brand: "VALENTINO", price: 11690, category: "women",
+    variants: [{ ml: 50, price: 7290 }, { ml: 100, price: 11690 }, { ml: 150, price: 16290 }],
+    line: "BORN IN ROMA", tint: "#e8398f", type: "Eau de Parfum",
+    photo: shotDonnaRoma, photoDark: true,
+    desc: "Ярко-розовые шипы Born In Roma — версия, которую видно через всю полку.",
+    notes: { top: "", heart: "", base: "" }, notesUnknown: true
+  },
+  {
+    id: 18, name: "Donna Purple", brand: "VALENTINO", price: 11690, category: "women",
+    variants: [{ ml: 50, price: 7290 }, { ml: 100, price: 11690 }, { ml: 150, price: 16290 }],
+    line: "BORN IN ROMA", tint: "#a86fc0", type: "Eau de Parfum",
+    photo: shotDonnaPurple, photoDark: true,
+    desc: "Фиолетовое гранёное стекло с серебряными шипами и тёмной подписью дома.",
+    notes: { top: "", heart: "", base: "" }, notesUnknown: true
+  },
+  {
+    id: 19, name: "Donna Yellow", brand: "VALENTINO", price: 11690, category: "women",
+    variants: [{ ml: 50, price: 7290 }, { ml: 100, price: 11690 }, { ml: 150, price: 16290 }],
+    line: "BORN IN ROMA", tint: "#d8b63c", type: "Eau de Parfum",
+    photo: shotDonnaYellow, photoDark: true,
+    desc: "Золотисто-жёлтое стекло на серебряном цоколе — самый солнечный флакон линии.",
+    notes: { top: "", heart: "", base: "" }, notesUnknown: true
   }
 ];
 

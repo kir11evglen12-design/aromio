@@ -90,7 +90,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
 
         <div className="card-chips">
           <span className="card-chip" data-cat={p.category}>{CATEGORY_LABEL[p.category]}</span>
-          <span className="card-chip">{p.notes.top.split(",")[0].trim()}</span>
+          <span className="card-chip">{p.notes.top ? p.notes.top.split(",")[0].trim() : p.line}</span>
           <span className="card-chip card-chip--ship"><Truck size={12} strokeWidth={1.6} />Доставка</span>
         </div>
 
