@@ -2303,8 +2303,8 @@ html.anim [data-reveal="fade"] { transform: none; }
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
-    background: var(--paper);
-    --mesh: rgb(242 240 236 / 21%);
+    background: #050506;
+    --mesh: rgb(214 214 218 / 26%);
 }
 
 .bd-mesh { display: block; width: 100%; height: 100%; }
@@ -2315,8 +2315,8 @@ html.anim [data-reveal="fade"] { transform: none; }
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(120% 78% at 50% 42%, rgb(11 11 12 / 62%), rgb(11 11 12 / 22%) 58%, transparent 100%),
-        linear-gradient(180deg, rgb(11 11 12 / 72%), transparent 22% 78%, rgb(11 11 12 / 72%));
+        radial-gradient(130% 86% at 50% 46%, rgb(7 7 8 / 34%), rgb(7 7 8 / 8%) 62%, transparent 100%),
+        linear-gradient(180deg, rgb(7 7 8 / 58%), transparent 26% 74%, rgb(7 7 8 / 58%));
 }
 
 /* a light section would hide the mesh entirely, so the light ones stay clear */
@@ -3202,7 +3202,7 @@ kbd {
     /* no filter: blur() here. A 70px blur over a viewport-sized layer costs
        ~100ms per frame because every transform step re-rasterises it; the
        gradients below are already soft, so the blur bought nothing. */
-    opacity: .55;
+    opacity: .14;
     background:
         radial-gradient(30% 34% at 22% 28%, rgb(46 92 168 / 42%), transparent 70%),
         radial-gradient(28% 30% at 78% 22%, rgb(178 96 54 / 34%), transparent 70%),
