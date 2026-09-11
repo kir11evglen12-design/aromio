@@ -20,7 +20,7 @@ export function scrollToId(id: string) {
 }
 
 export default function Header() {
-  const { cart, user, openDrawer, openProfile, setCategory, setPaletteOpen } = useShop();
+  const { cart, user, openDrawer, openProfile, openCatalog, setCategory, setPaletteOpen } = useShop();
   const [compact, setCompact] = useState(false);
   const [menu, setMenu] = useState(false);
 
@@ -36,8 +36,11 @@ export default function Header() {
 
   const go = (target: Filter | "houses") => {
     setMenu(false);
-    if (target === "houses") scrollToId("houses");
-    else { setCategory(target); scrollToId("collection"); }
+    if (target === "houses") { scrollToId("houses"); return; }
+    /* «Каталог» открывает витрину отдельным окном, остальные пункты фильтруют её */
+    if (target === "all") { openCatalog(); return; }
+    setCategory(target);
+    scrollToId("collection");
   };
 
   return (

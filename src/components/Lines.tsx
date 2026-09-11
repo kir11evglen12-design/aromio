@@ -31,9 +31,9 @@ export default function Lines() {
               <div className="house-side">
                 <button className="house-title" onClick={() => { setCategory(house); scrollToId("collection"); }}>
                   <b>{house}</b>
-                  <span>{HOUSE_STORIES[house].founded} — {HOUSE_STORIES[house].place} — {items.length} {plural(items.length, "аромат", "аромата", "ароматов")}</span>
+                  <span>{HOUSE_STORIES[house]?.founded ?? "—"} — {HOUSE_STORIES[house]?.place ?? "—"} — {items.length} {plural(items.length, "аромат", "аромата", "ароматов")}</span>
                 </button>
-                <p className="house-story">{HOUSE_STORIES[house].text}</p>
+                {HOUSE_STORIES[house] && <p className="house-story">{HOUSE_STORIES[house].text}</p>}
               </div>
 
               <div className="house-items">

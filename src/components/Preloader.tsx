@@ -4,11 +4,16 @@ import Wordmark from "./Wordmark";
 
 /** First frames: the wordmark draws itself on black, then the curtain lifts. */
 export default function Preloader({ onDone }: { onDone: () => void }) {
-  const seen = (() => {
-    try { return sessionStorage.getItem("aromio_intro") === "1"; } catch { return false; }
-  })();
-
-  const quick = seen || prefersReducedMotion();
+  /* read once: this used to be recomputed on every render, and since the
+     effect writes the flag immediately, the very next render decided the
+     intro had already been seen and cut it short */
+  const [quick] = useState(() => {
+    try {
+      return sessionStorage.getItem("aromio_intro") === "1" || prefersReducedMotion();
+    } catch {
+      return prefersReducedMotion();
+    }
+  });
   const [progress, setProgress] = useState(quick ? 100 : 0);
   const [done, setDone] = useState(false);
 
@@ -20,24 +25,26 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
       return () => clearTimeout(t);
     }
 
-    const iv = setInterval(() => {
-      setProgress(p => {
-        const next = Math.min(100, p + 6 + Math.random() * 10);
-        if (next >= 100) {
-          clearInterval(iv);
-          setTimeout(() => { setDone(true); onDone(); }, 520);
-        }
-        return next;
-      });
-    }, 150);
+    /* ровно две секунды: полоса идёт по реальному времени, а не шагами */
+    const INTRO = 2000;
+    const started = performance.now();
 
-    return () => clearInterval(iv);
+    const tick = () => {
+      const k = Math.min(1, (performance.now() - started) / INTRO);
+      setProgress(k * 100);
+      if (k < 1) raf = requestAnimationFrame(tick);
+      else { setDone(true); onDone(); }
+    };
+
+    let raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [quick, onDone]);
 
   return (
     <div className={"preloader" + (done ? " is-done" : "") + (quick ? " quick" : "")}>
       <div className="pre-inner">
         <Wordmark className="pre-mark" />
+        <div className="pre-claim">НОВЫЕ ЗАПАХИ НА КАЖДЫЙ ДЕНЬ</div>
         <div className="pre-bar"><div className="pre-fill" style={{ width: progress + "%" }} /></div>
       </div>
     </div>

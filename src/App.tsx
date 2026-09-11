@@ -21,6 +21,8 @@ import Journal from "./components/Journal";
 import Lexicon from "./components/Lexicon";
 import Service from "./components/Service";
 import Compare from "./components/Compare";
+import CatalogWindow from "./components/CatalogWindow";
+import Market from "./components/Market";
 import CommandPalette from "./components/CommandPalette";
 import Footer from "./components/Footer";
 import ProductPage from "./components/ProductPage";
@@ -56,6 +58,7 @@ function Shell() {
         <Journal />
         <SplitGender />
         <Lexicon />
+        <Market />
         <Ticker dark />
         <Lines />
         <Service />
@@ -66,6 +69,7 @@ function Shell() {
 
       <ProductPage />
       <ProfilePage />
+      <CatalogWindow />
       <Compare />
       <CommandPalette />
 

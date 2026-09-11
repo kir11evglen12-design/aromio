@@ -90,6 +90,11 @@ interface ShopValue {
   paletteOpen: boolean;
   setPaletteOpen: (v: boolean) => void;
 
+  /** the catalogue in its own window */
+  catalogOpen: boolean;
+  openCatalog: () => void;
+  closeCatalog: () => void;
+
   toast: (msg: string) => void;
   toastMsg: string;
 }
@@ -135,6 +140,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const [compare, setCompare] = useState<number[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const [recent, setRecent] = useState<number[]>(() => {
     try {
       return (JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]") as number[]).slice(0, 8);
@@ -173,9 +179,9 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   /* body scroll lock while an overlay is up */
   useEffect(() => {
-    const locked = drawer !== null || productId !== null || profileOpen;
+    const locked = drawer !== null || productId !== null || profileOpen || catalogOpen;
     document.body.classList.toggle("is-locked", locked);
-  }, [drawer, productId, profileOpen]);
+  }, [drawer, productId, profileOpen, catalogOpen]);
 
   useEffect(() => {
     try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch { /* ignore */ }
@@ -313,11 +319,12 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       if (e.key !== "Escape") return;
       if (productId !== null) setProductId(null);
       else if (profileOpen) setProfileOpen(false);
+      else if (catalogOpen) setCatalogOpen(false);
       else setDrawer(null);
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [productId, profileOpen]);
+  }, [productId, profileOpen, catalogOpen]);
 
   const value = useMemo<ShopValue>(() => ({
     cart,
@@ -370,6 +377,9 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     removeReminder,
     paletteOpen,
     setPaletteOpen,
+    catalogOpen,
+    openCatalog: () => setCatalogOpen(true),
+    closeCatalog: () => setCatalogOpen(false),
     toast,
     toastMsg
   }), [
@@ -377,7 +387,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     isFavorite, toggleFavorite, drawer, authIntro, openAuth, authMode, productId,
     profileOpen, category, sort, noteQuery, compare, toggleCompare, compareOpen,
     recent, shelf, addToShelf, removeFromShelf, reminders, addReminder,
-    toggleReminder, removeReminder, paletteOpen, toast, toastMsg
+    toggleReminder, removeReminder, paletteOpen, catalogOpen, toast, toastMsg
   ]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

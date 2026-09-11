@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, Heart, Layers, Maximize2, ShoppingBag, Truck } from "lucide-react";
-import { CATEGORY_LABEL, money, variantOf } from "../data/products";
+import { bottles, CATEGORY_LABEL, money, sprays, variantOf } from "../data/products";
 import type { Product } from "../data/products";
 import { useShop } from "../lib/shop";
 import Plate from "./Plate";
@@ -22,6 +22,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
   const { addToCart, openProduct, isFavorite, toggleFavorite, compare, toggleCompare } = useShop();
   const [ml, setMl] = useState(() => variantOf(p, 100).ml);
   const variant = variantOf(p, ml);
+  const [sprayLo, sprayHi] = sprays(p);
   const inCompare = compare.includes(p.id);
 
   const open = () => openProduct(p.id);
@@ -58,7 +59,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
 
       {/* the thumbnail strip of a shop, doing something real: volume */}
       <div className="card-sizes" role="radiogroup" aria-label={`Объём — ${p.name}`}>
-        {p.variants.map(v => (
+        {bottles(p).map(v => (
           <button
             key={v.ml}
             role="radio"
@@ -91,7 +92,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
 
         <div className="card-chips">
           <span className="card-chip" data-cat={p.category}>{CATEGORY_LABEL[p.category]}</span>
-          <span className="card-chip">{p.notes.top ? p.notes.top.split(",")[0].trim() : p.line}</span>
+          <span className="card-chip">{sprayLo}–{sprayHi} пшика</span>
           <span className="card-chip card-chip--ship"><Truck size={12} strokeWidth={1.6} />Доставка</span>
         </div>
 

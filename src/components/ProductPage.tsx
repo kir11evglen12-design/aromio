@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Check, Heart, Layers, X } from "lucide-react";
-import { byId, CATEGORY_LABEL, fromPrice, money, products, variantOf } from "../data/products";
+import { bottles, byId, CATEGORY_LABEL, fromPrice, money, products, samples, sprays, variantOf } from "../data/products";
 import { HOUSE_STORIES, PRODUCT_STORIES } from "../data/facts";
 import { plural } from "../lib/auth";
 import { useShop } from "../lib/shop";
@@ -24,8 +24,9 @@ export default function ProductPage() {
   const house = HOUSE_STORIES[p.brand];
 
   /* how long a bottle lasts: one press of a sprayer is about 0.1 ml */
-  const [sprays, setSprays] = useState(3);
-  const days = Math.round(variant.ml / (sprays * 0.1));
+  const [sprayCount, setSprayCount] = useState(3);
+  const [sprayLo, sprayHi] = sprays(p);
+  const days = Math.round(variant.ml / (sprayCount * 0.1));
   const months = Math.max(1, Math.round(days / 30));
   const perWear = Math.round(variant.price / Math.max(1, days));
 
@@ -79,7 +80,7 @@ export default function ProductPage() {
                 <span className="sizes-hint">{variant.ml} мл — {money(variant.price)}</span>
               </div>
               <div className="sizes-row">
-                {p.variants.map(v => (
+                {bottles(p).map(v => (
                   <button
                     key={v.ml}
                     role="radio"
@@ -94,10 +95,28 @@ export default function ProductPage() {
               </div>
             </div>
 
+            <div className="samples pp-anim">
+              <div className="sizes-head">
+                <span className="eyebrow">Пробники</span>
+                <span className="sizes-hint">Отлив из флакона — попробовать, прежде чем брать целиком</span>
+              </div>
+              <div className="sizes-row">
+                {samples(p).map(v => (
+                  <button key={v.ml}
+                          className={"size size--sample" + (v.ml === ml ? " is-on" : "")}
+                          onClick={() => setMl(v.ml)}>
+                    <b>{v.ml}<i>мл</i></b>
+                    <span>{money(v.price)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="pp-meta pp-anim">
               <div><span>Концентрация</span><b>{p.type}</b></div>
               <div><span>Категория</span><b>{CATEGORY_LABEL[p.category]}</b></div>
               <div><span>Наличие</span><b className="pp-stock"><i />В наличии</b></div>
+              <div><span>Хватает</span><b>{sprayLo}–{sprayHi} {plural(sprayHi, "пшик", "пшика", "пшиков")}</b></div>
             </div>
 
             <div className="pp-buy pp-anim">
@@ -128,9 +147,9 @@ export default function ProductPage() {
                 </span>
               </div>
               <label className="pp-calc-slider">
-                <span>{sprays} {plural(sprays, "нажатие", "нажатия", "нажатий")} в день</span>
-                <input type="range" min={1} max={8} value={sprays}
-                       onChange={e => setSprays(Number(e.target.value))}
+                <span>{sprayCount} {plural(sprayCount, "нажатие", "нажатия", "нажатий")} в день</span>
+                <input type="range" min={1} max={8} value={sprayCount}
+                       onChange={e => setSprayCount(Number(e.target.value))}
                        aria-label="Нажатий в день" />
               </label>
               <p className="pp-calc-note">
