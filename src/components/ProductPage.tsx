@@ -103,7 +103,7 @@ export default function ProductPage() {
             <div className="pp-buy pp-anim">
               <span className="pp-price">{money(variant.price)}</span>
               <button className="btn btn--solid btn--buy" onClick={() => addToCart(p.id, ml)}>
-                В корзину — {variant.ml} мл
+                В корзину<span className="pp-buy-ml"> — {variant.ml} мл</span>
                 <ArrowRight className="btn__arrow" size={14} strokeWidth={1.4} />
               </button>
               <button className={"fav-btn" + (isFavorite(p.id) ? " is-on" : "")}

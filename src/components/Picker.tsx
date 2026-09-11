@@ -17,7 +17,12 @@ export default function Picker() {
   const [radius, setRadius] = useState(168);
 
   useEffect(() => {
-    const measure = () => setRadius(innerWidth < 620 ? 148 : 178);
+    const measure = () => {
+      /* the ring must stay inside the narrowest phone, so it is derived
+         from the viewport rather than from a pair of breakpoints */
+      if (innerWidth < 400) return setRadius(Math.max(104, innerWidth * 0.34));
+      setRadius(innerWidth < 620 ? 148 : 178);
+    };
     measure();
     addEventListener("resize", measure, { passive: true });
     return () => removeEventListener("resize", measure);

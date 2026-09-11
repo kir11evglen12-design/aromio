@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { byId, products } from "../data/products";
 import { LEXICON } from "../data/lexicon";
 import { gsap, prefersReducedMotion, revealLines, useGsap } from "../lib/motion";
 import Plate from "./Plate";
+import { useShop } from "../lib/shop";
 import { scrollToId } from "./Header";
 
 /** Drifting motes, drawn only while the hero is on screen. */
@@ -95,6 +96,7 @@ const FACTS: [string, string][] = [
 ];
 
 export default function Hero({ ready }: { ready: boolean }) {
+  const { setPaletteOpen } = useShop();
   const stage = useRef<HTMLDivElement>(null);
   useParticles(stage);
 
@@ -141,6 +143,9 @@ export default function Hero({ ready }: { ready: boolean }) {
           <span className="hero-kbd">
             <kbd>Ctrl</kbd><kbd>K</kbd> — поиск по всему сайту
           </span>
+          <button className="hero-chip hero-chip--find" onClick={() => setPaletteOpen(true)}>
+            <Search size={14} strokeWidth={1.6} />Найти аромат
+          </button>
         </div>
 
         <div className="hero-cta hero-fade">

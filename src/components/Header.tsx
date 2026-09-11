@@ -19,7 +19,7 @@ export function scrollToId(id: string) {
 }
 
 export default function Header() {
-  const { cart, user, openDrawer, openProfile, setCategory } = useShop();
+  const { cart, user, openDrawer, openProfile, setCategory, setPaletteOpen } = useShop();
   const [compact, setCompact] = useState(false);
   const [menu, setMenu] = useState(false);
 
@@ -79,6 +79,15 @@ export default function Header() {
           <button key={label} onClick={() => go(target)}>{label}</button>
         ))}
         <button onClick={() => { setMenu(false); setCategory("niche"); scrollToId("collection"); }}>Нишевая</button>
+
+        <div className="mobile-menu-sep" aria-hidden />
+
+        {([["Журнал", "journal"], ["Лексикон", "lexicon"], ["Вопросы", "service"]] as const).map(([label, id]) => (
+          <button key={id} className="mobile-menu-sub" onClick={() => { setMenu(false); scrollToId(id); }}>{label}</button>
+        ))}
+        <button className="mobile-menu-sub" onClick={() => { setMenu(false); setPaletteOpen(true); }}>
+          Поиск по всему сайту
+        </button>
       </div>
     </>
   );
