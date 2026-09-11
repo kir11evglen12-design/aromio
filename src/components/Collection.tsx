@@ -5,13 +5,13 @@ import { SORT_LABEL, useShop, visibleProducts } from "../lib/shop";
 import type { Sort } from "../lib/shop";
 import { gsap, parallax, prefersReducedMotion, revealFrom, useGsap } from "../lib/motion";
 import ProductCard from "./ProductCard";
+import SearchBar from "./SearchBar";
 
 const FILTERS: (ProductCategory | "all")[] = ["all", "women", "men", "unisex", "niche"];
 
 export default function Collection() {
   const {
-    category, setCategory, openProduct,
-    sort, setSort, noteQuery, setNoteQuery, recent
+    category, setCategory, openProduct, sort, setSort, noteQuery, recent
   } = useShop();
   const list = visibleProducts(category, sort, noteQuery);
 
@@ -38,9 +38,11 @@ export default function Collection() {
           <h2 className="display">Ароматы<br /><em>витрины</em></h2>
         </div>
         <p className="lead">
-          Три дома, {products.length} ароматов. Фотография стоит там, где её дал магазин; остальные позиции — цветные карточки. Сравните до трёх сразу, отфильтруйте по ноте или отсортируйте по цене.
+          Три дома, {products.length} ароматов. Фотография стоит там, где её дал магазин; остальные позиции — цветные карточки. Ищите по названию, дому или ноте, сравнивайте до трёх сразу и сортируйте по цене.
         </p>
       </div>
+
+      <SearchBar />
 
       <div className="filters houses" role="group" aria-label="Фильтр по домам">
         {HOUSES.map(h => (
@@ -63,15 +65,6 @@ export default function Collection() {
       </div>
 
       <div className="cl-tools">
-        <label className="cl-note">
-          <span className="sr-only">Фильтр по ноте</span>
-          <input value={noteQuery} onChange={e => setNoteQuery(e.target.value)}
-                 placeholder="Фильтр по ноте: уд, ирис, кофе…" />
-          {noteQuery && (
-            <button className="cl-clear" onClick={() => setNoteQuery("")} aria-label="Сбросить фильтр по ноте">×</button>
-          )}
-        </label>
-
         <div className="cl-sort" role="group" aria-label="Сортировка">
           {(Object.keys(SORT_LABEL) as Sort[]).map(k => (
             <button key={k} className={"cl-sort-btn" + (sort === k ? " is-on" : "")}
