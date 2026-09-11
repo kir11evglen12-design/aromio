@@ -7,6 +7,7 @@ import Preloader from "./components/Preloader";
 import Cursor from "./components/Cursor";
 import Progress from "./components/Progress";
 import Header from "./components/Header";
+import MobileBar from "./components/MobileBar";
 import Hero from "./components/Hero";
 import Ticker from "./components/Ticker";
 import Manifest from "./components/Manifest";
@@ -59,6 +60,7 @@ function Shell() {
       </main>
 
       <Footer />
+      <MobileBar />
 
       <ProductPage />
       <ProfilePage />

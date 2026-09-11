@@ -12,7 +12,8 @@ import { prefersReducedMotion } from "../lib/motion";
  * survives a resize without re-deriving anything.
  */
 
-const COLS = 64;
+/* a phone neither needs nor wants 64 columns of mesh */
+const COLS = typeof innerWidth !== "undefined" && innerWidth < 720 ? 38 : 64;
 /** rows follow the viewport's aspect so the cells stay square */
 const MAX_ROWS = 96;
 /** the mesh is drawn wider than the viewport so the folds never show an edge */
