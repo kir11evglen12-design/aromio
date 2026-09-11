@@ -383,6 +383,23 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
+/**
+ * A query has to hit the start of a word, not just any substring: plain
+ * `includes` made "уд" match "пУДровый". JS word boundaries do not work on
+ * Cyrillic, so the character before the hit is checked by hand — which
+ * still lets a prefix like "ванил" find "ваниль".
+ */
+const isLetter = (ch: string): boolean => /[\p{L}\p{N}]/u.test(ch);
+
+const startsWord = (hay: string, needle: string): boolean => {
+  let i = hay.indexOf(needle);
+  while (i !== -1) {
+    if (i === 0 || !isLetter(hay[i - 1])) return true;
+    i = hay.indexOf(needle, i + 1);
+  }
+  return false;
+};
+
 export const visibleProducts = (
   filter: Filter,
   sort: Sort = "house",
@@ -396,10 +413,18 @@ export const visibleProducts = (
       : list.filter(p => p.category === filter);
   }
 
+  /* one field searches everything a shopper might type: a name, a house,
+     a line, the concentration or a note */
   const q = noteQuery.trim().toLowerCase();
   if (q) {
-    list = list.filter(p =>
-      (p.notes.top + p.notes.heart + p.notes.base).toLowerCase().includes(q));
+    const words = q.split(/\s+/).filter(Boolean);
+    list = list.filter(p => {
+      const hay = [
+        p.name, p.brand, p.line, p.type, p.desc,
+        p.notes.top, p.notes.heart, p.notes.base
+      ].join(" ").toLowerCase();
+      return words.every(w => startsWord(hay, w));
+    });
   }
 
   const priced = (p: Product) => Math.min(...p.variants.map(v => v.price));
