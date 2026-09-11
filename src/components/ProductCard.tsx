@@ -5,6 +5,13 @@ import type { Product } from "../data/products";
 import { useShop } from "../lib/shop";
 import Plate from "./Plate";
 
+/** each house gets its own accent, so a row of cards is not one blue wall */
+const HOUSE_COLOR: Record<string, string> = {
+  DIOR: "#2f7bff",
+  "LOUIS VUITTON": "#d8a13a",
+  VALENTINO: "#e8398f"
+};
+
 /** short badge text: the concentration, which is what the label really says */
 const SHORT_TYPE: Record<string, string> = {
   "Eau de Parfum": "EDP",
@@ -29,6 +36,10 @@ export default function ProductCard({ product: p }: { product: Product }) {
   return (
     <article
       className="card"
+      style={{
+        ["--house" as string]: HOUSE_COLOR[p.brand] ?? "#2f7bff",
+        ["--tint" as string]: p.tint
+      }}
       role="button"
       tabIndex={0}
       aria-label={`${p.brand} ${p.name} — открыть карточку`}

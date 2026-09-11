@@ -3609,3 +3609,98 @@ html.calm .bd-veil { opacity: .9; }
 }
 
 .p-missing p { margin-top: 8px; font-size: 13.5px; line-height: 1.7; color: #c2bdb4; }
+
+
+/* ============================================================
+   ВЫРАВНИВАНИЕ КАРТОЧЕК
+   Каждая карточка — сетка из фиксированных полос: медиа, объёмы,
+   заголовок, описание, чипы, подвал. Полосы одинаковой высоты во
+   всех карточках, поэтому цены и кнопки стоят на одной линии,
+   сколько бы строк ни занимало название.
+   ============================================================ */
+
+.grid { align-items: stretch; }
+
+.card {
+    display: grid;
+    grid-template-rows: auto auto auto auto auto 1fr;
+    height: 100%;
+}
+
+.card-body {
+    display: grid;
+    grid-template-rows: auto auto auto 1fr;
+    gap: 10px;
+    padding: 12px 4px 0;
+}
+
+/* две строки под название и две под описание — в любой карточке */
+.card-head { min-height: 62px; align-items: start; }
+.card-name { min-height: 2.4em; }
+.card-desc { min-height: 3.1em; }
+.card-chips { min-height: 30px; align-content: start; }
+
+/* подвал всегда прижат к низу карточки */
+.card-foot { align-self: end; }
+
+/* плитка без фотографии заполняет медиа так же, как снимок */
+.card .plate {
+    --bw: 112px;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 12px;
+    justify-content: flex-end;
+}
+
+.card .plate .pl-meta { display: none; }
+/* a percentage font-size resolves against the parent, which made this
+   collapse to a few pixels; the monogram is sized from the plate instead */
+.card .pl-mono { font-size: calc(var(--bw) * 0.98); }
+
+@media (max-width: 640px) {
+    .card-head { min-height: 54px; }
+    .card-name { min-height: 2.4em; }
+}
+
+
+/* ── Цвет дома и цвет аромата в карточке ─────────────────────────────── */
+
+.card { --house: var(--blue); }
+
+.card-badge {
+    background: linear-gradient(120deg,
+        color-mix(in srgb, var(--house) 78%, #ffffff),
+        var(--house));
+    box-shadow: 0 10px 22px -12px color-mix(in srgb, var(--house) 90%, transparent);
+    color: #0b0b0c;
+}
+
+.card-buy {
+    background: linear-gradient(120deg,
+        color-mix(in srgb, var(--house) 82%, #ffffff),
+        var(--house));
+    box-shadow: 0 14px 28px -16px color-mix(in srgb, var(--house) 95%, transparent);
+    color: #0b0b0c;
+}
+
+.card-buy:hover { box-shadow: 0 18px 34px -16px var(--house); }
+
+/* активный объём светится цветом самого аромата */
+.card-size.is-on {
+    border-color: var(--tint);
+    background: color-mix(in srgb, var(--tint) 14%, transparent);
+    box-shadow: 0 0 0 1px var(--tint), 0 10px 22px -16px var(--tint);
+    color: #fff;
+}
+
+.card:hover { border-color: color-mix(in srgb, var(--tint) 55%, rgb(255 255 255 / 20%)); }
+.card-cmp.is-on { background: var(--house); border-color: var(--house); color: #0b0b0c; }
+.card-fav.is-on { background: color-mix(in srgb, var(--house) 20%, transparent); border-color: var(--house); color: var(--house); }
+.card-fav.is-on svg { fill: var(--house); stroke: var(--house); }
+.card-line { color: color-mix(in srgb, var(--house) 65%, #ffffff); }
+
+/* фильтры домов красятся тем же набором */
+.filters.houses .filter--house:nth-child(1) { --chip: #2f7bff; }
+.filters.houses .filter--house:nth-child(2) { --chip: #d8a13a; }
+.filters.houses .filter--house:nth-child(3) { --chip: #e8398f; }
