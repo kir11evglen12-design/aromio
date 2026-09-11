@@ -1,6 +1,5 @@
 import { LayoutGrid, Search, ShoppingBag, User as UserIcon } from "lucide-react";
 import { useShop } from "../lib/shop";
-import { scrollToId } from "./Header";
 
 /**
  * The phone's home row. On a small screen the header's icons are a stretch
@@ -8,14 +7,14 @@ import { scrollToId } from "./Header";
  * of the screen instead, above the home indicator.
  */
 export default function MobileBar() {
-  const { cart, openDrawer, openProfile, setCategory, drawer, productId, profileOpen } = useShop();
+  const { cart, openDrawer, openProfile, openCatalog, drawer, productId, profileOpen, catalogOpen } = useShop();
 
   /* an overlay owns the screen while it is up; the bar would sit on top of it */
-  const hidden = drawer !== null || productId !== null || profileOpen;
+  const hidden = drawer !== null || productId !== null || profileOpen || catalogOpen;
 
   return (
     <nav className={"mbar" + (hidden ? " is-hidden" : "")} aria-label="Основное меню">
-      <button onClick={() => { setCategory("all"); scrollToId("collection"); }}>
+      <button onClick={openCatalog}>
         <LayoutGrid size={20} strokeWidth={1.5} />
         <span>Каталог</span>
       </button>

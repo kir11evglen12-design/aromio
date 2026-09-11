@@ -96,7 +96,7 @@ const FACTS: [string, string][] = [
 ];
 
 export default function Hero({ ready }: { ready: boolean }) {
-  const { setPaletteOpen } = useShop();
+  const { setPaletteOpen, openCatalog } = useShop();
   const stage = useRef<HTMLDivElement>(null);
   useParticles(stage);
 
@@ -123,7 +123,7 @@ export default function Hero({ ready }: { ready: boolean }) {
       <div className="hero-glow" aria-hidden />
 
       <div className="hero-copy">
-        <div className="eyebrow hero-line"><span>Нишевая парфюмерия — с 2026</span></div>
+        <div className="eyebrow hero-line"><span>Новые запахи на каждый день</span></div>
 
         <h1 className="display hero-title">
           <span className="line hero-line"><span>Аромат,</span></span>
@@ -149,8 +149,8 @@ export default function Hero({ ready }: { ready: boolean }) {
         </div>
 
         <div className="hero-cta hero-fade">
-          <button className="btn btn--solid" onClick={() => scrollToId("collection")}>
-            Смотреть коллекцию
+          <button className="btn btn--solid" onClick={openCatalog}>
+            Открыть каталог
             <ArrowRight className="btn__arrow" size={14} strokeWidth={1.4} />
           </button>
           <button className="link-u hero-about" onClick={() => scrollToId("manifest")}>О бренде</button>

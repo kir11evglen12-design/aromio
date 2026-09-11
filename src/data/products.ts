@@ -18,6 +18,8 @@ export interface Variant {
   /** volume in millilitres */
   ml: number;
   price: number;
+  /** a decant to try, not a bottle to own */
+  sample?: boolean;
 }
 
 export interface Notes {
@@ -46,6 +48,8 @@ export interface Product {
   photo?: string;
   /** the shot is on a black ground rather than a white studio sweep */
   photoDark?: boolean;
+  /** the nose, where the house has named one */
+  nose?: string;
   /**
    * The shop has not given us the composition of this bottle. We say so
    * rather than inventing a pyramid: an empty note list is honest, a
@@ -62,7 +66,10 @@ export const CATEGORY_LABEL: Record<Category | "all", string> = {
   niche: "Нишевая"
 };
 
-export const HOUSES = ["DIOR", "LOUIS VUITTON", "VALENTINO", "JEAN PAUL GAULTIER", "LACOSTE"] as const;
+export const HOUSES = [
+  "DIOR", "LOUIS VUITTON", "VALENTINO", "JEAN PAUL GAULTIER", "LACOSTE",
+  "CHANEL", "TOM FORD", "YVES SAINT LAURENT", "PACO RABANNE", "CREED"
+] as const;
 export type House = (typeof HOUSES)[number];
 
 export const products: Product[] = [
@@ -306,6 +313,127 @@ export const products: Product[] = [
     line: "L.12.12", tint: "#2b2f33", type: "Eau de Toilette",
     desc: "Тёмная версия той же линии — плотнее и теплее белой, для вечера.",
     notes: { top: "", heart: "", base: "" }, notesUnknown: true
+  },
+
+  /* ---------------- CHANEL ---------------- */
+  {
+    id: 24, name: "Bleu de Chanel", brand: "CHANEL", price: 13990, category: "men",
+    variants: [{ ml: 50, price: 9490 }, { ml: 100, price: 13990 }, { ml: 150, price: 18490 }],
+    line: "BLEU", tint: "#2b4a72", type: "Eau de Parfum", nose: "Жак Польж",
+    desc: "Цитрусовый старт на ладанно-древесной базе: дом называет его ароматом свободы от условностей.",
+    notes: {
+      top: "Грейпфрут, лимон, мята",
+      heart: "Имбирь, мускатный орех, жасмин",
+      base: "Ладан, кедр, сандал"
+    }
+  },
+  {
+    id: 25, name: "Coco Mademoiselle", brand: "CHANEL", price: 14490, category: "women",
+    variants: [{ ml: 50, price: 9990 }, { ml: 100, price: 14490 }, { ml: 200, price: 21990 }],
+    line: "COCO", tint: "#c9884f", type: "Eau de Parfum", nose: "Жак Польж",
+    desc: "Шипр с апельсиновой искрой и пачулевой подписью — один из самых узнаваемых женских ароматов дома.",
+    notes: {
+      top: "Апельсин, бергамот",
+      heart: "Роза, жасмин",
+      base: "Пачули, ваниль, белый мускус"
+    }
+  },
+
+  /* ---------------- TOM FORD ---------------- */
+  {
+    id: 26, name: "Tobacco Vanille", brand: "TOM FORD", price: 27900, category: "unisex",
+    variants: [{ ml: 50, price: 27900 }, { ml: 100, price: 39900 }],
+    line: "PRIVATE BLEND", tint: "#7a4a22", type: "Eau de Parfum", nose: "Оливье Жилотен",
+    desc: "Табачный лист с ванилью и сухофруктами — плотный, тёплый и очень зимний.",
+    notes: {
+      top: "Табак, специи",
+      heart: "Ваниль, какао, сухофрукты",
+      base: "Бобы тонка, древесные ноты"
+    }
+  },
+  {
+    id: 27, name: "Lost Cherry", brand: "TOM FORD", price: 29900, category: "unisex",
+    variants: [{ ml: 50, price: 29900 }, { ml: 100, price: 42900 }],
+    line: "PRIVATE BLEND", tint: "#a52a3c", type: "Eau de Parfum", nose: "Луиза Тёрнер",
+    desc: "Вишнёвый ликёр и миндаль поверх тонка-ванильной базы: сладость, доведённая до предела.",
+    notes: {
+      top: "Вишня, ликёр, миндаль",
+      heart: "Роза, жасмин",
+      base: "Бобы тонка, ваниль, сандал"
+    }
+  },
+
+  /* ---------------- YVES SAINT LAURENT ---------------- */
+  {
+    id: 28, name: "Libre", brand: "YVES SAINT LAURENT", price: 12990, category: "women",
+    variants: [{ ml: 50, price: 8990 }, { ml: 90, price: 12990 }, { ml: 150, price: 17490 }],
+    line: "LIBRE", tint: "#c8a64a", type: "Eau de Parfum", nose: "Анн Флипо и Карлос Бенаим",
+    desc: "Лаванда против ванили — мужской материал в женском аромате, на этом контрасте всё и держится.",
+    notes: {
+      top: "Лаванда, мандарин, чёрная смородина",
+      heart: "Жасмин, апельсиновый цвет",
+      base: "Ваниль, мускус, кедр"
+    }
+  },
+  {
+    id: 29, name: "Y Eau de Parfum", brand: "YVES SAINT LAURENT", price: 12490, category: "men",
+    variants: [{ ml: 60, price: 9490 }, { ml: 100, price: 12490 }, { ml: 200, price: 18990 }],
+    line: "Y", tint: "#34424f", type: "Eau de Parfum",
+    desc: "Сухая древесина с имбирным стартом: аромат-униформа для рабочей недели.",
+    notes: {
+      top: "Бергамот, имбирь",
+      heart: "Шалфей, герань",
+      base: "Кедр, амбра, бобы тонка"
+    }
+  },
+
+  /* ---------------- PACO RABANNE ---------------- */
+  {
+    id: 30, name: "1 Million", brand: "PACO RABANNE", price: 9490, category: "men",
+    variants: [{ ml: 50, price: 6990 }, { ml: 100, price: 9490 }, { ml: 200, price: 14490 }],
+    line: "1 MILLION", tint: "#c2922f", type: "Eau de Toilette",
+    nose: "Кристоф Рейно, Оливье Пешё и Мишель Жирар",
+    desc: "Корица с кожей под грейпфрутовым стартом — золотой слиток на полке и в звучании.",
+    notes: {
+      top: "Грейпфрут, мята, мандарин",
+      heart: "Корица, роза, кожа",
+      base: "Амбра, пачули, кожа"
+    }
+  },
+  {
+    id: 31, name: "Invictus", brand: "PACO RABANNE", price: 8990, category: "men",
+    variants: [{ ml: 50, price: 6490 }, { ml: 100, price: 8990 }, { ml: 200, price: 13990 }],
+    line: "INVICTUS", tint: "#3f6f86", type: "Eau de Toilette",
+    desc: "Морская свежесть на древесно-амбровой базе: спортивный профиль, который держится весь день.",
+    notes: {
+      top: "Грейпфрут, морская нота",
+      heart: "Лавр, жасмин",
+      base: "Амбра, пачули, дубовый мох"
+    }
+  },
+
+  /* ---------------- CREED ---------------- */
+  {
+    id: 32, name: "Aventus", brand: "CREED", price: 38900, category: "niche",
+    variants: [{ ml: 50, price: 27900 }, { ml: 100, price: 38900 }, { ml: 120, price: 45900 }],
+    line: "AVENTUS", tint: "#6d4a2f", type: "Eau de Parfum", nose: "Эрвен Крид",
+    desc: "Дымный ананас с берёзой — аромат, который в 2010-х переписал представление о мужской нише.",
+    notes: {
+      top: "Ананас, бергамот, чёрная смородина, яблоко",
+      heart: "Берёза, пачули, жасмин",
+      base: "Мускус, дубовый мох, амбра, ваниль"
+    }
+  },
+  {
+    id: 33, name: "Silver Mountain Water", brand: "CREED", price: 35900, category: "unisex",
+    variants: [{ ml: 50, price: 25900 }, { ml: 100, price: 35900 }],
+    line: "MILLESIME", tint: "#7f98a6", type: "Eau de Parfum",
+    desc: "Холодная вода и зелёный чай: прозрачный аромат, придуманный как портрет альпийского ручья.",
+    notes: {
+      top: "Бергамот, мандарин",
+      heart: "Зелёный чай, чёрная смородина",
+      base: "Сандал, мускус"
+    }
   }
 ];
 
@@ -321,8 +449,45 @@ export const byHouse = (house: House): Product[] =>
 export const money = (n: number): string => n.toLocaleString("ru-RU") + " ₽";
 
 /** cheapest variant, used for the "от …" price on cards */
+/**
+ * Decants, added to every bottle: 1, 5 and 10 ml to try before committing.
+ * Priced from the cheapest full bottle's per-millilitre rate with a decanting
+ * fee, because splitting a bottle by hand costs more per drop than the bottle.
+ */
+export const SAMPLE_ML = [1, 5, 10] as const;
+
+const sampleFor = (p: Product, ml: number): Variant => {
+  const full = p.variants.filter(v => !v.sample);
+  const perMl = Math.min(...full.map(v => v.price / v.ml));
+  return { ml, price: Math.round((perMl * ml * 1.6 + 240) / 10) * 10, sample: true };
+};
+
+/** bottles only — what the volume picker on a card offers */
+export const bottles = (p: Product): Variant[] => p.variants.filter(v => !v.sample);
+
+/** the three decants for a fragrance, computed once and cached */
+const sampleCache = new Map<number, Variant[]>();
+
+export const samples = (p: Product): Variant[] => {
+  const hit = sampleCache.get(p.id);
+  if (hit) return hit;
+  const made = SAMPLE_ML.map(ml => sampleFor(p, ml));
+  sampleCache.set(p.id, made);
+  return made;
+};
+
+/**
+ * How many sprays a wear takes. Not a brand claim: it follows from the
+ * concentration — the denser the juice, the fewer presses it needs.
+ */
+export const sprays = (p: Product): [number, number] => {
+  if (/extrait|parfum$/i.test(p.type) && !/eau de parfum/i.test(p.type)) return [2, 3];
+  if (/eau de parfum/i.test(p.type)) return [3, 4];
+  return [4, 6];
+};
+
 export const fromPrice = (p: Product): number =>
   Math.min(...p.variants.map(v => v.price));
 
 export const variantOf = (p: Product, ml: number): Variant =>
-  p.variants.find(v => v.ml === ml) ?? p.variants[0];
+  p.variants.find(v => v.ml === ml) ?? samples(p).find(v => v.ml === ml) ?? p.variants[0];

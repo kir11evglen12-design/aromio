@@ -1,4 +1,5 @@
 const ITEMS: [string, string][] = [
+  ["Новые запахи на каждый день", ""],
   ["Eau de Parfum", "парфюмерная вода"],
   ["Sillage", "шлейф"],
   ["Dry-down", "высыхание"],
@@ -17,7 +18,7 @@ const ITEMS: [string, string][] = [
  */
 export default function Ticker({ dark }: { dark?: boolean }) {
   const row = ITEMS.map(([fr, ru]) => (
-    <span key={fr}><b>{fr}</b><em>{ru}</em><i /></span>
+    <span key={fr}><b>{fr}</b>{ru && <em>{ru}</em>}<i /></span>
   ));
 
   return (
