@@ -3,6 +3,7 @@ import { Search, ShoppingBag, User as UserIcon } from "lucide-react";
 import { useShop } from "../lib/shop";
 import type { Filter } from "../lib/shop";
 import { initials } from "../lib/auth";
+import Wordmark from "./Wordmark";
 
 const NAV: [string, Filter | "houses"][] = [
   ["Каталог", "all"],
@@ -43,7 +44,8 @@ export default function Header() {
     <>
       <header className={"header" + (compact ? " is-compact" : "")}>
         <a className="brand" href="#top" onClick={e => { e.preventDefault(); scrollTo({ top: 0, behavior: "smooth" }); }}>
-          AROMIO<small>PARFUM’S</small>
+          <Wordmark className="brand-mark" />
+          <small>PARFUM’S</small>
         </a>
 
         <nav className="nav">

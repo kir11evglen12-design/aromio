@@ -2,6 +2,7 @@ import { useShop } from "../lib/shop";
 import { GUIDES } from "../data/guides";
 import { HOUSES } from "../data/products";
 import { scrollToId } from "./Header";
+import Wordmark from "./Wordmark";
 
 /**
  * The footer carries the honest note: this is a prototype storefront and
@@ -15,7 +16,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-top">
         <div className="footer-brand">
-          <div className="footer-word">AROMIO</div>
+          <Wordmark className="footer-mark" />
           <p className="footer-claim">
             Витрина трёх домов, собранная как учебный проект: каталог, пирамиды нот,
             журнал и лексикон. Всё, что здесь можно нажать, работает — и живёт
