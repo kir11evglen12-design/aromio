@@ -3551,3 +3551,41 @@ html.calm .bd-veil { opacity: .9; }
 
 .btn--buy::before { background: linear-gradient(120deg, #4b8dff, #7db4ff); }
 .btn--buy:hover { color: #fff; box-shadow: 0 20px 40px -18px rgb(47 123 255 / 100%); }
+
+/* снимки на чёрном фоне ложатся прямо на карточку, без светлой подложки */
+.photo--dark {
+    /* block, not grid: a grid row sizes itself to the image and then a
+       percentage height on the image resolves against that row, which is
+       how the shot ended up taller than its own frame */
+    display: block;
+    inset: 2%;
+    padding: 0;
+    background: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.photo--dark img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+    mix-blend-mode: normal;
+}
+
+/* в карточке снимок заполняет поле, на странице товара — вписывается целиком */
+.card .photo--dark { inset: 0; border-radius: 12px; }
+.card .photo--dark img { object-fit: cover; }
+
+/* честная замена пирамиде, когда состав не передан */
+.p-missing {
+    padding: 18px 20px;
+    border: 1px dashed rgb(242 240 236 / 20%);
+    border-radius: 6px;
+    background: rgb(255 255 255 / 3%);
+}
+
+.p-missing p { margin-top: 8px; font-size: 13.5px; line-height: 1.7; color: #c2bdb4; }

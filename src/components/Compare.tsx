@@ -66,9 +66,9 @@ export default function Compare() {
                     row === "Линия" ? p.line :
                     row === "Категория" ? CATEGORY_LABEL[p.category] :
                     row === "Год" ? (story?.year ?? "—") :
-                    row === "Верхние ноты" ? p.notes.top :
-                    row === "Ноты сердца" ? p.notes.heart :
-                    row === "База" ? p.notes.base :
+                    row === "Верхние ноты" ? (p.notes.top || "не указаны") :
+                    row === "Ноты сердца" ? (p.notes.heart || "не указаны") :
+                    row === "База" ? (p.notes.base || "не указана") :
                     row === "Объёмы" ? p.variants.map(v => `${v.ml} мл`).join(" · ") :
                     "от " + money(fromPrice(p));
                   return <div className="cmp-val" key={p.id + row}>{value}</div>;
