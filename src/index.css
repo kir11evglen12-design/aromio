@@ -5234,3 +5234,324 @@ body { font-weight: 500; letter-spacing: -0.004em; }
 @media (prefers-reduced-motion: reduce) {
   .cn-port { clip-path: inset(0 0 0 0 round 24px); }
 }
+
+/* ============================================================
+   КАТАЛОГ: ПАНЕЛЬ ПОИСКА И КАРТОЧКИ
+   Раскладка снята с маркетплейса скинов: плитка, сортировка,
+   фильтры, строка поиска со сбросом — и карточка, у которой кнопка
+   покупки идёт во всю ширину. Цвет наш: белая кнопка, не оранжевая.
+   ============================================================ */
+
+.cw-bar {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  margin: 0 var(--gutter) 6px;
+  border: 1px solid var(--line-w);
+  border-radius: 22px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.cw-bar-row { display: flex; gap: 10px; align-items: stretch; }
+
+.cw-tile {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 9%);
+  border: 1px solid var(--line-w);
+}
+
+.cw-tile-mark { width: 40px; height: auto; color: var(--w); }
+
+.cw-select {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 16px;
+  border: 1px solid var(--line-w);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 4%);
+  color: var(--w);
+}
+
+.cw-select svg { flex: none; opacity: .75; }
+
+.cw-select select {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--w);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  appearance: none;
+  padding-right: 18px;
+}
+
+.cw-select select option { background: #15151a; color: #fff; }
+
+.cw-select::after {
+  content: "";
+  position: absolute;
+  right: 18px;
+  width: 9px; height: 9px;
+  border-right: 2px solid var(--w-2);
+  border-bottom: 2px solid var(--w-2);
+  transform: translateY(-3px) rotate(45deg);
+  pointer-events: none;
+}
+
+.cw-find {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 0 18px;
+  border: 1px solid var(--line-w);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 4%);
+}
+
+.cw-find svg { flex: none; color: var(--w-3); }
+
+.cw-find input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--w);
+  font: inherit;
+  font-size: 17px;
+}
+
+.cw-find input::placeholder { color: var(--w-3); }
+
+.cw-icon {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  min-height: 56px;
+  border: 1px solid var(--line-w);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 4%);
+  color: var(--w);
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out), border-color var(--micro) var(--ease-out);
+}
+
+.cw-icon:hover:not(:disabled) { background: rgb(255 255 255 / 10%); border-color: var(--w-3); }
+.cw-icon:disabled { opacity: .4; cursor: default; }
+.cw-icon.is-on { background: var(--w); color: #0b0b0c; border-color: var(--w); }
+
+.cw-icon i {
+  position: absolute;
+  top: 6px; right: 8px;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--w);
+  color: #0b0b0c;
+  font: 800 11px/18px var(--font-body);
+  font-style: normal;
+  text-align: center;
+}
+
+.cw-icon.is-on i { background: #0b0b0c; color: var(--w); }
+
+/* ---------- карточка ---------- */
+
+.cw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.cw-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  border: 1px solid var(--line-w);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 3.5%);
+  overflow: hidden;
+}
+
+.cw-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px 0;
+}
+
+.cw-tag {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 10%);
+  color: var(--w-2);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.cw-tag--sale { background: var(--w); color: #0b0b0c; }
+
+.cw-heart {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--w-3);
+  cursor: pointer;
+  transition: color var(--micro) var(--ease-out), background var(--micro) var(--ease-out);
+}
+
+.cw-heart:hover { color: var(--w); background: rgb(255 255 255 / 8%); }
+.cw-heart.is-on { color: var(--w); }
+.cw-heart.is-on svg { fill: var(--w); }
+
+.cw-card .cw-media {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  padding: 6px 14px 12px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.cw-card-body { display: grid; gap: 6px; padding: 0 14px 14px; align-content: start; }
+
+.cw-card .cw-line {
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--w-3);
+}
+
+.cw-card .cw-name {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--w);
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: -.01em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cw-card .cw-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.cw-card .cw-price b { font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+.cw-card .cw-price span {
+  display: inline-flex;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--w-3);
+  white-space: nowrap;
+}
+
+.cw-card .cw-price s { color: var(--w-3); }
+
+.cw-card .cw-facts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+
+/* кнопка покупки во всю ширину — её и просили крупнее */
+.cw-buy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1px;
+  margin-top: auto;
+  border-top: 1px solid var(--line-w);
+  background: var(--line-w);
+}
+
+.cw-cta {
+  min-height: 62px;
+  padding: 0 16px;
+  border: 0;
+  background: linear-gradient(180deg, #ffffff, #e7e5e1);
+  color: #0b0b0c;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter var(--micro) var(--ease-out);
+}
+
+.cw-cta:hover { filter: brightness(1.06); }
+.cw-cta:active { filter: brightness(.94); }
+
+.cw-cart {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  border: 0;
+  background: rgb(255 255 255 / 8%);
+  color: var(--w);
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out);
+}
+
+.cw-cart:hover { background: rgb(255 255 255 / 16%); }
+
+@media (max-width: 720px) {
+  .cw-bar { margin-inline: 14px; padding: 12px; border-radius: 18px; }
+  .cw-tile { width: 54px; }
+  .cw-tile-mark { width: 32px; }
+  .cw-icon { width: 54px; }
+  .cw-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .cw-card .cw-name { font-size: 17px; }
+  .cw-card .cw-price b { font-size: 19px; }
+  .cw-cta { min-height: 56px; font-size: 13px; }
+  .cw-cart { width: 56px; }
+}
+
+/* панель и цена не должны распирать узкий экран */
+.cw-select, .cw-find { min-width: 0; }
+.cw-select select { text-overflow: ellipsis; }
+
+.cw-card .cw-price { flex-wrap: wrap; }
+.cw-card .cw-price b { white-space: nowrap; }
+
+@media (max-width: 720px) {
+  .cw-bar-row { flex-wrap: nowrap; }
+  .cw-card .cw-price b { font-size: 18px; }
+  .cw-card .cw-price span { font-size: 12px; }
+  .cw-card .cw-facts .card-chip { font-size: 11px; padding: 4px 8px; }
+}
+
+@media (max-width: 420px) {
+  /* на самых узких карточках второй чип только добавляет высоту */
+  .cw-card .cw-facts .card-chip:nth-child(2) { display: none; }
+}
+
+/* колонка грида шириной auto не сжимается ниже содержимого — из-за этого
+   панель распирала окно на телефоне */
+.cw-bar { grid-template-columns: minmax(0, 1fr); }
+.cw-bar-row { min-width: 0; }

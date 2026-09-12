@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from "react";
-import { Check, SlidersHorizontal, X } from "lucide-react";
+import { Check, Heart, RotateCcw, Search, ShoppingBag, SlidersHorizontal, X } from "lucide-react";
 import {
-  bottles, CATEGORY_LABEL, fromPrice, HOUSES, money, products, sprays
+  bottles, CATEGORY_LABEL, fromPrice, HOUSES, money, products, SHORT_TYPE, sprays
 } from "../data/products";
 import type { Category, House, Product } from "../data/products";
 import { flyToCart, setSharedOrigin, useFlip } from "../lib/motion";
-import { saleUntil } from "../data/products";
+import Wordmark from "./Wordmark";
+
 import { plural } from "../lib/auth";
 import { useShop } from "../lib/shop";
 import Plate from "./Plate";
@@ -43,10 +44,11 @@ export default function CatalogWindow() {
   const [samplesOnly, setSamplesOnly] = useState(false);
   const [sort, setSort] = useState<Sort>("house");
   const [rail, setRail] = useState(false);
+  const [q, setQ] = useState("");
 
   /* the rows rearrange rather than repaint when a filter flips */
   const grid = useRef<HTMLDivElement>(null);
-  useFlip(grid, [houses, cats, types, maxPrice, samplesOnly, sort]);
+  useFlip(grid, [houses, cats, types, maxPrice, samplesOnly, sort, q]);
 
   const toggle = <T,>(list: T[], set: (v: T[]) => void, v: T) =>
     set(list.includes(v) ? list.filter(x => x !== v) : [...list, v]);
@@ -60,16 +62,29 @@ export default function CatalogWindow() {
     );
     if (samplesOnly) out = out.filter(p => bottles(p).length > 0);
 
+    /* строка ищет по названию, дому, линии, концентрации и нотам —
+       по тем же полям, что и поиск на главной */
+    const needle = q.trim().toLowerCase();
+    if (needle) {
+      const words = needle.split(/\s+/).filter(Boolean);
+      out = out.filter(p => {
+        const hay = [p.name, p.brand, p.line, p.type, p.desc,
+                     p.notes.top, p.notes.heart, p.notes.base].join(" ").toLowerCase();
+        return words.every(w => hay.includes(w));
+      });
+    }
+
     switch (sort) {
       case "asc":  return [...out].sort((a, b) => fromPrice(a) - fromPrice(b));
       case "desc": return [...out].sort((a, b) => fromPrice(b) - fromPrice(a));
       case "name": return [...out].sort((a, b) => a.name.localeCompare(b.name, "ru"));
       default:     return out;
     }
-  }, [houses, cats, types, maxPrice, samplesOnly, sort]);
+  }, [houses, cats, types, maxPrice, samplesOnly, sort, q]);
 
   const reset = () => {
     setHouses([]); setCats([]); setTypes([]); setMaxPrice(PRICE_MAX); setSamplesOnly(false);
+    setQ("");
   };
 
   const active = houses.length + cats.length + types.length +
@@ -94,6 +109,41 @@ export default function CatalogWindow() {
           </button>
         </div>
       </header>
+
+      <div className="cw-bar">
+        <div className="cw-bar-row">
+          <div className="cw-tile" aria-hidden>
+            <Wordmark className="cw-tile-mark" />
+          </div>
+
+          <label className="cw-select">
+            <SlidersHorizontal size={15} strokeWidth={2} aria-hidden />
+            <select value={sort} onChange={e => setSort(e.target.value as Sort)}
+                    aria-label="Сортировка">
+              {SORTS.map(([k, label]) => <option key={k} value={k}>{label}</option>)}
+            </select>
+          </label>
+
+          <button className={"cw-icon" + (rail ? " is-on" : "")} onClick={() => setRail(r => !r)}
+                  aria-pressed={rail} aria-label={`Фильтры${active > 0 ? `, выбрано ${active}` : ""}`}>
+            <SlidersHorizontal size={18} strokeWidth={1.9} />
+            {active > 0 && <i>{active}</i>}
+          </button>
+        </div>
+
+        <div className="cw-bar-row">
+          <div className="cw-find">
+            <Search size={19} strokeWidth={1.9} aria-hidden />
+            <input value={q} onChange={e => setQ(e.target.value)}
+                   placeholder="Поиск по ароматам" aria-label="Поиск по каталогу" />
+          </div>
+
+          <button className="cw-icon" onClick={reset} disabled={active === 0 && !q}
+                  aria-label="Сбросить фильтры и поиск">
+            <RotateCcw size={18} strokeWidth={1.9} />
+          </button>
+        </div>
+      </div>
 
       <div className="cw-body">
         <aside className={"cw-rail" + (rail ? " is-open" : "")} aria-label="Фильтры">
@@ -181,36 +231,45 @@ function Row({ product: p, onOpen, onBuy, fav, onFav }: {
 }) {
   const media = useRef<HTMLButtonElement>(null);
   const [lo, hi] = sprays(p);
-  const until = saleUntil();
+  const ml = bottles(p)[0]?.ml ?? 100;
+  const list = p.sale ? Math.min(...bottles(p).map(v => v.price)) : undefined;
+
   return (
-    <article className="cw-item" data-flip-id={p.id}>
+    <article className="cw-card" data-flip-id={p.id}>
+      <div className="cw-card-top">
+        <span className="cw-tag">{SHORT_TYPE[p.type] ?? p.type}</span>
+        {p.sale ? <span className="cw-tag cw-tag--sale">−{p.sale}%</span> : null}
+        <button className={"cw-heart" + (fav ? " is-on" : "")} onClick={onFav}
+                aria-pressed={fav} aria-label={`${fav ? "Убрать из избранного" : "В избранное"} — ${p.name}`}>
+          <Heart size={17} strokeWidth={1.7} />
+        </button>
+      </div>
+
       <button className="cw-media" ref={media} onClick={() => onOpen(media.current)}
-                aria-label={`Открыть ${p.name}`}>
-        <Plate product={p} style={{ ["--bw" as string]: "76px" }} />
+              aria-label={`Открыть ${p.name}`}>
+        <Plate product={p} style={{ ["--bw" as string]: "92px" }} />
       </button>
 
-      <div className="cw-info">
-        <div className="cw-line">{p.brand} · {p.type}</div>
+      <div className="cw-card-body">
+        <div className="cw-line">{p.brand} · {CATEGORY_LABEL[p.category]}</div>
         <button className="cw-name" onClick={() => onOpen(media.current)}>{p.name}</button>
-        <p className="cw-desc">{p.desc}</p>
+
+        <div className="cw-price">
+          <b>{money(fromPrice(p))}</b>
+          <span>{list !== undefined && <s>{money(list)}</s>}×{ml} мл</span>
+        </div>
 
         <div className="cw-facts">
-          <span className="card-chip">{CATEGORY_LABEL[p.category]}</span>
-          <span className="card-chip">{lo}–{hi} {plural(hi, "пшик", "пшика", "пшиков")} на раз</span>
-          <span className="card-chip">{bottles(p).map(v => v.ml).join(" / ")} мл</span>
+          <span className="card-chip">{lo}–{hi} {plural(hi, "пшик", "пшика", "пшиков")}</span>
           <span className="card-chip">пробники от 1 мл</span>
-          {p.sale ? <span className="card-chip cw-off">−{p.sale}% до {until}</span> : null}
         </div>
       </div>
 
       <div className="cw-buy">
-        <span className="cw-price">
-          от {money(fromPrice(p))}
-          {p.sale ? <s>{money(Math.min(...bottles(p).map(v => v.price)))}</s> : null}
-        </span>
-        <button className="btn btn--solid cw-cta" onClick={onBuy}>Купить</button>
-        <button className={"fav-btn" + (fav ? " is-on" : "")} onClick={onFav}
-                aria-pressed={fav} aria-label="В избранное">♥</button>
+        <button className="cw-cta" onClick={onBuy}>Купить сейчас</button>
+        <button className="cw-cart" onClick={onBuy} aria-label={`Положить ${p.name} в корзину`}>
+          <ShoppingBag size={19} strokeWidth={1.6} />
+        </button>
       </div>
     </article>
   );
