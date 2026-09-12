@@ -1,11 +1,18 @@
+import almond from "../../assets/notes/almond.webp";
 import amber from "../../assets/notes/amber.webp";
+import bayleaf from "../../assets/notes/bayleaf.webp";
 import bergamot from "../../assets/notes/bergamot.webp";
 import blackcurrant from "../../assets/notes/blackcurrant.webp";
+import cardamom from "../../assets/notes/cardamom.webp";
+import cedar from "../../assets/notes/cedar.webp";
 import cinnamon from "../../assets/notes/cinnamon.webp";
+import cocoa from "../../assets/notes/cocoa.webp";
 import coconut from "../../assets/notes/coconut.webp";
 import coffee from "../../assets/notes/coffee.webp";
 import gardenia from "../../assets/notes/gardenia.webp";
+import ginger from "../../assets/notes/ginger.webp";
 import grapefruit from "../../assets/notes/grapefruit.webp";
+import greentea from "../../assets/notes/greentea.webp";
 import greenapple from "../../assets/notes/greenapple.webp";
 import iris from "../../assets/notes/iris.webp";
 import jasmine from "../../assets/notes/jasmine.webp";
@@ -17,6 +24,8 @@ import mandarin from "../../assets/notes/mandarin.webp";
 import marine from "../../assets/notes/marine.webp";
 import mineral from "../../assets/notes/mineral.webp";
 import mint from "../../assets/notes/mint.webp";
+import nutmeg from "../../assets/notes/nutmeg.webp";
+import oakmoss from "../../assets/notes/oakmoss.webp";
 import musk from "../../assets/notes/musk.webp";
 import orange from "../../assets/notes/orange.webp";
 import orangeblossom from "../../assets/notes/orangeblossom.webp";
@@ -29,6 +38,7 @@ import pine from "../../assets/notes/pine.webp";
 import pineapple from "../../assets/notes/pineapple.webp";
 import raspberry from "../../assets/notes/raspberry.webp";
 import rose from "../../assets/notes/rose.webp";
+import saffron from "../../assets/notes/saffron.webp";
 import sandalwood from "../../assets/notes/sandalwood.webp";
 import tobacco from "../../assets/notes/tobacco.webp";
 import tonka from "../../assets/notes/tonka.webp";
@@ -54,6 +64,9 @@ interface NoteImage {
 
 export const NOTE_IMAGES: NoteImage[] = [
   /* compound names first */
+  { match: /мускатный орех|мускатн|мацис/i,   src: nutmeg,        label: "мускатный орех" },
+  { match: /дубовый мох|дубовы|оукмосс/i,     src: oakmoss,       label: "дубовый мох" },
+  { match: /зелёный чай|зеленый чай|чай/i,    src: greentea,      label: "зелёный чай" },
   { match: /перец|перц/i,                     src: pepper,        label: "чёрный перец" },
   { match: /зелёное яблоко|зеленое яблоко/i,  src: greenapple,    label: "зелёное яблоко" },
   { match: /фиалк/i,                          src: violet,        label: "фиалка" },
@@ -86,7 +99,8 @@ export const NOTE_IMAGES: NoteImage[] = [
   /* woods, resins, leaves */
   { match: /сандал/i,              src: sandalwood, label: "сандал" },
   { match: /^уд$|агарвуд/i,        src: oud,        label: "уд" },
-  { match: /кедр|можжевельник|сосн|хвой|мирт/i, src: pine, label: "кедр" },
+  { match: /кедр/i,                src: cedar,      label: "кедр" },
+  { match: /можжевельник|сосн|хвой|мирт|древесн/i, src: pine, label: "хвоя" },
   { match: /ветивер/i,             src: vetiver,    label: "ветивер" },
   { match: /пачул/i,               src: patchouli,  label: "пачули" },
   { match: /мята|мяты|мятн/i,      src: mint,       label: "мята" },
@@ -100,6 +114,12 @@ export const NOTE_IMAGES: NoteImage[] = [
   { match: /табак/i,               src: tobacco,    label: "табак" },
   { match: /кофе/i,                src: coffee,     label: "кофе" },
   { match: /корица|корицы/i,       src: cinnamon,   label: "корица" },
+  { match: /кардамон/i,            src: cardamom,   label: "кардамон" },
+  { match: /имбир/i,               src: ginger,     label: "имбирь" },
+  { match: /шафран/i,              src: saffron,    label: "шафран" },
+  { match: /лавр/i,                src: bayleaf,    label: "лавровый лист" },
+  { match: /миндал/i,              src: almond,     label: "миндаль" },
+  { match: /какао|шоколад|джандуй/i, src: cocoa,    label: "какао" },
 
   /* mineral and marine */
   { match: /морск|соль|водоросл|акватич/i, src: marine, label: "морская соль" },
