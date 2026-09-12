@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowRight, Check, Heart, Layers, ShoppingBag, X } from "lucide-react";
-import { bottles, byId, CATEGORY_LABEL, fromPrice, money, priceList, priceNow, products, samples, saleUntil, sprays, variantOf } from "../data/products";
+import { bottles, byId, CATEGORY_LABEL, fromPrice, money, priceList, priceNow, products, samples, saleUntil, season, sprays, variantOf } from "../data/products";
+import { SEASON_IMAGES, SEASON_LABEL } from "../data/seasonImages";
 import { HOUSE_STORIES, PRODUCT_STORIES } from "../data/facts";
 import { plural } from "../lib/auth";
 import { useShop } from "../lib/shop";
@@ -95,6 +96,15 @@ export default function ProductPage() {
             <div className="eyebrow pp-anim">{p.brand} — {p.line}</div>
             <h2 className="display pp-name pp-anim">{p.name}</h2>
             <p className="lead pp-anim">{p.desc}</p>
+
+            {/* время года — маленький снимок, а не фон: когда его носят */}
+            <figure className="pp-season pp-anim">
+              <img src={SEASON_IMAGES[season(p)]} alt="" loading="lazy" decoding="async" />
+              <figcaption>
+                <span>Когда носить</span>
+                <b>{SEASON_LABEL[season(p)]}</b>
+              </figcaption>
+            </figure>
 
             {story && (
               <aside className="story pp-anim">
