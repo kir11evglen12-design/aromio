@@ -6517,3 +6517,183 @@ body { font-weight: 500; letter-spacing: -0.004em; }
   .card .card-media { aspect-ratio: 1 / 1; height: auto; padding: 8px; }
   .card .card-buybar { grid-template-columns: minmax(0, 1fr) auto; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Радиусы, качество краёв и цвет
+
+   Витрина была чёрно-белой и углы у кнопок жили каждый своей жизнью:
+   где-то 6 px, где-то 20, где-то прямой угол. Здесь одна шкала радиусов
+   на весь сайт и один смысл у цвета — зелёное покупает, красное про
+   деньги и скидку, синее уводит к дому и сравнению.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --r-pill: 999px;
+  --r-btn: 14px;      /* обычная кнопка */
+  --r-card: 20px;     /* карточка, плитка, окно */
+  --r-tile: 12px;     /* мелкая плашка, поле, чип */
+
+  --go: #16a34a;      /* купить */
+  --go-2: #22c55e;
+  --go-ink: #041a0d;
+  --red: #ef4444;     /* цена ниже, скидка, удалить */
+  --red-soft: #ff7b7b;
+  --blue-t: #5b9dff;  /* дом, сравнение, справка */
+}
+
+/* ---------- сглаживание ----------
+   Скруглённый угол с бордюром и градиентом под ним рвался лесенкой:
+   фон вылезал из-под рамки на долю пикселя. background-clip прижимает
+   заливку к рамке, а не к внешнему краю. */
+.card,
+.cw-card,
+.btn,
+.card-cta, .card-cart, .cw-cta, .cw-cart,
+.icon-btn, .card-mini, .card-size, .sd-tool, .sd-chip,
+.hero-chip, .picker-chip, .cmp-chip, .cl-recent-chip, .cl-sort-btn,
+.cw-tile, .cw-select, .cw-icon, .cw-find, .sbar-btn, .search-field {
+  background-clip: padding-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- одна шкала радиусов ---------- */
+.btn, .btn--sm, .btn--solid, .btn--buy, .btn--light,
+.card-cta, .cw-cta, .pp-buy .btn, .cn-cta, .hero-cta,
+.sbar-btn, .cl-sort-btn, .auth-tab, .profile-tab {
+  border-radius: var(--r-btn);
+}
+
+.icon-btn, .card-mini, .fav-btn, .cmp-btn, .cw-rail-btn,
+.hero-chip, .picker-chip, .cmp-chip, .cl-recent-chip,
+.card-label, .card-chip, .cw-tag, .sd-chip-x {
+  border-radius: var(--r-pill);
+}
+
+.card, .cw-card, .sd-tool, .sd-chip, .sd-hit, .drawer, .cw {
+  border-radius: var(--r-card);
+}
+
+.card-size, .cw-tile, .cw-select, .cw-icon, .cw-find, .search-field,
+.card-cart, .cw-cart, .sd-tool-icon, .sd-chip-media, .pp-add,
+input, select, textarea {
+  border-radius: var(--r-tile);
+}
+
+/* верх плитки скругляем отдельно: вложенный прямой угол под скруглённым
+   родителем даёт ту самую лесенку */
+.card .card-media { border-radius: var(--r-card) var(--r-card) 0 0; }
+.card .card-season { border-radius: inherit; }
+
+@media (max-width: 720px) {
+  :root { --r-card: 16px; --r-btn: 12px; }
+}
+
+/* ---------- зелёным — то, что покупает ---------- */
+.card .card-cta,
+.cw-cta,
+.btn--buy,
+.pp-cta {
+  background: linear-gradient(168deg, var(--go-2), var(--go));
+  border: 0;
+  color: #fff;
+  box-shadow: 0 10px 24px -14px rgb(22 163 74 / 80%);
+}
+
+.card .card-cta:hover,
+.cw-cta:hover,
+.btn--buy:hover,
+.pp-cta:hover { background: linear-gradient(168deg, #2ee06a, #15913f); color: #fff; }
+
+.card .card-cta:active,
+.cw-cta:active,
+.btn--buy:active,
+.pp-cta:active { filter: brightness(.93); }
+
+/* у .btn--buy под текстом лежит белая шторка из старой чёрно-белой темы */
+.btn--buy::before, .pp-cta::before { content: none; }
+
+/* корзина рядом с «купить» остаётся тихой, но перестаёт быть серой */
+.card .card-cart, .cw-cart, .pp-add {
+  background: rgb(22 163 74 / 12%);
+  border: 1px solid rgb(22 163 74 / 30%);
+  color: var(--go);
+}
+.card .card-cart:hover, .cw-cart:hover, .pp-add:hover { background: rgb(22 163 74 / 22%); }
+
+/* ---------- красным — деньги и скидка ---------- */
+.card .card-price s, .cw-price s, .pp-price s { color: var(--red); }
+
+.card .card-top .card-label--sale,
+.cw-tag--sale,
+.pp-sale-tag {
+  background: var(--red);
+  color: #fff;
+}
+
+.sale-badge, .mbar i[data-off="1"] { background: var(--red); color: #fff; }
+
+/* ---------- синим — дом, сравнение, справка ---------- */
+.card .card-line,
+.cw-card .cw-house,
+.sd-hit-text i,
+.sd-chip-text i { color: var(--blue-t); }
+
+.card-mini--cmp.is-on,
+.card-mini--cmp.is-on svg { color: var(--blue-t); stroke: var(--blue-t); }
+
+a:not(.btn):not([class*="cta"]) { color: var(--blue-t); }
+
+/* избранное — красное сердце, а не белое */
+.card-mini--fav.is-on, .fav-btn.is-on { color: var(--red); }
+.card-mini--fav.is-on svg, .fav-btn.is-on svg { fill: var(--red); stroke: var(--red); }
+
+/* Кнопка со скруглением, прижатая к краю карточки, читается как ошибка
+   вёрстки — даём ей поле, чтобы радиус был виден целиком. */
+.card .card-buybar { padding: 8px; gap: 8px; background: transparent; border-top: 0; }
+.card .card-cta { min-height: 46px; }
+.card .card-cart { min-height: 46px; min-width: 46px; }
+
+.card .card-cart {
+  background: rgb(22 163 74 / 16%);
+  border-color: rgb(22 163 74 / 42%);
+  color: #11803b;
+}
+
+/* то же поле под кнопкой в окне каталога */
+.cw-buy { padding: 8px; gap: 8px; background: transparent; border-top: 0; }
+.cw-cta { min-height: 46px; }
+.cw-cart { min-height: 46px; min-width: 46px; background: rgb(34 197 94 / 14%); border: 1px solid rgb(34 197 94 / 34%); color: var(--go-2); }
+.cw-cart:hover { background: rgb(34 197 94 / 24%); }
+
+/* дом и категория — синим и здесь */
+.cw-line { color: var(--blue-t); }
+
+.cw-card .cw-line { color: var(--blue-t); }
+
+/* после поля кнопка стала уже и «КУПИТЬ СЕЙЧАС» рвалось на две строки */
+.cw-cta, .card .card-cta { font-size: 13px; white-space: nowrap; letter-spacing: .04em; }
+
+/* зачёркнутая цена в каталоге лежит внутри span — красим её, а не строку */
+.cw-card .cw-price s { color: var(--red); }
+
+/* ---------- последние цветные метки ---------- */
+
+/* счётчик корзины — красный кружок, его и ищут глазами */
+.cart-count[data-has="1"],
+.mbar i[data-cart-count] { background: var(--red); color: #fff; border-radius: var(--r-pill); }
+
+/* «Удалить» в корзине — красным, это необратимое действие */
+.drawer--cart .row-sub + button,
+.drawer--cart .cart-line > button:last-child,
+.drawer--cart li > button:last-child { color: var(--red); }
+
+/* дом и объём в строке корзины — синим */
+.drawer--cart .row-sub { color: var(--blue-t); }
+
+/* «в наличии» — зелёная точка и зелёный текст */
+.pp-stock, .cw-stock { color: var(--go-2); }
+
+.drawer-body .row > button { color: var(--red); border-radius: var(--r-tile); }
+.drawer-body .row > button:hover { background: rgb(239 68 68 / 12%); }
+.drawer-body .row .row-sub { color: var(--blue-t); }
