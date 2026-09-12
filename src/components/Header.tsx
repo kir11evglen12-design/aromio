@@ -4,6 +4,7 @@ import { useShop } from "../lib/shop";
 import type { Filter } from "../lib/shop";
 import { initials } from "../lib/auth";
 import Wordmark from "./Wordmark";
+import ThemeSwitch from "./ThemeSwitch";
 
 const NAV: [string, Filter | "houses"][] = [
   ["Каталог", "all"],
@@ -58,6 +59,8 @@ export default function Header() {
         </nav>
 
         <div className="tools">
+          <ThemeSwitch />
+
           <button className="icon-btn" onClick={() => openDrawer("search")} aria-label="Поиск">
             <Search size={19} strokeWidth={1.3} />
           </button>

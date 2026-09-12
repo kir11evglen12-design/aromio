@@ -1,19 +1,17 @@
 import { useRef, useState } from "react";
 import { Check, Heart, Layers, ShoppingBag } from "lucide-react";
 import {
-  bottles, CATEGORY_LABEL, money, priceList, priceNow, season, SHORT_TYPE, variantOf
+  bottles, CATEGORY_LABEL, money, priceList, priceNow, SHORT_TYPE, variantOf
 } from "../data/products";
 import type { Product } from "../data/products";
-import { SEASON_IMAGES } from "../data/seasonImages";
 import { useShop } from "../lib/shop";
 import { flyToCart, setSharedOrigin } from "../lib/motion";
 import Plate from "./Plate";
 
 /**
- * Квадратная плитка: сверху — флакон на запылённом фоне того времени
- * года, в которое этот аромат носят, снизу — берёзовая панель с ценой и
- * кнопкой. Сезон выводится из нот самого аромата, подписи под фоном нет:
- * это настроение, а не обещание.
+ * Квадратная плитка с прямыми углами: сверху флакон, снизу панель с
+ * ценой и кнопкой. Время года за флаконом убрано — оно спорило со
+ * снимком и стало маленькой фотографией на самой карточке товара.
  */
 export default function ProductCard({ product: p }: { product: Product }) {
   const { addToCart, buyNow, openProduct, isFavorite, toggleFavorite, compare, toggleCompare } = useShop();
@@ -39,14 +37,9 @@ export default function ProductCard({ product: p }: { product: Product }) {
 
   return (
     <article className="card" data-flip-id={p.id}
-             style={{
-               ["--tint" as string]: p.tint,
-               ["--season" as string]: `url(${SEASON_IMAGES[season(p)]})`
-             }}>
+             style={{ ["--tint" as string]: p.tint }}>
       <button className={"card-media" + (p.photo ? " media--photo" : "")}
               onClick={open} aria-label={`Открыть ${p.brand} ${p.name}`}>
-        <span className="card-season" aria-hidden />
-
         <span className="card-top">
           <span className="card-label">{SHORT_TYPE[p.type] ?? p.type}</span>
           {p.sale ? <span className="card-label card-label--sale"><i aria-hidden>↓</i>{p.sale}%</span> : null}

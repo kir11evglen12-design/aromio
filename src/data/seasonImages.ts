@@ -10,3 +10,10 @@ import type { Season } from "./products";
  * под ней нет.
  */
 export const SEASON_IMAGES: Record<Season, string> = { spring, summer, autumn, winter };
+
+export const SEASON_LABEL: Record<Season, string> = {
+  spring: "Весна",
+  summer: "Лето",
+  autumn: "Осень",
+  winter: "Зима"
+};
