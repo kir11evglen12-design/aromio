@@ -268,7 +268,7 @@ function Row({ product: p, onOpen, onBuy, onAdd, fav, onFav }: {
       </div>
 
       <div className="cw-buy">
-        <button className="cw-cta" onClick={onBuy}>Купить сейчас</button>
+        <button className="cw-cta" onClick={onBuy}>Купить<span className="cta-more"> сейчас</span></button>
         <button className="cw-cart" onClick={onAdd} aria-label={`Положить ${p.name} в корзину`}>
           <ShoppingBag size={19} strokeWidth={1.6} />
         </button>

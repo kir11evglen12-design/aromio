@@ -6697,3 +6697,137 @@ a:not(.btn):not([class*="cta"]) { color: var(--blue-t); }
 .drawer-body .row > button { color: var(--red); border-radius: var(--r-tile); }
 .drawer-body .row > button:hover { background: rgb(239 68 68 / 12%); }
 .drawer-body .row .row-sub { color: var(--blue-t); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Текст на флаконе
+
+   Монограмма жила на opacity .3 со screen-блендом — на карточке её было
+   почти не разобрать, а линия и концентрация на карточках вообще были
+   спрятаны. Там, где снимка нет, плашка остаётся единственной приметой
+   флакона: пусть на ней читается, что это.
+   ══════════════════════════════════════════════════════════════════ */
+
+.plate .pl-mono {
+  opacity: .52;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--tint) 24%, #ffffff);
+  text-shadow: 0 2px 18px rgb(0 0 0 / 45%);
+}
+
+.card .plate .pl-mono { opacity: .46; }
+
+/* линия и концентрация возвращаются на плашку карточки — внизу, на
+   собственной подложке, чтобы не спорить с сезоном за ними */
+.card .plate .pl-meta {
+  display: flex;
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  align-items: center;
+  gap: 2px;
+  max-width: calc(100% - 20px);
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: rgb(10 10 12 / 62%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-align: center;
+}
+
+.card .plate .pl-line {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  color: #fff;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 70%);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card .plate .pl-type {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: color-mix(in srgb, var(--tint) 30%, #ffffff);
+}
+
+/* на большой плашке товара тот же принцип, только крупнее */
+.pp-media .plate .pl-line, .product-page .plate .pl-line {
+  font-size: 13px;
+  color: #fff;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 70%);
+}
+.pp-media .plate .pl-type, .product-page .plate .pl-type {
+  color: color-mix(in srgb, var(--tint) 26%, #ffffff);
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .card .plate .pl-meta { bottom: 8px; padding: 5px 10px; }
+  .card .plate .pl-line { font-size: 10px; letter-spacing: .12em; }
+}
+
+/* ── Снимки на чёрном внутри квадратной плитки ────────────────────────
+   object-fit: cover в рамке 3/4 срезал у флакона горлышко и донышко —
+   снимок горизонтальный, а рамка вертикальная. Даём снимку квадрат и
+   contain: флакон виден целиком. Чёрный фон снимка держим стеклянной
+   панелью, как у монограммы, чтобы сезон за ней читался. */
+.card .card-media-in:has(.photo--dark) {
+  aspect-ratio: 1 / 1;
+  height: 100%;      /* рамку задаёт высота плитки, иначе квадрат перерастал её */
+  width: auto;
+  max-width: 100%;
+}
+
+.card .photo--dark {
+  inset: 0;
+  border-radius: 14px;
+  background: rgb(9 9 11 / 62%);
+  box-shadow: 0 16px 34px rgb(8 8 10 / 40%), inset 0 0 0 1px rgb(255 255 255 / 8%);
+}
+
+.card .photo--dark img {
+  object-fit: contain;
+  padding: 6%;
+}
+
+/* ── Флакону — больше места в квадрате ────────────────────────────────
+   Из 310 px плитки на снимок оставалось 117: этикетку на флаконе было
+   не прочесть. Имя занимало 46 px на одну строку в 21 — убираем запас,
+   поджимаем поля, и флакон получает почти полторы сотни. */
+.card .card-body { padding: 6px 12px 4px; gap: 2px; }
+.card .card-name { height: auto; min-height: 0; margin: 0; line-height: 1.15; }
+.card .card-line { line-height: 1.2; }
+.card .card-row { margin-top: 0; }
+.card .card-buybar { padding: 6px 8px 8px; }
+.card .card-cta, .card .card-cart { min-height: 42px; }
+
+/* Плашка без снимка получает ту же квадратную рамку, что и снимок:
+   в узкой вертикальной полосе линия дома не помещалась и рвалась. */
+.card .card-media-in:has(.plate:not(.photo)) {
+  aspect-ratio: 1 / 1;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+}
+
+.card .plate .pl-meta { flex-direction: row; gap: 7px; }
+.card .plate .pl-type { white-space: nowrap; }
+
+/* концентрация уже стоит плашкой слева сверху — на флаконе она лишняя
+   и выталкивала имя линии из подложки */
+.card .plate .pl-type { display: none; }
+.card .plate .pl-meta { max-width: calc(100% - 16px); }
+.card .plate .pl-line { min-width: 0; letter-spacing: .12em; }
+
+/* На плитке в 168 px «КУПИТЬ СЕЙЧАС» в одну строку не влезало и заезжало
+   под корзину. На узком экране кнопка говорит короче — «Купить». */
+.cta-more { display: inline; }
+
+@media (max-width: 620px) {
+  .card .cta-more, .cw-cta .cta-more { display: none; }
+  .card .card-cta, .cw-cta { font-size: 12px; letter-spacing: .06em; }
+}

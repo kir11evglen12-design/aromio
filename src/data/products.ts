@@ -12,6 +12,28 @@ import shotDonnaRoma from "../../assets/opt/valentino-donna-roma.webp";
 import shotDonnaPurple from "../../assets/opt/valentino-donna-purple.webp";
 import shotDonnaYellow from "../../assets/opt/valentino-donna-yellow.webp";
 
+/* ниша: снимки поставлены владельцем витрины, все на чёрном фоне */
+import shotEsc02 from "../../assets/opt/escentric-molecules-escentric-02.webp";
+import shotEsc01 from "../../assets/opt/escentric-molecules-escentric-01.webp";
+import shotMol01 from "../../assets/opt/escentric-molecules-molecule-01.webp";
+import shotFleurNarcotique from "../../assets/opt/ex-nihilo-fleur-narcotique.webp";
+import shotCedratBoise from "../../assets/opt/mancera-cedrat-boise.webp";
+import shotRedTobacco from "../../assets/opt/mancera-red-tobacco.webp";
+import shotBoisImperial from "../../assets/opt/essential-parfums-bois-imperial.webp";
+import shotRosesMusk from "../../assets/opt/montale-roses-musk.webp";
+import shotSoleilCapri from "../../assets/opt/montale-soleil-de-capri.webp";
+import shotYara from "../../assets/opt/lattafa-yara.webp";
+import shotGuidance from "../../assets/opt/amouage-guidance.webp";
+import shotBR540 from "../../assets/opt/mfk-baccarat-rouge-540.webp";
+import shotLostCherry from "../../assets/opt/tom-ford-lost-cherry.webp";
+import shotBalAfrique from "../../assets/opt/byredo-bal-dafrique.webp";
+import shotSantal33 from "../../assets/opt/le-labo-santal-33.webp";
+import shotAventus from "../../assets/opt/creed-aventus.webp";
+import shotBlackAfgano from "../../assets/opt/nasomatto-black-afgano.webp";
+import shotKirke from "../../assets/opt/tiziana-terenzi-kirke.webp";
+import shotAndromeda from "../../assets/opt/tiziana-terenzi-andromeda.webp";
+import shotErbaPura from "../../assets/opt/xerjoff-erba-pura.webp";
+
 export type Category = "women" | "men" | "unisex" | "niche";
 
 export interface Variant {
@@ -74,7 +96,10 @@ export const CATEGORY_LABEL: Record<Category | "all", string> = {
 
 export const HOUSES = [
   "DIOR", "LOUIS VUITTON", "VALENTINO", "JEAN PAUL GAULTIER", "LACOSTE",
-  "CHANEL", "TOM FORD", "YVES SAINT LAURENT", "PACO RABANNE", "CREED"
+  "CHANEL", "TOM FORD", "YVES SAINT LAURENT", "PACO RABANNE", "CREED",
+  "ESCENTRIC MOLECULES", "EX NIHILO", "MANCERA", "ESSENTIAL PARFUMS",
+  "MONTALE", "LATTAFA", "AMOUAGE", "MAISON FRANCIS KURKDJIAN",
+  "BYREDO", "LE LABO", "NASOMATTO", "TIZIANA TERENZI", "XERJOFF"
 ] as const;
 export type House = (typeof HOUSES)[number];
 
@@ -361,6 +386,7 @@ export const products: Product[] = [
     id: 27, name: "Lost Cherry", brand: "TOM FORD", price: 29900, category: "unisex",
     variants: [{ ml: 50, price: 29900 }, { ml: 100, price: 42900 }],
     line: "PRIVATE BLEND", tint: "#a52a3c", type: "Eau de Parfum", nose: "Луиза Тёрнер",
+    photo: shotLostCherry, photoDark: true,
     desc: "Вишнёвый ликёр и миндаль поверх тонка-ванильной базы: сладость, доведённая до предела.",
     notes: {
       top: "Вишня, ликёр, миндаль",
@@ -423,6 +449,7 @@ export const products: Product[] = [
     id: 32, name: "Aventus", brand: "CREED", price: 38900, category: "niche",
     variants: [{ ml: 50, price: 27900 }, { ml: 100, price: 38900 }, { ml: 120, price: 45900 }],
     line: "AVENTUS", tint: "#6d4a2f", type: "Eau de Parfum", nose: "Эрвен Крид",
+    photo: shotAventus, photoDark: true,
     desc: "Дымный ананас с берёзой — аромат, который в 2010-х переписал представление о мужской нише.",
     notes: {
       top: "Ананас, бергамот, чёрная смородина, яблоко",
@@ -439,6 +466,248 @@ export const products: Product[] = [
       top: "Бергамот, мандарин",
       heart: "Зелёный чай, чёрная смородина",
       base: "Сандал, мускус"
+    }
+  },
+
+  /* ---------------- ESCENTRIC MOLECULES ---------------- */
+  {
+    id: 34, name: "Molecule 01", brand: "ESCENTRIC MOLECULES", price: 14900, category: "unisex",
+    variants: [{ ml: 30, price: 9900 }, { ml: 100, price: 14900 }],
+    line: "MOLECULE", tint: "#8d8b86", type: "Eau de Toilette", nose: "Гёза Шён",
+    photo: shotMol01, photoDark: true,
+    desc: "Одна молекула вместо пирамиды: Iso E Super в чистом виде. Пахнет по-разному на каждой коже и то появляется, то пропадает в течение дня.",
+    notes: {
+      top: "Iso E Super",
+      heart: "Iso E Super",
+      base: "Iso E Super"
+    }
+  },
+  {
+    id: 35, name: "Escentric 01", brand: "ESCENTRIC MOLECULES", price: 15900, category: "unisex",
+    variants: [{ ml: 30, price: 10900 }, { ml: 100, price: 15900 }],
+    line: "ESCENTRIC", tint: "#7f8a7a", type: "Eau de Toilette", nose: "Гёза Шён",
+    photo: shotEsc01, photoDark: true,
+    desc: "Та же Iso E Super, но обведённая по контуру: цитрус, перец и ирис делают молекулу слышимой.",
+    notes: {
+      top: "Лайм, розовый перец",
+      heart: "Ирис, зелёные ноты",
+      base: "Iso E Super, мускус"
+    }
+  },
+  {
+    id: 36, name: "Escentric 02", brand: "ESCENTRIC MOLECULES", price: 15900, category: "unisex",
+    variants: [{ ml: 30, price: 10900 }, { ml: 100, price: 15900 }],
+    line: "ESCENTRIC", tint: "#6f7d83", type: "Eau de Toilette", nose: "Гёза Шён",
+    photo: shotEsc02, photoDark: true,
+    desc: "Вторая пара к Molecule 02: мускусная прозрачность с зелёным чаем и лаймом, почти без веса.",
+    notes: {
+      top: "Лайм, бальзамические ноты",
+      heart: "Зелёный чай, ирис",
+      base: "Мускус, ветивер"
+    }
+  },
+
+  /* ---------------- EX NIHILO ---------------- */
+  {
+    id: 37, name: "Fleur Narcotique", brand: "EX NIHILO", price: 33900, category: "unisex",
+    variants: [{ ml: 50, price: 24900 }, { ml: 100, price: 33900 }],
+    line: "INITIALE", tint: "#c9a3a8", type: "Eau de Parfum",
+    photo: shotFleurNarcotique, photoDark: true,
+    desc: "Персик и личи поверх белых цветов: тот самый «цветочный, который любят все» из парижского бутика на Рю Сент-Оноре.",
+    notes: {
+      top: "Персик, личи, бергамот",
+      heart: "Пион, жасмин, флёрдоранж",
+      base: "Мускус, мох"
+    }
+  },
+
+  /* ---------------- MANCERA ---------------- */
+  {
+    id: 38, name: "Cedrat Boise", brand: "MANCERA", price: 14900, sale: 10, category: "unisex",
+    variants: [{ ml: 60, price: 10900 }, { ml: 120, price: 14900 }],
+    line: "LES CONFIDENTIELS", tint: "#93803f", type: "Eau de Parfum",
+    photo: shotCedratBoise, photoDark: true,
+    desc: "Лимонная корка на древесно-ванильной подложке: свежий старт, который к вечеру становится тёплым.",
+    notes: {
+      top: "Сицилийский лимон, бергамот, чёрная смородина",
+      heart: "Жасмин, специи, древесные ноты",
+      base: "Ваниль, уд, сандал, пачули, мускус"
+    }
+  },
+  {
+    id: 39, name: "Red Tobacco", brand: "MANCERA", price: 16900, category: "unisex",
+    variants: [{ ml: 60, price: 12400 }, { ml: 120, price: 16900 }],
+    line: "LES CONFIDENTIELS", tint: "#6e1d18", type: "Eau de Parfum",
+    photo: shotRedTobacco, photoDark: true,
+    desc: "Пряный табак с корицей и шафраном: густой, сладкий, слышно издалека.",
+    notes: {
+      top: "Табак, специи, корица",
+      heart: "Шафран, уд",
+      base: "Амбра, ваниль, древесные ноты"
+    }
+  },
+
+  /* ---------------- ESSENTIAL PARFUMS ---------------- */
+  {
+    id: 40, name: "Bois Imperial", brand: "ESSENTIAL PARFUMS", price: 12900, category: "unisex",
+    variants: [{ ml: 30, price: 7900 }, { ml: 100, price: 12900 }],
+    line: "PARIS", tint: "#8a7b5c", type: "Eau de Parfum", nose: "Кантен Биш",
+    photo: shotBoisImperial, photoDark: true,
+    desc: "Грейпфрут и ветивер на прозрачной древесной основе — дом сознательно собирает такие ароматы из немногих материалов.",
+    notes: {
+      top: "Грейпфрут, лист фиалки",
+      heart: "Ветивер, древесные ноты",
+      base: "Мускус, амбретта"
+    }
+  },
+
+  /* ---------------- MONTALE ---------------- */
+  {
+    id: 41, name: "Roses Musk", brand: "MONTALE", price: 13900, category: "women",
+    variants: [{ ml: 50, price: 9900 }, { ml: 100, price: 13900 }],
+    line: "LES ROSES", tint: "#c0567f", type: "Eau de Parfum",
+    photo: shotRosesMusk, photoDark: true,
+    desc: "Роза, промытая мускусом до чистоты свежего белья: без варенья и без пудры.",
+    notes: {
+      top: "Турецкая роза, болгарская роза",
+      heart: "Жасмин, мускус",
+      base: "Белый мускус, амбра"
+    }
+  },
+  {
+    id: 42, name: "Soleil de Capri", brand: "MONTALE", price: 12900, sale: 15, category: "unisex",
+    variants: [{ ml: 50, price: 9400 }, { ml: 100, price: 12900 }],
+    line: "LES SOLEILS", tint: "#d8b64a", type: "Eau de Parfum",
+    photo: shotSoleilCapri, photoDark: true,
+    desc: "Цитрусовый лимонад с флёрдоранжем: самый летний флакон на витрине.",
+    notes: {
+      top: "Апельсин, лимон, мандарин",
+      heart: "Нероли, жасмин",
+      base: "Мускус, ваниль"
+    }
+  },
+
+  /* ---------------- LATTAFA ---------------- */
+  {
+    id: 43, name: "Yara", brand: "LATTAFA", price: 4990, category: "women",
+    variants: [{ ml: 50, price: 3990 }, { ml: 100, price: 4990 }],
+    line: "YARA", tint: "#c98fa2", type: "Eau de Parfum",
+    photo: shotYara, photoDark: true,
+    desc: "Сладкий восточный цветочный с гелиотропом и ванилью: самый доступный вход в плотную парфюмерию на витрине.",
+    notes: {
+      top: "Флёрдоранж, мандарин",
+      heart: "Гелиотроп, орхидея, тропические фрукты",
+      base: "Ваниль, сандал, мускус"
+    }
+  },
+
+  /* ---------------- AMOUAGE ---------------- */
+  {
+    id: 44, name: "Guidance", brand: "AMOUAGE", price: 52900, category: "niche",
+    variants: [{ ml: 50, price: 39900 }, { ml: 100, price: 52900 }],
+    line: "EXCEPTIONAL EXTRAITS", tint: "#b98c7a", type: "Extrait de Parfum",
+    photo: shotGuidance, photoDark: true,
+    desc: "Медовая тубероза с ладаном и сандалом: плотный белый цветок в оманской оправе.",
+    notes: {
+      top: "Мёд, шафран",
+      heart: "Тубероза, жасмин",
+      base: "Сандал, ладан, мускус"
+    }
+  },
+
+  /* ---------------- MAISON FRANCIS KURKDJIAN ---------------- */
+  {
+    id: 45, name: "Baccarat Rouge 540", brand: "MAISON FRANCIS KURKDJIAN", price: 44900, category: "unisex",
+    variants: [{ ml: 35, price: 26900 }, { ml: 70, price: 44900 }, { ml: 200, price: 89900 }],
+    line: "BACCARAT ROUGE", tint: "#8c1d2a", type: "Eau de Parfum", nose: "Франсис Куркджян",
+    photo: shotBR540, photoDark: true,
+    desc: "Шафран и жасмин, сплавленные с амброй в почти минеральную сладость. Аромат, который в 2015-м задал тон целому десятилетию.",
+    notes: {
+      top: "Шафран, жасмин",
+      heart: "Амбровое дерево, кедр",
+      base: "Амбра, смола пихты"
+    }
+  },
+
+  /* ---------------- BYREDO ---------------- */
+  {
+    id: 46, name: "Bal d’Afrique", brand: "BYREDO", price: 27900, category: "unisex",
+    variants: [{ ml: 50, price: 20900 }, { ml: 100, price: 27900 }],
+    line: "BYREDO", tint: "#9a7c4e", type: "Eau de Parfum", nose: "Жером Эпине",
+    photo: shotBalAfrique, photoDark: true,
+    desc: "Неролиевый цитрус с фиалкой и ветивером — отсылка к парижскому увлечению африканским искусством в 1920-е.",
+    notes: {
+      top: "Бергамот, лимон, нероли, бархатцы",
+      heart: "Фиалка, цикламен, жасмин",
+      base: "Мускус, ветивер, кедр, амбра"
+    }
+  },
+
+  /* ---------------- LE LABO ---------------- */
+  {
+    id: 47, name: "Santal 33", brand: "LE LABO", price: 34900, category: "unisex",
+    variants: [{ ml: 50, price: 26900 }, { ml: 100, price: 34900 }],
+    line: "CITY EXCLUSIVES", tint: "#8a6f52", type: "Eau de Parfum", nose: "Франк Фёлькль",
+    photo: shotSantal33, photoDark: true,
+    desc: "Сухой сандал с кожей и папирусом: запах, который в 2010-х стал звучать одинаково в кофейнях от Нью-Йорка до Берлина.",
+    notes: {
+      top: "Кардамон, фиалка, ирис",
+      heart: "Сандал, папирус, кедр",
+      base: "Кожа, амбра, мускус"
+    }
+  },
+
+  /* ---------------- NASOMATTO ---------------- */
+  {
+    id: 48, name: "Black Afgano", brand: "NASOMATTO", price: 39900, category: "niche",
+    variants: [{ ml: 30, price: 39900 }],
+    line: "NASOMATTO", tint: "#2f2a24", type: "Extrait de Parfum", nose: "Алессандро Гуальтьери",
+    photo: shotBlackAfgano, photoDark: true,
+    desc: "Смолы, уд и кофе в почти смоляной густоте. Один объём, 30 мл — дом других не выпускает.",
+    notes: {
+      top: "Зелёные ноты, кофе",
+      heart: "Табак, смолы",
+      base: "Уд, древесные ноты, мускус"
+    }
+  },
+
+  /* ---------------- TIZIANA TERENZI ---------------- */
+  {
+    id: 49, name: "Kirke", brand: "TIZIANA TERENZI", price: 46900, sale: 10, category: "women",
+    variants: [{ ml: 30, price: 24900 }, { ml: 100, price: 46900 }],
+    line: "LUNA", tint: "#b4603f", type: "Extrait de Parfum",
+    photo: shotKirke, photoDark: true,
+    desc: "Маракуйя и персик, залитые ванилью: густой фруктовый шлейф, который держится на одежде сутками.",
+    notes: {
+      top: "Маракуйя, персик, слива",
+      heart: "Малина, земляника, жасмин",
+      base: "Ваниль, мускус, пачули, сандал"
+    }
+  },
+  {
+    id: 50, name: "Andromeda", brand: "TIZIANA TERENZI", price: 46900, category: "unisex",
+    variants: [{ ml: 30, price: 24900 }, { ml: 100, price: 46900 }],
+    line: "LUNA", tint: "#c9c4bb", type: "Extrait de Parfum",
+    photo: shotAndromeda, photoDark: true,
+    desc: "Прозрачный цитрус с фрезией и амброй — светлая сторона той же коллекции, что и Kirke.",
+    notes: {
+      top: "Бергамот, лимон, цитрусовые",
+      heart: "Фрезия, флёрдоранж",
+      base: "Мускус, амбра, древесные ноты"
+    }
+  },
+
+  /* ---------------- XERJOFF ---------------- */
+  {
+    id: 51, name: "Erba Pura", brand: "XERJOFF", price: 41900, category: "unisex",
+    variants: [{ ml: 50, price: 31900 }, { ml: 100, price: 41900 }],
+    line: "CASAMORATI · SHOOTING STARS", tint: "#27a8a8", type: "Eau de Parfum",
+    photo: shotErbaPura, photoDark: true,
+    desc: "Сицилийский цитрус и фруктовый сироп на ванильно-мускусной базе: сладко, но не тяжело.",
+    notes: {
+      top: "Сицилийский апельсин, лимон, бергамот, фрукты",
+      heart: "Белый мускус, жасмин",
+      base: "Амбра, ваниль, мадагаскарская ваниль"
     }
   }
 ];
