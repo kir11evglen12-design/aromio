@@ -15,8 +15,8 @@ type Sort = "house" | "asc" | "desc" | "name";
 
 const SORTS: [Sort, string][] = [
   ["house", "По дому"],
-  ["asc", "Сначала дешевле"],
-  ["desc", "Сначала дороже"],
+  ["asc", "↓ Сначала дешевле"],
+  ["desc", "↑ Сначала дороже"],
   ["name", "По названию"]
 ];
 
@@ -240,7 +240,7 @@ function Row({ product: p, onOpen, onBuy, onAdd, fav, onFav }: {
     <article className="cw-card" data-flip-id={p.id}>
       <div className="cw-card-top">
         <span className="cw-tag">{SHORT_TYPE[p.type] ?? p.type}</span>
-        {p.sale ? <span className="cw-tag cw-tag--sale">−{p.sale}%</span> : null}
+        {p.sale ? <span className="cw-tag cw-tag--sale"><i aria-hidden>↓</i>{p.sale}%</span> : null}
         <button className={"cw-heart" + (fav ? " is-on" : "")} onClick={onFav}
                 aria-pressed={fav} aria-label={`${fav ? "Убрать из избранного" : "В избранное"} — ${p.name}`}>
           <Heart size={17} strokeWidth={1.7} />

@@ -27,8 +27,8 @@ export type Sort = "house" | "price-asc" | "price-desc" | "name";
 
 export const SORT_LABEL: Record<Sort, string> = {
   house: "По дому",
-  "price-asc": "Сначала дешевле",
-  "price-desc": "Сначала дороже",
+  "price-asc": "↓ Сначала дешевле",
+  "price-desc": "↑ Сначала дороже",
   name: "По названию"
 };
 
