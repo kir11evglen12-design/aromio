@@ -81,20 +81,37 @@
   }
 
   // ---- shared drawer / overlay / modal handling --------------------------
+  // Tracks whatever had focus before a panel opened, so closing it (via
+  // Escape, backdrop click, or a close button) returns focus there instead
+  // of silently dropping it back to <body> — keyboard/screen-reader users
+  // would otherwise lose their place every time a drawer closes.
+  let lastFocusedEl = null;
+
   function openPanel(el) {
     if (!el) return;
+    const trigger = document.activeElement;
     closePanels();
+    lastFocusedEl = trigger;
     el.classList.add("open");
     const backdrop = document.getElementById("backdrop");
     if (backdrop) backdrop.classList.add("open");
     lockScroll();
+
+    const focusTarget = el.querySelector("[data-autofocus]") || el.querySelector(".close");
+    if (focusTarget) setTimeout(() => focusTarget.focus(), 200);
   }
 
   function closePanels() {
-    $$(".drawer.open, .overlay.open, .modal.open, .mobile-nav.open").forEach((p) => p.classList.remove("open"));
+    const wasOpen = $$(".drawer.open, .overlay.open, .modal.open, .mobile-nav.open");
+    wasOpen.forEach((p) => p.classList.remove("open"));
     const backdrop = document.getElementById("backdrop");
     if (backdrop) backdrop.classList.remove("open");
     unlockScroll();
+
+    if (wasOpen.length && lastFocusedEl && document.contains(lastFocusedEl) && typeof lastFocusedEl.focus === "function") {
+      lastFocusedEl.focus();
+    }
+    lastFocusedEl = null;
   }
 
   // ---- restart a CSS animation reliably (bump / pop effects) ------------

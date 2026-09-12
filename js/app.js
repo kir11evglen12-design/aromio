@@ -51,8 +51,6 @@
         if (target) {
           e.preventDefault();
           utils.openPanel(target);
-          const input = target.querySelector("[data-autofocus]");
-          if (input) setTimeout(() => input.focus(), 320);
         }
         return;
       }
