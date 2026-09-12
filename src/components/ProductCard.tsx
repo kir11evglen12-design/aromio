@@ -96,7 +96,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
       </div>
 
       <div className="card-buybar">
-        <button className="card-cta" onClick={buy}>Купить сейчас</button>
+        <button className="card-cta" onClick={buy}>Купить<span className="cta-more"> сейчас</span></button>
         <button className="card-cart" onClick={add} aria-label={`Положить ${p.name} в корзину`}>
           <ShoppingBag size={19} strokeWidth={1.6} />
         </button>
