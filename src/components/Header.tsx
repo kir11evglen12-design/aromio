@@ -48,7 +48,7 @@ export default function Header() {
       <header className={"header" + (compact ? " is-compact" : "")}>
         <a className="brand" href="#top" onClick={e => { e.preventDefault(); scrollTo({ top: 0, behavior: "smooth" }); }}>
           <Wordmark className="brand-mark" />
-          <small>PARFUM’S</small>
+          <small>духи и пробники</small>
         </a>
 
         <nav className="nav">

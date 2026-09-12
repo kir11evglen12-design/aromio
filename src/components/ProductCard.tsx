@@ -13,7 +13,7 @@ import Plate from "./Plate";
  * to press. Everything shown comes from the product's own data.
  */
 export default function ProductCard({ product: p }: { product: Product }) {
-  const { addToCart, openProduct, isFavorite, toggleFavorite, compare, toggleCompare } = useShop();
+  const { addToCart, buyNow, openProduct, isFavorite, toggleFavorite, compare, toggleCompare } = useShop();
   const [ml, setMl] = useState(() => variantOf(p, 100).ml);
   const variant = variantOf(p, ml);
   const [sprayLo, sprayHi] = sprays(p);
@@ -26,10 +26,16 @@ export default function ProductCard({ product: p }: { product: Product }) {
   /* the plate the visitor clicked is where the product page comes from */
   const open = () => { setSharedOrigin(media.current); openProduct(p.id); };
 
-  const buy = (e: React.MouseEvent) => {
+  /* квадрат с сумкой — тихо добавить; широкая кнопка — купить и открыть корзину */
+  const add = (e: React.MouseEvent) => {
     e.stopPropagation();
     flyToCart(e.currentTarget);
     addToCart(p.id, ml);
+  };
+
+  const buy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    buyNow(p.id, ml);
   };
 
   return (
@@ -90,7 +96,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
 
       <div className="card-buybar">
         <button className="card-cta" onClick={buy}>Купить сейчас</button>
-        <button className="card-cart" onClick={buy} aria-label={`Положить ${p.name} в корзину`}>
+        <button className="card-cart" onClick={add} aria-label={`Положить ${p.name} в корзину`}>
           <ShoppingBag size={19} strokeWidth={1.6} />
         </button>
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowRight, Check, Heart, Layers, X } from "lucide-react";
+import { ArrowRight, Check, Heart, Layers, ShoppingBag, X } from "lucide-react";
 import { bottles, byId, CATEGORY_LABEL, fromPrice, money, priceList, priceNow, products, samples, saleUntil, sprays, variantOf } from "../data/products";
 import { HOUSE_STORIES, PRODUCT_STORIES } from "../data/facts";
 import { plural } from "../lib/auth";
@@ -10,7 +10,7 @@ import Pyramid from "./Pyramid";
 
 export default function ProductPage() {
   const {
-    productId, closeProduct, addToCart, isFavorite, toggleFavorite,
+    productId, closeProduct, addToCart, buyNow, isFavorite, toggleFavorite,
     compare, toggleCompare, addToShelf, onShelf, openProduct
   } = useShop();
   const open = productId !== null;
@@ -160,9 +160,14 @@ export default function ProductPage() {
                 {money(priceNow(p, variant))}
                 {priceList(p, variant) !== undefined && <s>{money(variant.price)}</s>}
               </span>
-              <button className="btn btn--solid btn--buy" onClick={e => { flyToCart(e.currentTarget); addToCart(p.id, ml); }}>
-                В корзину<span className="pp-buy-ml"> — {variant.ml} мл</span>
+              <button className="btn btn--solid btn--buy" onClick={() => buyNow(p.id, ml)}>
+                Купить сейчас<span className="pp-buy-ml"> — {variant.ml} мл</span>
                 <ArrowRight className="btn__arrow" size={14} strokeWidth={1.4} />
+              </button>
+              <button className="fav-btn pp-add"
+                      aria-label={`Положить ${p.name} в корзину, ${variant.ml} мл`}
+                      onClick={e => { flyToCart(e.currentTarget); addToCart(p.id, ml); }}>
+                <ShoppingBag size={18} strokeWidth={1.5} />
               </button>
               <button className={"fav-btn" + (isFavorite(p.id) ? " is-on" : "")}
                       aria-pressed={isFavorite(p.id)}

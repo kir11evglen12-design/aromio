@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { byId, CATEGORY_LABEL, fromPrice, HOUSES, money, products } from "../data/products";
+import { byId, bottles, CATEGORY_LABEL, fromPrice, HOUSES, money, products, SAMPLE_ML } from "../data/products";
 import { plural } from "../lib/auth";
 import type { Category as ProductCategory } from "../data/products";
 import { SORT_LABEL, useShop, visibleProducts } from "../lib/shop";
@@ -9,6 +9,14 @@ import ProductCard from "./ProductCard";
 import SearchBar from "./SearchBar";
 
 const FILTERS: (ProductCategory | "all")[] = ["all", "women", "men", "unisex", "niche"];
+
+/* обе цифры считаются из каталога, поэтому разойтись с витриной не могут */
+const VOLUMES = (() => {
+  const all = [...new Set(products.flatMap(p => bottles(p).map(v => v.ml)))].sort((a, b) => a - b);
+  return `${all[0]}–${all[all.length - 1]}`;
+})();
+
+const CHEAPEST = Math.min(...products.map(p => fromPrice(p)));
 
 export default function Collection() {
   const {
@@ -31,15 +39,40 @@ export default function Collection() {
     <section className="section collection" id="collection" ref={scope}>
       <div className="section-head">
         <div>
-          <div className="eyebrow">Коллекция</div>
-          <h2 className="display">Ароматы <em>витрины</em></h2>
+          <div className="eyebrow">Интернет-магазин парфюмерии</div>
+          <h2 className="display">Духи <em>и пробники</em></h2>
         </div>
         <p className="lead">
-          {HOUSES.length} {plural(HOUSES.length, "дом", "дома", "домов")}, {products.length}{" "}
-          {plural(products.length, "аромат", "аромата", "ароматов")}. Фотография стоит там, где её дал
-          магазин; остальные позиции — цветные карточки. Ищите по названию, дому или ноте,
-          сравнивайте до трёх сразу и сортируйте по цене.
+          Флаконы парфюмерных домов и розлив от 1 мл — попробовать аромат раньше, чем
+          покупать целиком.{" "}
+          <span className="lead-more">
+            Ищите по названию, дому или ноте, сравнивайте до трёх сразу и сортируйте по цене.
+          </span>
         </p>
+      </div>
+
+      {/* строка фактов: что продаётся, сколько и почём — видно сразу */}
+      <div className="pitch" aria-label="Коротко о витрине">
+        <div className="pitch-fact">
+          <b>{products.length}</b>
+          <span>{plural(products.length, "аромат", "аромата", "ароматов")}</span>
+        </div>
+        <div className="pitch-fact">
+          <b>{HOUSES.length}</b>
+          <span>{plural(HOUSES.length, "дом", "дома", "домов")}</span>
+        </div>
+        <div className="pitch-fact">
+          <b>{VOLUMES}</b>
+          <span>мл во флаконе</span>
+        </div>
+        <div className="pitch-fact">
+          <b>{SAMPLE_ML.join(" / ")}</b>
+          <span>мл в пробнике</span>
+        </div>
+        <div className="pitch-fact">
+          <b>от {money(CHEAPEST)}</b>
+          <span>цена на витрине</span>
+        </div>
       </div>
 
       <SearchBar />

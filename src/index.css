@@ -4506,14 +4506,7 @@ body { font-weight: 500; letter-spacing: -0.004em; }
 @media (max-width: 620px) {
     .collection { padding-top: 78px; }
     .collection .display { font-size: clamp(25px, 7.4vw, 31px); }
-    /* line-clamp здесь не срабатывает: display перебивается другим
-       правилом, поэтому высота ограничена ровно двумя строками */
-    .collection .lead {
-        font-size: 13.5px;
-        line-height: 1.5;
-        max-height: 3em;
-        overflow: hidden;
-    }
+    .collection .lead { font-size: 13.5px; line-height: 1.5; }
     .collection .sbar { margin: 12px 0 10px; }
     .collection .filters { margin-bottom: 6px; }
     .collection .cl-tools { margin: 6px 0 12px; }
@@ -5833,3 +5826,85 @@ body { font-weight: 500; letter-spacing: -0.004em; }
   .card .card-price span:has(s) i { display: none; }
 }
 .card .card-price span i { font-style: normal; }
+
+/* ============================================================
+   ПЕРВЫЙ ЭКРАН: строка фактов
+   Человек должен за секунду увидеть, чем торгуют и почём.
+   Цифры считаются из каталога, поэтому расходиться с ним не могут.
+   ============================================================ */
+
+.pitch {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1px;
+  margin: 22px 0 6px;
+  border: 1px solid var(--line-w);
+  border-radius: 18px;
+  background: var(--line-w);
+  overflow: hidden;
+}
+
+.pitch-fact {
+  display: grid;
+  gap: 2px;
+  padding: 16px 18px;
+  background: #0b0b0c;
+}
+
+.pitch-fact b {
+  font-size: clamp(20px, 2.4vw, 30px);
+  font-weight: 900;
+  letter-spacing: -.02em;
+  line-height: 1.05;
+  color: var(--w);
+  font-variant-numeric: tabular-nums;
+}
+
+.pitch-fact span {
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--w-3);
+}
+
+@media (max-width: 720px) {
+  .pitch { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 16px; }
+  .pitch-fact { padding: 12px 14px; }
+  .pitch-fact b { font-size: 19px; }
+  .pitch-fact span { font-size: 11px; }
+}
+
+/* квадрат «в корзину» на странице товара — рядом с «Купить сейчас» */
+.pp-add { color: var(--w); }
+
+/* На узком экране шапка секции была flex-строкой: подпись вставала рядом с
+   заголовком, налезала на него и уезжала за край (у flex-элемента min-width
+   по умолчанию — размер содержимого). Один столбец и min-width: 0. */
+@media (max-width: 860px) {
+  .section-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+  }
+
+  .section-head > * { min-width: 0; }
+  .section-head h2 { margin-top: 6px; }
+  .section-head .lead { padding-bottom: 0; max-width: none; }
+}
+
+@media (max-width: 720px) {
+  /* пятая плитка занимает всю строку — иначе рядом пустое место */
+  .pitch-fact:last-child { grid-column: 1 / -1; }
+}
+
+/* На телефоне первый экран должен оставаться коротким, но обрезать фразу
+   на полуслове нельзя: вторая половина подписи просто не показывается. */
+@media (max-width: 620px) {
+  .collection .lead-more { display: none; }
+}
+
+/* заголовок с плотным интерлиньяжем вылезал из своей ячейки на 5 пикселей
+   и касался подписи — даём ему дописать строку */
+.collection .section-head h2 { padding-bottom: 6px; }
+@media (max-width: 860px) { .collection .section-head { gap: 14px; } }
