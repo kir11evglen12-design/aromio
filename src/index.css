@@ -1237,12 +1237,21 @@ html:not(.anim) .manifest-text .w { opacity: 1; }
     background: var(--paper);
     overflow-y: auto;
     overscroll-behavior: contain;
-    clip-path: inset(0 0 100% 0);
-    transition: clip-path .85s var(--ease);
+    /* карточка приезжает с правого края и уходит туда же */
+    transform: translateX(100%);
+    transition: transform .42s cubic-bezier(.16, 1, .3, 1);
     pointer-events: none;
+    will-change: transform;
 }
 
-.product-page.is-open { clip-path: inset(0 0 0 0); pointer-events: auto; }
+.product-page.is-open { transform: none; pointer-events: auto; }
+
+.product-page.is-leaving {
+    transform: translateX(100%);
+    transition-duration: .26s;
+    transition-timing-function: cubic-bezier(.5, 0, .75, 0);
+    pointer-events: none;
+}
 
 .pp-close {
     position: fixed;
@@ -5555,3 +5564,272 @@ body { font-weight: 500; letter-spacing: -0.004em; }
    панель распирала окно на телефоне */
 .cw-bar { grid-template-columns: minmax(0, 1fr); }
 .cw-bar-row { min-width: 0; }
+
+/* ============================================================
+   ШАПКА: подложка без блюра
+   Сборщик выбрасывал нестандартное свойство backdrop-filter, блюр не
+   применялся, и текст страницы просвечивал сквозь 82% подложки. Делаем
+   плотный фон — тогда содержимое проезжает ПОД шапкой, а не сквозь неё.
+   ============================================================ */
+
+.header.is-compact {
+  background: #0b0b0c;
+  border-bottom-color: var(--line-w);
+  box-shadow: 0 12px 30px -22px rgb(0 0 0 / 90%);
+}
+
+/* ============================================================
+   КАРТОЧКА ВИТРИНЫ — раскладка маркетплейса
+   ============================================================ */
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--line-w);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 3.5%);
+  overflow: hidden;
+  cursor: default;
+  transition: border-color var(--micro) var(--ease-out), transform var(--micro) var(--ease-out);
+}
+
+.card:hover { border-color: rgb(255 255 255 / 26%); }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px 0;
+}
+
+.card-label {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 10%);
+  color: var(--w-2);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card-label::before { content: none; }
+.card-label--sale { background: var(--w); color: #0b0b0c; }
+
+.card-mini {
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--w-3);
+  cursor: pointer;
+  transition: color var(--micro) var(--ease-out), background var(--micro) var(--ease-out);
+}
+
+.card-mini:first-of-type { margin-left: auto; }
+.card-mini:hover { color: var(--w); background: rgb(255 255 255 / 8%); }
+.card-mini.is-on { color: var(--w); }
+.card-mini.is-on svg { fill: currentColor; }
+
+.card .card-media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  padding: 8px 14px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  aspect-ratio: auto;
+  cursor: pointer;
+}
+
+.card .card-media-in { display: block; width: min(100%, 168px); }
+
+.card-body {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 0 14px 14px;
+  min-width: 0;
+}
+
+.card .card-line {
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--w-3);
+}
+
+.card .card-name {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--w);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -.01em;
+  text-align: left;
+  line-height: 1.15;
+  cursor: pointer;
+  max-height: none;
+  overflow: visible;
+}
+
+.card .card-sizes {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.card .card-size {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0;
+  border: 1px solid var(--line-w);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--w-2);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out), color var(--micro) var(--ease-out);
+}
+
+.card .card-size.is-on { background: var(--w); border-color: var(--w); color: #0b0b0c; }
+
+.card .card-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 10px;
+}
+
+.card .card-price b { font-size: 23px; font-weight: 900; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.card .card-price span {
+  display: inline-flex;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--w-3);
+  white-space: nowrap;
+}
+
+.card .card-price s { color: var(--w-3); }
+
+.card .card-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.card .card-buybar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1px;
+  margin-top: auto;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line-w);
+  border-radius: 0;
+  background: var(--line-w);
+}
+
+/* плашке вернули пропорцию: её сняли ради квадратной .card-media,
+   но теперь картинка живёт во вложенном блоке и считает высоту сама */
+.card .card-media-in .plate { aspect-ratio: 3 / 4; width: 100%; height: auto; }
+
+.card-cta {
+  min-height: 62px;
+  padding: 0 14px;
+  border: 0;
+  background: linear-gradient(180deg, #ffffff, #e7e5e1);
+  color: #0b0b0c;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter var(--micro) var(--ease-out);
+}
+
+.card-cta:hover { filter: brightness(1.06); }
+.card-cta:active { filter: brightness(.93); }
+
+.card .card-cart {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: rgb(255 255 255 / 8%);
+  color: var(--w);
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out);
+}
+
+.card .card-cart:hover { background: rgb(255 255 255 / 16%); }
+
+@media (max-width: 720px) {
+  .card .card-name { font-size: 17px; }
+  .card .card-price b { font-size: 19px; }
+  .card-cta { min-height: 56px; font-size: 13px; }
+  .card .card-cart { width: 56px; }
+  .card .card-chips .card-chip:nth-child(2) { display: none; }
+}
+
+/* Плашке нужен свой ящик с высотой: .photo позиционируется абсолютно и
+   без него схлопывалась в полоску, наезжая на строку дома. */
+.card .card-media-in {
+  position: relative;
+  display: block;
+  width: min(100%, 168px);
+  aspect-ratio: 3 / 4;
+}
+
+.card .card-media-in .plate,
+.card .card-media-in .photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.card .card-media-in .photo { inset: 0; padding: 8%; }
+
+/* верхняя строка: плашки жмутся, иконки остаются на месте */
+.card-top { min-width: 0; }
+.card-label { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.card-mini { flex: none; }
+
+/* строка дома не должна обрезаться многоточием посреди слова */
+.card .card-line { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* На узкой карточке плашка концентрации и скидка вдвоём не помещаются:
+   концентрация сжималась до «E…». Скидка важнее — она и остаётся. */
+@media (max-width: 520px) {
+  .card-label--sale { flex: none; }
+  .card-top:has(.card-label--sale) .card-label:not(.card-label--sale) { display: none; }
+}
+
+/* Объём уже выбран кнопкой выше, поэтому в узкой строке цены он лишний —
+   рядом со старой ценой он не помещался и обрезался. */
+@media (max-width: 520px) {
+  .card .card-price span { flex-wrap: wrap; }
+  .card .card-price span:has(s) { font-size: 12px; }
+  /* со старой ценой рядом объём не влезает — он уже выбран кнопкой выше */
+  .card .card-price span:has(s) i { display: none; }
+}
+.card .card-price span i { font-style: normal; }

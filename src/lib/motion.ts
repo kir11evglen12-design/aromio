@@ -287,6 +287,37 @@ export function sharedOut(from: HTMLElement | null): Promise<void> {
   return anim.finished.then(() => undefined, () => undefined);
 }
 
+/* ---------- карточка товара въезжает сбоку ---------- */
+
+/**
+ * Страница товара приходит с правого края: ширина от нуля до полной, а
+ * содержимое внутри едет следом, но короче — из-за этого движение читается
+ * как «панель выехала», а не «страница мигнула».
+ */
+export function slideIn(panel: HTMLElement | null, inner: HTMLElement | null): void {
+  if (!panel || prefersReducedMotion()) return;
+  panel.animate(
+    [{ transform: "translateX(100%)" }, { transform: "none" }],
+    { duration: dur(ENTER), easing: EASE_OUT }
+  );
+  if (inner) {
+    inner.animate(
+      [{ opacity: 0, transform: "translateX(64px)" }, { opacity: 1, transform: "none" }],
+      { duration: dur(ENTER), easing: EASE_OUT, delay: dur(70), fill: "backwards" }
+    );
+  }
+}
+
+/** Тот же путь назад, короче — выход всегда быстрее входа. */
+export function slideOut(panel: HTMLElement | null): Promise<void> {
+  if (!panel || prefersReducedMotion()) return Promise.resolve();
+  const anim = panel.animate(
+    [{ transform: "none" }, { transform: "translateX(100%)" }],
+    { duration: dur(EXIT), easing: EASE_IN }
+  );
+  return anim.finished.then(() => undefined, () => undefined);
+}
+
 /* ---------- полёт в корзину ---------- */
 
 /**

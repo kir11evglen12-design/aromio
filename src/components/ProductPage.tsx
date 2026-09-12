@@ -4,7 +4,7 @@ import { bottles, byId, CATEGORY_LABEL, fromPrice, money, priceList, priceNow, p
 import { HOUSE_STORIES, PRODUCT_STORIES } from "../data/facts";
 import { plural } from "../lib/auth";
 import { useShop } from "../lib/shop";
-import { animate, EXIT, flyToCart, sharedIn, sharedOut } from "../lib/motion";
+import { animate, dur, ENTER, EXIT, flyToCart, prefersReducedMotion } from "../lib/motion";
 import Plate from "./Plate";
 import Pyramid from "./Pyramid";
 
@@ -16,23 +16,28 @@ export default function ProductPage() {
   const open = productId !== null;
   const p = byId(productId ?? 1);
 
-  /* the visual is the shared element: it starts life as the card's plate */
+  /* the page itself travels: it comes in from the right edge */
+  const panel = useRef<HTMLDivElement>(null);
   const visual = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const [leaving, setLeaving] = useState(false);
 
+  /* панель выезжает с правого края — это делает CSS через класс is-open,
+     а содержимое догоняет её чуть позже, поэтому движение читается как
+     «панель приехала», а не «страница мигнула» */
   useLayoutEffect(() => {
-    if (!open) return;
-    sharedIn(visual.current);
-    animate(inner.current, [{ opacity: 0 }, { opacity: 1 }], 420, { delay: 90, fill: "backwards" });
+    if (!open || prefersReducedMotion()) return;
+    animate(inner.current,
+      [{ opacity: 0, transform: "translateX(56px)" }, { opacity: 1, transform: "none" }],
+      ENTER, { delay: dur(90), fill: "backwards" });
   }, [open, productId]);
 
   /* the way back is the same path, run shorter — a slow exit feels sticky */
   const leave = () => {
     if (leaving) return;
     setLeaving(true);
-    animate(inner.current, [{ opacity: 1 }, { opacity: 0 }], EXIT);
-    sharedOut(visual.current).then(() => { setLeaving(false); closeProduct(); });
+    /* тем же путём назад и быстрее: выход короче входа */
+    setTimeout(() => { setLeaving(false); closeProduct(); }, dur(EXIT) + 20);
   };
 
   /* default to the 100 ml bottle where a house offers one */
@@ -64,8 +69,9 @@ export default function ProductPage() {
     .slice(0, 4);
 
   return (
-    <div className={"product-page" + (open ? " is-open" : "")} role="dialog" aria-modal="true"
-         aria-label="Карточка аромата" aria-hidden={!open}>
+    <div className={"product-page" + (open && !leaving ? " is-open" : "") + (leaving ? " is-leaving" : "")}
+         role="dialog" aria-modal="true"
+         aria-label="Карточка аромата" aria-hidden={!open} ref={panel}>
       <button className="pp-close" onClick={leave} aria-label="Закрыть карточку">
         <X size={17} strokeWidth={1.4} />
       </button>
