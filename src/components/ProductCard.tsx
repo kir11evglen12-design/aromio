@@ -1,18 +1,12 @@
 import { useRef, useState } from "react";
 import { Check, Heart, Layers, Maximize2, ShoppingBag, Truck } from "lucide-react";
-import { bottles, CATEGORY_LABEL, money, priceList, priceNow, sprays, variantOf } from "../data/products";
+import { bottles, CATEGORY_LABEL, money, priceList, priceNow, SHORT_TYPE, sprays, variantOf } from "../data/products";
 import type { Product } from "../data/products";
 import { useShop } from "../lib/shop";
 import { flyToCart, setSharedOrigin } from "../lib/motion";
 import Plate from "./Plate";
 
 /** short badge text: the concentration, which is what the label really says */
-const SHORT_TYPE: Record<string, string> = {
-  "Eau de Parfum": "EDP",
-  "Eau de Toilette": "EDT",
-  "Extrait de Parfum": "EXTRAIT"
-};
-
 /**
  * A marketplace-style card: glass frame, media pane, a strip that picks
  * the volume (the price under it follows), two honest chips and a buy

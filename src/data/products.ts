@@ -460,6 +460,13 @@ export const money = (n: number): string => n.toLocaleString("ru-RU") + " ₽";
  * Priced from the cheapest full bottle's per-millilitre rate with a decanting
  * fee, because splitting a bottle by hand costs more per drop than the bottle.
  */
+/** короткая подпись концентрации — на узкой плашке полное название не влезает */
+export const SHORT_TYPE: Record<string, string> = {
+  "Eau de Parfum": "EDP",
+  "Eau de Toilette": "EDT",
+  "Extrait de Parfum": "EXTRAIT"
+};
+
 export const SAMPLE_ML = [1, 5, 10] as const;
 
 const sampleFor = (p: Product, ml: number): Variant => {
