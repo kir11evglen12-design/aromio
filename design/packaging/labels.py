@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Наклейки на флаконы декантов. Ширина = длина окружности + нахлёст."""
 import math, os
-from dieline import wordmark, txt, shrink, esc, BLEED
+from dieline import wordmark, txt, shrink, esc, BLEED, mesh
 
 # (ключ, подпись, Ø флакона мм, высота наклейки мм)
 VIALS = [("01", "1 мл", 7.0, 13.0), ("05", "5 мл", 16.0, 26.0), ("10", "10 мл", 19.0, 32.0)]
@@ -16,7 +16,11 @@ def build(key, label, dia, h):
 
     o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{pw:.2f}mm" height="{ph:.2f}mm" viewBox="0 0 {pw:.2f} {ph:.2f}">',
          f'<rect width="{pw:.2f}" height="{ph:.2f}" fill="#ffffff"/>',
-         f'<rect x="{ox:.2f}" y="{oy:.2f}" width="{w:.2f}" height="{h:.2f}" rx="{min(2.0, h*0.12):.2f}" fill="{paper}"/>']
+         f'<rect x="{ox:.2f}" y="{oy:.2f}" width="{w:.2f}" height="{h:.2f}" rx="{min(2.0, h*0.12):.2f}" fill="{paper}"/>',
+         f'<clipPath id="lab"><rect x="{ox:.2f}" y="{oy:.2f}" width="{w:.2f}" height="{h:.2f}" rx="{min(2.0, h*0.12):.2f}"/></clipPath>',
+         f'<g clip-path="url(#lab)">',
+         mesh(ox, oy, w, h, cols=max(12, int(w / 3)), rows=max(10, int(h / 2)), op=0.16, sw=0.07),
+         f'</g>']
 
     mw = min(w * 0.34, h * 1.9)
     o.append(wordmark(ox + w * 0.055, oy + h * 0.20, mw, ink))
