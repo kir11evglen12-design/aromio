@@ -5908,3 +5908,184 @@ body { font-weight: 500; letter-spacing: -0.004em; }
    и касался подписи — даём ему дописать строку */
 .collection .section-head h2 { padding-bottom: 6px; }
 @media (max-width: 860px) { .collection .section-head { gap: 14px; } }
+
+/* ============================================================
+   ПОИСК: история и инструменты
+   Пустой поиск показывает то, что человек уже смотрел, и входы
+   в разделы, которые на сайте есть на самом деле.
+   ============================================================ */
+
+.drawer--search .search-field { position: relative; }
+
+.sd-clear {
+  position: absolute;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 30px; height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 10%);
+  color: var(--w);
+  cursor: pointer;
+}
+
+.sd-clear:hover { background: rgb(255 255 255 / 20%); }
+
+.sd-body { display: grid; gap: 22px; align-content: start; }
+
+.sd-block { display: grid; gap: 12px; }
+
+.sd-block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sd-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--w-3);
+}
+
+.sd-clear-all {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--w-2);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sd-clear-all:hover { color: var(--w); }
+
+/* ---------- недавно смотрели ---------- */
+
+.sd-recent { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+
+.sd-chip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border: 1px solid var(--line-w);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 4%);
+  overflow: hidden;
+}
+
+.sd-chip-open {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 6px 10px 10px;
+  border: 0;
+  background: none;
+  color: var(--w);
+  text-align: left;
+  cursor: pointer;
+}
+
+.sd-chip-media { display: block; width: 34px; }
+.sd-chip-text { display: grid; gap: 1px; min-width: 0; }
+.sd-chip-text b { font-size: 15px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sd-chip-text i { font-style: normal; font-size: 12px; color: var(--w-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sd-chip-x {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 100%;
+  border: 0;
+  background: none;
+  color: var(--w-3);
+  cursor: pointer;
+}
+
+.sd-chip-x:hover { color: var(--w); background: rgb(255 255 255 / 8%); }
+
+/* ---------- инструменты ---------- */
+
+.sd-tools { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+
+.sd-tool {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line-w);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 4%);
+  color: var(--w);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out), border-color var(--micro) var(--ease-out);
+}
+
+.sd-tool:hover { background: rgb(255 255 255 / 10%); border-color: var(--w-3); }
+
+.sd-tool-icon {
+  display: grid;
+  place-items: center;
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 10%);
+  border: 1px solid var(--line-w);
+  color: var(--w);
+}
+
+.sd-tool-text { display: grid; gap: 2px; min-width: 0; }
+.sd-tool-text b { font-size: 15px; font-weight: 900; line-height: 1.2; }
+.sd-tool-text i { font-style: normal; font-size: 12.5px; color: var(--w-3); line-height: 1.3; }
+
+.sd-hint { margin-top: 4px; text-align: center; font-size: 13px; color: var(--w-3); }
+
+/* ---------- результаты ---------- */
+
+.sd-results { display: grid; gap: 8px; }
+
+.sd-hit {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px 10px 10px;
+  border: 1px solid var(--line-w);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 3.5%);
+  color: var(--w);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out);
+}
+
+.sd-hit:hover { background: rgb(255 255 255 / 10%); }
+.sd-hit-media { display: block; width: 40px; }
+.sd-hit-text { display: grid; gap: 1px; min-width: 0; }
+.sd-hit-text b { font-size: 16px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sd-hit-text i { font-style: normal; font-size: 12px; color: var(--w-3); }
+.sd-hit-price { font-size: 14px; font-weight: 800; white-space: nowrap; }
+
+@media (max-width: 520px) {
+  .sd-recent, .sd-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sd-tool { gap: 10px; padding: 12px; }
+  .sd-tool-icon { width: 38px; height: 38px; border-radius: 12px; }
+  .sd-tool-text b { font-size: 13.5px; }
+  .sd-tool-text i { font-size: 11.5px; }
+}
+
+/* В миниатюре поиска подпись плашки превращается в нечитаемый шум —
+   остаётся только монограмма дома. */
+.sd-chip-media .pl-meta,
+.sd-hit-media .pl-meta { display: none; }
+
+.sd-chip-media .plate,
+.sd-hit-media .plate { padding: 6px; border-radius: 8px; }

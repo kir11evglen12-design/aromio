@@ -82,6 +82,8 @@ interface ShopValue {
 
   /** the last products opened, newest first */
   recent: number[];
+  removeRecent: (id: number) => void;
+  clearRecent: () => void;
 
   /** bottles the visitor says they own */
   shelf: ShelfItem[];
@@ -408,6 +410,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     compareOpen,
     setCompareOpen,
     recent,
+    removeRecent: (id: number) => setRecent(r => r.filter(x => x !== id)),
+    clearRecent: () => setRecent([]),
     shelf,
     addToShelf,
     removeFromShelf,
