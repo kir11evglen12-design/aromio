@@ -6245,3 +6245,275 @@ body { font-weight: 500; letter-spacing: -0.004em; }
 .card .card-line,
 .card .card-price span,
 .cw-card .cw-line { color: rgb(255 255 255 / 62%); }
+
+/* ============================================================
+   КВАДРАТНАЯ КАРТОЧКА НА БЕРЁЗЕ
+   Плитка ровно квадратная: сверху флакон на запылённом фоне сезона,
+   снизу светлая берёзовая панель. На светлом корпусе буквы тёмные —
+   иначе их не прочесть; остальная страница остаётся чёрной с белым.
+   ============================================================ */
+
+:root {
+  --birch: #efe3cd;          /* берёза, светлая сторона */
+  --birch-2: #e3d4b8;        /* тень на срезе */
+  --birch-line: #cbb894;
+  --birch-ink: #2a2118;      /* тёмный текст по берёзе */
+  --birch-ink-2: #6b5b46;
+}
+
+.card {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr);
+  border: 1px solid var(--birch-line);
+  border-radius: 18px;
+  background:
+    repeating-linear-gradient(94deg, rgb(120 92 54 / 5%) 0 1px, transparent 1px 9px),
+    linear-gradient(168deg, var(--birch) 0 62%, var(--birch-2));
+  overflow: hidden;
+}
+
+.card:hover { border-color: #b9a177; background:
+    repeating-linear-gradient(94deg, rgb(120 92 54 / 6%) 0 1px, transparent 1px 9px),
+    linear-gradient(168deg, #f4ead8 0 62%, #e7d9be); }
+
+/* ---------- верх: сезон и флакон ---------- */
+
+.card .card-media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 10px;
+  border: 0;
+  border-radius: 0;
+  background: #0d0d10;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.card-season {
+  position: absolute;
+  inset: 0;
+  background-image: var(--season);
+  background-size: cover;
+  background-position: center;
+  /* запылённо: приглушённая, посветлённая картинка, поверх — вуаль */
+  filter: saturate(.66) contrast(.92) brightness(1.06);
+  opacity: .66;
+}
+
+.card-season::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgb(255 255 255 / 12%), transparent 62%),
+    linear-gradient(180deg, rgb(12 12 14 / 30%), rgb(12 12 14 / 62%));
+}
+
+.card .card-media-in {
+  position: relative;
+  z-index: 1;
+  display: block;
+  /* флакон меньше кадра — иначе сезон виден только по краям */
+  width: min(44%, 124px);
+  aspect-ratio: 3 / 4;
+  filter: drop-shadow(0 18px 26px rgb(0 0 0 / 45%));
+}
+
+.card .card-top {
+  position: absolute;
+  z-index: 2;
+  top: 10px; left: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+/* иконки вынесены из медиа: на светлой панели они были бы невидимы */
+.card-tools {
+  position: absolute;
+  z-index: 3;
+  top: 8px; right: 8px;
+  display: flex;
+  gap: 2px;
+}
+
+.card .card-mini { color: rgb(255 255 255 / 78%); }
+.card .card-mini:hover { color: #fff; background: rgb(255 255 255 / 16%); }
+
+/* ---------- низ: берёзовая панель ---------- */
+
+.card .card-body {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px 8px;
+  min-width: 0;
+  background: transparent;
+}
+
+.card .card-line {
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--birch-ink-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.card .card-name {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--birch-ink);
+  font-size: clamp(15px, 1.4vw, 19px);
+  font-weight: 900;
+  letter-spacing: -.01em;
+  line-height: 1.1;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.card .card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.card .card-price { display: flex; align-items: baseline; gap: 6px; }
+.card .card-price b { font-size: clamp(15px, 1.4vw, 19px); font-weight: 900; color: var(--birch-ink); white-space: nowrap; }
+.card .card-price s { font-size: 12px; color: #a2423f; }
+
+.card .card-sizes { display: flex; gap: 4px; }
+
+.card .card-size {
+  min-width: 30px;
+  min-height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--birch-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--birch-ink-2);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.card .card-size.is-on { background: var(--birch-ink); border-color: var(--birch-ink); color: var(--birch); }
+
+/* ---------- кнопка ---------- */
+
+.card .card-buybar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1px;
+  border: 0;
+  border-top: 1px solid var(--birch-line);
+  background: var(--birch-line);
+}
+
+.card .card-cta {
+  min-height: 52px;
+  padding: 0 10px;
+  border: 0;
+  background: var(--birch-ink);
+  color: var(--birch);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.card .card-cta:hover { background: #3a2e21; }
+
+.card .card-cart {
+  width: 56px;
+  border: 0;
+  background: var(--birch-2);
+  color: var(--birch-ink);
+}
+
+.card .card-cart:hover { background: #d8c7a6; }
+
+/* на узкой плитке объёмы уступают место цене */
+@media (max-width: 520px) {
+  .card .card-sizes { display: none; }
+  .card .card-cta { min-height: 46px; font-size: 12px; }
+  .card .card-cart { width: 46px; }
+  .card .card-body { padding: 8px 10px 6px; }
+}
+
+/* Цена со старой ценой переносилась и делала карточку выше соседей —
+   ряд шёл рваным. Держим строку в одну линию. */
+.card .card-row { flex-wrap: nowrap; }
+.card .card-price { min-width: 0; flex: 0 1 auto; flex-direction: row; flex-wrap: nowrap; align-items: baseline; }
+.card .card-price s { flex: none; font-size: 11px; }
+.card .card-sizes { flex: none; }
+
+/* со скидкой строка длиннее — объёмы ужимаются, но остаются на месте */
+.card:has(.card-label--sale) .card-size { min-width: 26px; padding: 0 4px; font-size: 11px; }
+
+/* сезон должен читаться: вуаль над ним легче */
+.card-season::after {
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgb(255 255 255 / 14%), transparent 60%),
+    linear-gradient(180deg, rgb(12 12 14 / 18%), rgb(12 12 14 / 48%));
+}
+
+/* ── Запылённый сезон: светлая дымка вместо чёрной вуали ──────────────
+   Тёмная вуаль делала фон грязным, а не пыльным. Пыль — это белёсая
+   взвесь: поднимаем яркость, гасим цвет и кладём тёплую дымку сверху.
+   Подписей у фона нет, поэтому читаемость держат сами плашки. */
+.card .card-season {
+  filter: saturate(.42) contrast(.86) brightness(1.16);
+  opacity: .82;
+}
+
+.card .card-season::after {
+  background:
+    radial-gradient(130% 85% at 50% 10%, rgb(245 238 226 / 34%), transparent 70%),
+    linear-gradient(180deg, rgb(20 18 15 / 34%) 0%, rgb(233 223 205 / 16%) 46%, rgb(20 18 15 / 26%) 100%);
+}
+
+/* на дымке белый текст без подложки пропадает — плашкам даём корпус */
+.card .card-top .card-label {
+  background: rgb(14 13 12 / 62%);
+  color: #fff;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.card .card-top .card-label--sale { background: #fff; color: #0b0b0c; }
+
+.card .card-mini {
+  background: rgb(14 13 12 / 52%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Ароматы без снимка показывают плашку с монограммой — сплошным
+   прямоугольником она закрывала сезон. Делаем её стеклянной: цвет дома
+   остаётся, но пейзаж читается насквозь. */
+.card .card-media:not(.media--photo) .card-media-in .plate {
+  opacity: .8;
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgb(8 8 10 / 34%);
+}
+
+/* ── Узкий экран: квадрат не выдерживает ─────────────────────────────
+   При ширине плитки ~168 px имя, цена и кнопка съедают весь квадрат, и
+   на фон остаётся 20 px — сезон превращается в полоску, а кружки
+   сравнения наезжают на строку дома. Ниже 720 px держим квадратным сам
+   фон, а карточка растёт вниз ровно на столько, сколько нужно тексту. */
+@media (max-width: 720px) {
+  .card { aspect-ratio: auto; grid-template-rows: auto auto auto; }
+  .card .card-media { aspect-ratio: 1 / 1; height: auto; padding: 8px; }
+  .card .card-buybar { grid-template-columns: minmax(0, 1fr) auto; }
+}

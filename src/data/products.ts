@@ -493,6 +493,41 @@ export const samples = (p: Product): Variant[] => {
  * How many sprays a wear takes. Not a brand claim: it follows from the
  * concentration — the denser the juice, the fewer presses it needs.
  */
+/**
+ * Сезон аромата выводится из его же нот и концентрации, а не назначается
+ * вручную: цитрус и морская свежесть — лето, цветы и зелень — весна,
+ * специи, кожа и древесина — осень, уд, ваниль и смолы — зима.
+ */
+export type Season = "spring" | "summer" | "autumn" | "winter";
+
+export const season = (p: Product): Season => {
+  /* верхние ноты решают первое впечатление, база — только оттеняет,
+     иначе любой аромат с сандалом и амброй уезжает в осень */
+  const weigh = (words: string[]) =>
+    words.reduce((n, w) =>
+      n + (p.notes.top.toLowerCase().includes(w) ? 3 : 0)
+        + (p.notes.heart.toLowerCase().includes(w) ? 2 : 0)
+        + (p.notes.base.toLowerCase().includes(w) ? 1 : 0), 0);
+
+  const winter = weigh(["уд", "ваниль", "ладан", "смол", "тонка", "какао", "шоколад",
+                        "кожа", "замша", "табак", "бальзам", "мирр", "дёгот"])
+                 + (p.type === "Extrait de Parfum" ? 2 : 0);
+  const summer = weigh(["бергамот", "лимон", "лайм", "грейпфрут", "мандарин", "апельсин", "цитрус",
+                        "морск", "соль", "водоросл", "кокос", "ананас", "мята", "акватич", "арбуз"])
+                 + (p.type === "Eau de Toilette" ? 2 : 0);
+  const spring = weigh(["роза", "пион", "жасмин", "ландыш", "фиалк", "ирис", "флёрдоранж", "нероли",
+                        "зелён", "чай", "яблок", "груша", "личи", "жимолость", "гардени", "магноли"]);
+  const autumn = weigh(["пачул", "ветивер", "сандал", "кедр", "древесн", "мох", "перец", "шафран",
+                        "кардамон", "корица", "имбирь", "мускатн", "лавр", "дубов", "каштан"]);
+
+  const best = Math.max(winter, summer, spring, autumn);
+  if (best === 0) return "autumn";
+  if (winter === best) return "winter";
+  if (summer === best) return "summer";
+  if (spring === best) return "spring";
+  return "autumn";
+};
+
 export const sprays = (p: Product): [number, number] => {
   if (/extrait|parfum$/i.test(p.type) && !/eau de parfum/i.test(p.type)) return [2, 3];
   if (/eau de parfum/i.test(p.type)) return [3, 4];
