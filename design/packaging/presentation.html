@@ -1,0 +1,451 @@
+<title>Коробочки декантов AROMIO</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper: #0b0b0c;
+    --paper-2: #131317;
+    --card: #17171c;
+    --ink: #ffffff;
+    --ink-2: rgba(255, 255, 255, 0.72);
+    --ink-3: rgba(255, 255, 255, 0.46);
+    --line: rgba(255, 255, 255, 0.14);
+    --line-2: rgba(255, 255, 255, 0.26);
+    --board: #f2f0ec;
+    --cut: #ff2f6d;      /* типографская условность: линия реза */
+    --fold: #35c6ff;     /* линия фальца */
+    --font: "Nunito", "Trebuchet MS", ui-rounded, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    --gutter: clamp(18px, 5vw, 72px);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1120px; margin-inline: auto; padding-inline: var(--gutter); }
+
+  h1, h2, h3, p, figure { margin: 0; }
+
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* ---------- шапка ---------- */
+
+  header { padding-block: clamp(38px, 8vh, 92px) clamp(28px, 5vh, 54px); }
+
+  .mark { width: 148px; height: auto; display: block; margin-bottom: 26px; }
+
+  h1 {
+    font-size: clamp(34px, 6vw, 72px);
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+    text-wrap: balance;
+    max-width: 16ch;
+  }
+
+  .lead {
+    margin-top: 18px;
+    max-width: 62ch;
+    color: var(--ink-2);
+    font-size: clamp(15px, 1.5vw, 18px);
+  }
+
+  /* ---------- линейка размеров ---------- */
+
+  .scale {
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(20px, 6vw, 74px);
+    padding: clamp(26px, 5vh, 56px) clamp(20px, 4vw, 48px);
+    margin-block: clamp(26px, 5vh, 52px);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: linear-gradient(180deg, var(--paper-2), var(--paper));
+    overflow-x: auto;
+  }
+
+  /* коробки нарисованы в реальной пропорции: 1 мм = 2.6 px */
+  .box { flex: none; display: grid; justify-items: center; gap: 14px; }
+
+  .box-body {
+    position: relative;
+    width: calc(var(--w) * 2.6px);
+    height: calc(var(--h) * 2.6px);
+    border-radius: 3px;
+    background:
+      radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, 0.14), transparent 66%),
+      repeating-linear-gradient(97deg, rgba(255, 255, 255, 0.10) 0 0.5px, transparent 0.5px 7px),
+      repeating-linear-gradient(2deg, rgba(255, 255, 255, 0.08) 0 0.5px, transparent 0.5px 9px),
+      linear-gradient(100deg, #0d0d11 0 62%, #17171d 62% 100%);
+    box-shadow: 0 26px 50px -26px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 8%;
+    padding: 8% 6%;
+  }
+
+  .box-body::after {
+    /* ребро коробки — тот же фальц, что на развёртке */
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 62%;
+    border-left: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+  .box-mark { width: 62%; height: auto; opacity: 0.95; }
+
+  .box-pill {
+    display: grid;
+    place-items: center;
+    min-width: 58%;
+    padding: 4% 10%;
+    border-radius: 999px;
+    background: var(--ink);
+    color: #0b0b0c;
+    font-weight: 900;
+    font-size: clamp(9px, calc(var(--w) * 0.42px), 15px);
+    line-height: 1.15;
+  }
+
+  .box-word {
+    font-size: clamp(6px, calc(var(--w) * 0.2px), 9px);
+    letter-spacing: 0.24em;
+    font-weight: 800;
+    color: var(--ink-2);
+  }
+
+  .box-cap { text-align: center; display: grid; gap: 2px; }
+  .box-cap b { font-size: 17px; font-weight: 900; }
+  .box-cap span { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+
+  /* ---------- разделы ---------- */
+
+  section { padding-block: clamp(30px, 6vh, 66px); border-top: 1px solid var(--line); }
+
+  h2 {
+    font-size: clamp(24px, 3.4vw, 40px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin-top: 10px;
+  }
+
+  .note { margin-top: 14px; max-width: 66ch; color: var(--ink-2); }
+
+  .sheets { display: grid; gap: 22px; margin-top: 30px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+  figure.sheet {
+    display: grid;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--card);
+  }
+
+  figure.sheet img { display: block; width: 100%; height: auto; background: var(--board); }
+
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 14px 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  figcaption b { font-weight: 900; font-size: 15px; }
+  figcaption span { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+
+  /* ---------- легенда линий ---------- */
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 15px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+
+  .chip i { width: 22px; height: 0; border-top: 2px solid currentColor; }
+  .chip--cut { color: var(--cut); }
+  .chip--fold i { border-top-style: dashed; }
+  .chip--fold { color: var(--fold); }
+
+  /* ---------- таблица спецификации ---------- */
+
+  .tablewrap { margin-top: 26px; overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 540px; }
+
+  th, td { padding: 13px 16px; text-align: left; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 700; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  /* ---------- панели ---------- */
+
+  .panels { display: grid; gap: 14px; margin-top: 26px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+
+  .panel { padding: 18px 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper-2); }
+  .panel h3 { font-size: 15px; font-weight: 900; margin-bottom: 6px; }
+  .panel p { font-size: 14px; color: var(--ink-2); }
+
+  /* ---------- предупреждение ---------- */
+
+  .flag {
+    margin-top: 28px;
+    padding: 20px 22px;
+    border: 1px solid var(--line-2);
+    border-left: 3px solid var(--cut);
+    border-radius: 0 14px 14px 0;
+    background: var(--paper-2);
+  }
+
+  .flag h3 { font-size: 16px; font-weight: 900; margin-bottom: 8px; }
+  .flag p { color: var(--ink-2); font-size: 15px; }
+  .flag p + p { margin-top: 10px; }
+
+  footer { padding-block: 40px 64px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13px; }
+
+  @media (max-width: 520px) {
+    .scale { gap: 18px; padding-inline: 16px; }
+  }
+</style>
+
+<svg style="position:absolute;width:0;height:0" aria-hidden="true">
+  <symbol id="wordmark" viewBox="0 0 600 170">
+    <g fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="52" cy="103" r="35"></circle><path d="M87 68 V138"></path>
+      <path d="M140 138 V68"></path><path d="M140 92 a35 35 0 0 1 35 -24"></path>
+      <circle cx="235" cy="103" r="35"></circle>
+      <path d="M300 138 V68"></path><path d="M300 92 a30 30 0 0 1 60 0 V138"></path>
+      <path d="M360 92 a30 30 0 0 1 60 0 V138"></path>
+      <path d="M455 138 V68"></path>
+      <circle cx="455" cy="26" r="9" fill="currentColor" stroke="none" stroke-width="0"></circle>
+      <circle cx="530" cy="103" r="35"></circle>
+    </g>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <header>
+    <svg class="mark" viewBox="0 0 600 170" role="img" aria-label="aromio"><use href="#wordmark"></use></svg>
+    <p class="eyebrow">Упаковка декантов · макеты под печать</p>
+    <h1>Три коробочки на один флакон</h1>
+    <p class="lead">
+      Пробники 1, 5 и 10 мл, которые уже продаются на витрине, получили физическую упаковку:
+      коробка с заправляемым торцом, наклейка на флакон и поля, которые магазин заполняет при
+      розливе. Всё взято с сайта буквально: та же складчатая сетка фона, тот же векторный знак,
+      та же белая пилюля с объёмом.
+    </p>
+  </header>
+
+  <div class="scale" role="img" aria-label="Три коробки в реальной пропорции: 14×52, 20×78 и 24×94 мм">
+    <div class="box" style="--w: 14; --h: 52;">
+      <div class="box-body">
+        <svg class="box-mark" viewBox="0 0 600 170"><use href="#wordmark"></use></svg>
+        <span class="box-pill">1 мл</span>
+        <span class="box-word">ДЕКАНТ</span>
+      </div>
+      <div class="box-cap"><b>1 мл</b><span>14 × 14 × 52</span></div>
+    </div>
+
+    <div class="box" style="--w: 20; --h: 78;">
+      <div class="box-body">
+        <svg class="box-mark" viewBox="0 0 600 170"><use href="#wordmark"></use></svg>
+        <span class="box-pill">5 мл</span>
+        <span class="box-word">ДЕКАНТ</span>
+      </div>
+      <div class="box-cap"><b>5 мл</b><span>20 × 20 × 78</span></div>
+    </div>
+
+    <div class="box" style="--w: 24; --h: 94;">
+      <div class="box-body">
+        <svg class="box-mark" viewBox="0 0 600 170"><use href="#wordmark"></use></svg>
+        <span class="box-pill">10 мл</span>
+        <span class="box-word">ДЕКАНТ</span>
+      </div>
+      <div class="box-cap"><b>10 мл</b><span>24 × 24 × 94</span></div>
+    </div>
+  </div>
+
+  <section>
+    <p class="eyebrow">Развёртки</p>
+    <h2>Макеты 1:1</h2>
+    <p class="note">
+      Straight tuck end — заправляемый торец сверху и снизу, клеевой клапан слева, пылевые
+      клапаны на боках. Файлы в SVG и PDF, размер страницы равен листу с вылетом, печатать
+      без масштабирования.
+    </p>
+
+    <div class="legend">
+      <span class="chip">сетка фона — из кода сайта</span>
+      <span class="chip chip--cut"><i></i>линия реза</span>
+      <span class="chip chip--fold"><i></i>линия фальца</span>
+      <span class="chip">вылет 3 мм</span>
+      <span class="chip">чёрный корпус, белый клеевой клапан</span>
+    </div>
+
+    <div class="sheets">
+      <figure class="sheet">
+        <img src="preview-dieline-01ml.png" alt="Развёртка коробки для деканта 1 мл" loading="lazy">
+        <figcaption><b>1 мл</b><span class="mono">70 × 81 мм лист</span></figcaption>
+      </figure>
+      <figure class="sheet">
+        <img src="preview-dieline-05ml.png" alt="Развёртка коробки для деканта 5 мл" loading="lazy">
+        <figcaption><b>5 мл</b><span class="mono">94 × 117 мм лист</span></figcaption>
+      </figure>
+      <figure class="sheet">
+        <img src="preview-dieline-10ml.png" alt="Развёртка коробки для деканта 10 мл" loading="lazy">
+        <figcaption><b>10 мл</b><span class="mono">110 × 139 мм лист</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Что на какой грани</p>
+    <h2>Четыре панели</h2>
+
+    <div class="panels">
+      <div class="panel">
+        <h3>Лицо</h3>
+        <p>Знак, PARFUM'S, пилюля с объёмом, слово «декант» и строка «розлив из оригинального флакона».</p>
+      </div>
+      <div class="panel">
+        <h3>Спинка</h3>
+        <p>Поля под аромат, дом, число пшиков и дату розлива. Ниже — предупреждение о спирте и кто разлил. На 5 и 10 мл есть место под штрихкод.</p>
+      </div>
+      <div class="panel">
+        <h3>Бока</h3>
+        <p>Одна строка вдоль высоты: AROMIO · объём · ДЕКАНТ. На узкой коробке кегль уменьшается сам.</p>
+      </div>
+      <div class="panel">
+        <h3>Наклейка</h3>
+        <p>Обёртка на сам флакон: знак, пилюля объёма и те же два поля. Ширина равна длине окружности плюс 4 мм нахлёста.</p>
+      </div>
+    </div>
+
+    <div class="sheets">
+      <figure class="sheet">
+        <img src="preview-label-01ml.png" alt="Наклейка на флакон 1 мл" loading="lazy">
+        <figcaption><b>Наклейка 1 мл</b><span class="mono">26 × 13 мм · Ø7</span></figcaption>
+      </figure>
+      <figure class="sheet">
+        <img src="preview-label-05ml.png" alt="Наклейка на флакон 5 мл" loading="lazy">
+        <figcaption><b>Наклейка 5 мл</b><span class="mono">54 × 26 мм · Ø16</span></figcaption>
+      </figure>
+      <figure class="sheet">
+        <img src="preview-label-10ml.png" alt="Наклейка на флакон 10 мл" loading="lazy">
+        <figcaption><b>Наклейка 10 мл</b><span class="mono">64 × 32 мм · Ø19</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Откуда что взято</p>
+    <h2>Коробка собрана из витрины</h2>
+    <p class="note">
+      Это не «в похожем стиле» — три элемента перенесены из исходников сайта как есть.
+    </p>
+
+    <div class="panels">
+      <div class="panel">
+        <h3>Складчатая сетка</h3>
+        <p>
+          Поле высот из <span class="mono">Backdrop.tsx</span> — те же три синуса и та же
+          степень перспективы. На развёртке она идёт сквозным полотном, поэтому на собранной
+          коробке складки обходят её кругом без стыка.
+        </p>
+      </div>
+      <div class="panel">
+        <h3>Знак</h3>
+        <p>
+          Контур из <span class="mono">Wordmark.tsx</span>, кривые один в один. Не шрифт —
+          в типографии без Nunito он не превратится во что-то другое.
+        </p>
+      </div>
+      <div class="panel">
+        <h3>Пилюля и свечение</h3>
+        <p>
+          Белая пилюля с объёмом — тот же приём, что у кнопок и чипов на сайте. Свет сверху
+          лицевой панели повторяет градиент плашки товара.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">В типографию</p>
+    <h2>Спецификация</h2>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Объём</th><th>Коробка, мм</th><th>Флакон</th><th>Лист с вылетом, мм</th><th>Наклейка, мм</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1 мл</td><td class="num">14 × 14 × 52</td><td>капля Ø7 × 45</td><td class="num">70 × 81</td><td class="num">26 × 13</td></tr>
+          <tr><td>5 мл</td><td class="num">20 × 20 × 78</td><td>спрей Ø16 × 72</td><td class="num">94 × 117</td><td class="num">54 × 26</td></tr>
+          <tr><td>10 мл</td><td class="num">24 × 24 × 94</td><td>спрей Ø19 × 88</td><td class="num">110 × 139</td><td class="num">64 × 32</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      Картон 300–350 г/м², печать 1+0 чёрным по всей площади корпуса, клеевой клапан оставлен
+      белым — по краске экономнее и клей держит лучше. Линии сетки тонкие: 0,09 мм. Если
+      типография работает офсетом и просит минимум 0,1 мм, скажите — подниму толщину в
+      генераторе одной строкой.
+    </p>
+  </section>
+
+  <section>
+    <div class="flag">
+      <h3>Что на коробке сказано прямо</h3>
+      <p>
+        Это упаковка декантов, а не оригинальная коробка дома. На макете нет ни одного чужого
+        логотипа: название аромата и дома вписывается как текст в поле, а на спинке стоит строка
+        «Аромат разлит из оригинального флакона. Упаковка и розлив — AROMIO».
+      </p>
+      <p>
+        Число пшиков на коробке — поле, а не напечатанное обещание: у парфюма это 2–3, у
+        парфюмерной воды 3–4, у туалетной 4–6, и печатать одно число на всех значило бы врать
+        на двух третях тиража. Поле под штрихкод пустое — номер выдавать нельзя, его получают
+        в GS1.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    Макеты лежат в репозитории проекта — <span class="mono">design/packaging</span>: по три
+    развёртки и наклейки в SVG и PDF плюс превью. Размеры флаконов взяты типовые для
+    атомайзеров; если ваш поставщик даёт другой диаметр, скажите — пересчитаю за минуту.
+  </footer>
+</div>

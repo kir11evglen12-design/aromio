@@ -5,6 +5,43 @@
 текста физически меньше, чем на 24-миллиметровой, и вёрстка это учитывает.
 """
 import os, textwrap
+import math
+
+# ---- та же сетка, что рисует фон сайта (src/components/Backdrop.tsx) ----
+def _height(u, v):
+    return (math.sin(v * 7.8 + u * 4.4) * 0.098
+            + math.sin(v * 5.0 - u * 3.4) * 0.058
+            + math.sin(v * 12.6 + u * 1.9) * 0.018)
+
+def _drift(u, v):
+    return (math.sin(u * 6.2 + v * 2.1) * 0.072
+            + math.sin(u * 3.0 - v * 2.7) * 0.030
+            + math.sin(v * 2.6) * 0.018)
+
+def mesh(x, y, w, h, cols=22, rows=30, colour="#ffffff", op=0.20, sw=0.09):
+    """Поле высот в миллиметрах, обрезанное по панели."""
+    bleed = 0.16
+    sx, ox = (1 + bleed * 2) * w, -bleed * w
+    sy, oy = (1 + bleed * 2) * h, -bleed * h
+    pts = []
+    for r in range(rows + 1):
+        v0 = (r / rows) ** 1.12
+        row = []
+        for c in range(cols + 1):
+            u = c / cols
+            px = (u + _drift(u, v0)) * sx + ox
+            py = (v0 + _height(u, v0)) * sy + oy
+            row.append((x + px, y + py))
+        pts.append(row)
+
+    d = []
+    for row in pts:
+        d.append("M" + " L".join(f"{px:.2f},{py:.2f}" for px, py in row))
+    for c in range(cols + 1):
+        d.append("M" + " L".join(f"{pts[r][c][0]:.2f},{pts[r][c][1]:.2f}" for r in range(rows + 1)))
+    return (f'<path d="{" ".join(d)}" fill="none" stroke="{colour}" stroke-width="{sw}" '
+            f'stroke-linejoin="round" opacity="{op}"/>')
+
 
 BLEED, GLUE = 3.0, 8.0
 CHAR_W = 0.55        # средняя ширина знака Nunito Bold в долях кегля
@@ -68,6 +105,15 @@ def build(key, label, W, D, H, vial, weight):
          f'viewBox="0 0 {pw:.2f} {ph:.2f}">',
          f'<rect width="{pw:.2f}" height="{ph:.2f}" fill="#ffffff"/>',
          f'<rect x="{x_back:.2f}" y="{top:.2f}" width="{W*2+D*2:.2f}" height="{H:.2f}" fill="{paper}"/>',
+         f'<clipPath id="body"><rect x="{x_back:.2f}" y="{top:.2f}" width="{W*2+D*2:.2f}" height="{H:.2f}"/></clipPath>',
+         f'<g clip-path="url(#body)">',
+         mesh(x_back, top, W * 2 + D * 2, H, cols=max(14, int(W)), rows=max(20, int(H / 2.4))),
+         # свечение сверху — то же, что в плашке карточки на сайте
+         f'<defs><radialGradient id="glow" cx="50%" cy="0%" r="86%">'
+         f'<stop offset="0%" stop-color="#ffffff" stop-opacity="0.16"/>'
+         f'<stop offset="68%" stop-color="#ffffff" stop-opacity="0"/></radialGradient></defs>',
+         f'<rect x="{x_front:.2f}" y="{top:.2f}" width="{W:.2f}" height="{H:.2f}" fill="url(#glow)"/>',
+         f'</g>',
          f'<rect x="{x_glue:.2f}" y="{top:.2f}" width="{GLUE:.2f}" height="{H:.2f}" fill="#f2f0ec"/>']
 
     # ---------- ЛИЦО ----------
