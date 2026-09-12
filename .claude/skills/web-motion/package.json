@@ -1,0 +1,10 @@
+{
+  "name": "web-motion-skill",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Close the agentic coding loop for web animation. Claude Code skill that lets the agent scroll your page while recording, analyze frames, and optimize animations through natural language.",
+  "type": "module",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
