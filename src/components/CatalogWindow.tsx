@@ -34,7 +34,7 @@ const PRICE_MAX = Math.max(...products.map(p => fromPrice(p)));
  */
 export default function CatalogWindow() {
   const {
-    catalogOpen, closeCatalog, openProduct, addToCart, isFavorite, toggleFavorite
+    catalogOpen, closeCatalog, openProduct, addToCart, buyNow, isFavorite, toggleFavorite
   } = useShop();
 
   const [houses, setHouses] = useState<House[]>([]);
@@ -208,7 +208,8 @@ export default function CatalogWindow() {
           <div className="cw-grid" ref={grid}>
             {list.map(p => <Row key={p.id} product={p}
                                 onOpen={el => { setSharedOrigin(el); closeCatalog(); openProduct(p.id); }}
-                                onBuy={e => { flyToCart(e.currentTarget); addToCart(p.id, 100); }}
+                                onBuy={() => { closeCatalog(); buyNow(p.id, 100); }}
+                                onAdd={e => { flyToCart(e.currentTarget); addToCart(p.id, 100); }}
                                 fav={isFavorite(p.id)}
                                 onFav={() => toggleFavorite(p.id)} />)}
           </div>
@@ -222,10 +223,11 @@ export default function CatalogWindow() {
   );
 }
 
-function Row({ product: p, onOpen, onBuy, fav, onFav }: {
+function Row({ product: p, onOpen, onBuy, onAdd, fav, onFav }: {
   product: Product;
   onOpen: (plate: HTMLElement | null) => void;
-  onBuy: (e: React.MouseEvent) => void;
+  onBuy: () => void;
+  onAdd: (e: React.MouseEvent) => void;
   fav: boolean;
   onFav: () => void;
 }) {
@@ -267,7 +269,7 @@ function Row({ product: p, onOpen, onBuy, fav, onFav }: {
 
       <div className="cw-buy">
         <button className="cw-cta" onClick={onBuy}>Купить сейчас</button>
-        <button className="cw-cart" onClick={onBuy} aria-label={`Положить ${p.name} в корзину`}>
+        <button className="cw-cart" onClick={onAdd} aria-label={`Положить ${p.name} в корзину`}>
           <ShoppingBag size={19} strokeWidth={1.6} />
         </button>
       </div>

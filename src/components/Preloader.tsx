@@ -44,7 +44,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
     <div className={"preloader" + (done ? " is-done" : "") + (quick ? " quick" : "")}>
       <div className="pre-inner">
         <Wordmark className="pre-mark" />
-        <div className="pre-claim">НОВЫЕ ЗАПАХИ НА КАЖДЫЙ ДЕНЬ</div>
+        <div className="pre-claim">ДУХИ И ПРОБНИКИ ПАРФЮМЕРНЫХ ДОМОВ</div>
         <div className="pre-bar"><div className="pre-fill" style={{ width: progress + "%" }} /></div>
       </div>
     </div>

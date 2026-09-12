@@ -38,6 +38,8 @@ interface ShopValue {
   addToCart: (id: number, ml?: number) => void;
   removeFromCart: (index: number) => void;
   restoreToCart: (index: number, line: CartLine) => void;
+  /** «Купить сейчас»: кладёт в корзину и сразу открывает её на оформлении */
+  buyNow: (id: number, ml?: number) => void;
   checkout: () => void;
 
   user: User | null;
@@ -233,6 +235,16 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     setCart(c => c.filter((_, i) => i !== index));
   }, []);
 
+  /**
+   * Кнопка «Купить сейчас» обязана вести к покупке: товар уходит в корзину
+   * и корзина тут же открывается, иначе надпись обманывает — человек жмёт
+   * «купить», а с виду не происходит ничего.
+   */
+  const buyNow = useCallback((id: number, ml?: number) => {
+    addToCart(id, ml);
+    setDrawer("cart");
+  }, [addToCart]);
+
   /** put a removed line back exactly where it was — this is what undo does */
   const restoreToCart = useCallback((index: number, line: CartLine) => {
     setCart(c => [...c.slice(0, index), line, ...c.slice(index)]);
@@ -359,6 +371,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     addToCart,
     removeFromCart,
     restoreToCart,
+    buyNow,
     checkout,
     user,
     setUser,
@@ -413,7 +426,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     toastUndo,
     runUndo
   }), [
-    cart, addToCart, removeFromCart, restoreToCart, checkout, user, setUser, signOut, saveProfile,
+    cart, addToCart, removeFromCart, restoreToCart, buyNow, checkout, user, setUser, signOut, saveProfile,
     isFavorite, toggleFavorite, drawer, authIntro, openAuth, authMode, productId,
     profileOpen, category, sort, noteQuery, compare, toggleCompare, compareOpen,
     recent, shelf, addToShelf, removeFromShelf, reminders, addReminder,
