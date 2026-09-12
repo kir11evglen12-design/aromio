@@ -6942,3 +6942,186 @@ body { background: var(--ground); }
   .cl-more { margin-top: 20px; }
   .more-btn { width: 100%; justify-content: center; min-height: 52px; padding: 0 20px; font-size: 13px; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   УКАЗАТЕЛЬ ДОМОВ
+
+   Раздел «Дома» раньше рассказывал про три дома, которых уже давно не
+   три. Теперь это указатель: буква сверху, плитки снизу. Логотип берётся
+   из assets/houses, если он там лежит; если нет — плитка набирает имя
+   дома шрифтом витрины, а не подставляет чужой знак наугад.
+   ══════════════════════════════════════════════════════════════════ */
+
+.hx-alpha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.hx-letter {
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line-w);
+  border-radius: var(--r-tile);
+  background: rgb(255 255 255 / 4%);
+  color: var(--w-2);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out), color var(--micro) var(--ease-out),
+              border-color var(--micro) var(--ease-out);
+}
+
+.hx-letter:hover:not(:disabled) { background: rgb(255 255 255 / 10%); color: #fff; }
+
+.hx-letter.is-on {
+  background: var(--go);
+  border-color: var(--go);
+  color: #fff;
+}
+
+.hx-letter:disabled { opacity: .26; cursor: default; }
+
+.hx-letter--all { padding: 0 18px; }
+
+.hx-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.hx-order { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.hx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.hx-tile {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line-w);
+  border-radius: var(--r-card);
+  background: var(--ground-2);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--micro) var(--ease-out), background var(--micro) var(--ease-out),
+              transform var(--micro) var(--ease-out);
+}
+
+.hx-tile:hover {
+  border-color: rgb(20 133 63 / 52%);
+  background: var(--ground-3);
+  transform: translateY(-2px);
+}
+
+/* белая карточка под знаком — как в каталогах домов: логотип читается
+   только на светлом, а не на тёмно-зелёном */
+.hx-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  padding: 14px 16px;
+  border-radius: var(--r-tile);
+  background: linear-gradient(168deg, #f7f5f1, #ddd8d0);
+  overflow: hidden;
+}
+
+.hx-mark img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.hx-word {
+  font-family: var(--font-display);
+  font-size: clamp(11px, 1.5vw, 15px);
+  font-weight: 800;
+  letter-spacing: .1em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  color: #1b1a17;
+  overflow-wrap: anywhere;
+}
+
+.hx-count {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 26px;
+  padding: 3px 7px;
+  border-radius: var(--r-pill);
+  background: var(--go);
+  color: #fff;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.hx-name {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.hx-meta {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--blue-t);
+}
+
+@media (max-width: 620px) {
+  .hx-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .hx-tile { padding: 10px; }
+  .hx-letter { min-width: 36px; min-height: 36px; padding: 0 7px; font-size: 12px; }
+  .hx-letter--all { padding: 0 12px; }
+}
+
+/* Без логотипа имя дома стоит на самой плитке — подпись под ней была бы
+   вторым таким же словом. Строку основания держим в одну линию, иначе
+   Creed со своей длинной справкой делал ряд неровным. */
+.hx-tile { align-content: start; }
+
+.hx-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hx-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+/* Плитки с логотипом несут ещё и подпись, без логотипа — нет, и ряд
+   выходил ступенькой. Ставим их колонкой и прижимаем текст к низу:
+   высоту тогда задаёт самая высокая, а строки остаются на одной линии. */
+.hx-tile {
+  display: flex;
+  flex-direction: column;
+  align-content: stretch;
+}
+
+.hx-tile .hx-mark { width: 100%; }
+.hx-tile .hx-name { margin-top: auto; padding-top: 8px; }
+.hx-tile .hx-meta { margin-top: auto; }
+.hx-tile .hx-name + .hx-meta { margin-top: 2px; }
