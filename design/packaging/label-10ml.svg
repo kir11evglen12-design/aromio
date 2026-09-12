@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="69.69mm" height="41.00mm" viewBox="0 0 69.69 41.00">
+<rect width="69.69" height="41.00" fill="#ffffff"/>
+<rect x="3.00" y="3.00" width="63.69" height="32.00" rx="2.00" fill="#0b0b0c"/>
+<g transform="translate(6.503,9.4) scale(0.03609)">
+ <g fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="52" cy="103" r="35"/><path d="M87 68 V138"/>
+  <path d="M140 138 V68"/><path d="M140 92 a35 35 0 0 1 35 -24"/>
+  <circle cx="235" cy="103" r="35"/>
+  <path d="M300 138 V68"/><path d="M300 92 a30 30 0 0 1 60 0 V138"/>
+  <path d="M360 92 a30 30 0 0 1 60 0 V138"/>
+  <path d="M455 138 V68"/><circle cx="455" cy="26" r="9" fill="#ffffff" stroke="none" stroke-width="0"/>
+  <circle cx="530" cy="103" r="35"/>
+ </g></g>
+<text x="31.98" y="15.80" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="2.58" font-weight="800" fill="#ffffff" text-anchor="start" letter-spacing="0.40" opacity="0.55">АРОМАТ</text>
+<line x1="31.98" y1="19.64" x2="60.14" y2="19.64" stroke="#ffffff" stroke-width="0.18" opacity=".4"/>
+<text x="31.98" y="26.68" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="2.58" font-weight="800" fill="#ffffff" text-anchor="start" letter-spacing="0.40" opacity="0.55">ДОМ</text>
+<line x1="31.98" y1="30.52" x2="60.14" y2="30.52" stroke="#ffffff" stroke-width="0.18" opacity=".4"/>
+<rect x="6.50" y="22.20" width="9.55" height="7.04" rx="3.52" fill="#ffffff"/>
+<text x="11.28" y="27.27" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="2.96" font-weight="900" fill="#0b0b0c" text-anchor="middle" letter-spacing="0.00" opacity="1">10 мл</text>
+<rect x="3.00" y="3.00" width="63.69" height="32.00" rx="2.00" fill="none" stroke="#111318" stroke-width="0.25"/>
+<line x1="62.69" y1="3.00" x2="62.69" y2="35.00" stroke="#111318" stroke-width="0.18" stroke-dasharray="1.2 1"/>
+<text x="3.00" y="39.80" font-family="monospace" font-size="1.55" fill="#111318">AROMIO · наклейка 10 мл · Ø19 мм · 63.7×32 мм · нахлёст 4 мм · 1:1</text>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="70.00mm" height="84.96mm" viewBox="0 0 70.00 84.96">
+<rect width="70.00" height="84.96" fill="#ffffff"/>
+<rect x="11.00" y="14.48" width="56.00" height="52.00" fill="#0b0b0c"/>
+<rect x="3.00" y="14.48" width="8.00" height="52.00" fill="#f2f0ec"/>
+<g transform="translate(41.38,21.24) scale(0.0154)">
+ <g fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="52" cy="103" r="35"/><path d="M87 68 V138"/>
+  <path d="M140 138 V68"/><path d="M140 92 a35 35 0 0 1 35 -24"/>
+  <circle cx="235" cy="103" r="35"/>
+  <path d="M300 138 V68"/><path d="M300 92 a30 30 0 0 1 60 0 V138"/>
+  <path d="M360 92 a30 30 0 0 1 60 0 V138"/>
+  <path d="M455 138 V68"/><circle cx="455" cy="26" r="9" fill="#ffffff" stroke="none" stroke-width="0"/>
+  <circle cx="530" cy="103" r="35"/>
+ </g></g>
+<text x="46.00" y="25.79" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="0.80" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="0.80" opacity="0.7">PARFUM'S</text>
+<rect x="41.66" y="42.56" width="8.68" height="6.00" rx="3.00" fill="#ffffff"/>
+<text x="46.00" y="46.76" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="1.93" font-weight="900" fill="#0b0b0c" text-anchor="middle" letter-spacing="0.00" opacity="1">1 мл</text>
+<text x="46.00" y="56.08" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="1.22" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="0.90" opacity="1">ДЕКАНТ</text>
+<text x="46.00" y="58.42" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="0.80" font-weight="600" fill="#ffffff" text-anchor="middle" letter-spacing="0.00" opacity="0.62">розлив из оригинального</text>
+<text x="46.00" y="59.58" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="0.80" font-weight="600" fill="#ffffff" text-anchor="middle" letter-spacing="0.00" opacity="0.62">флакона</text>
+<text x="12.82" y="20.20" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="0.88" font-weight="800" fill="#ffffff" text-anchor="start" letter-spacing="0.50" opacity="0.6">АРОМАТ</text>
+<line x1="12.82" y1="22.13" x2="23.18" y2="22.13" stroke="#ffffff" stroke-width="0.2" opacity=".35"/>
+<text x="12.82" y="24.58" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="0.88" font-weight="800" fill="#ffffff" text-anchor="start" letter-spacing="0.50" opacity="0.6">ДОМ</text>
+<line x1="12.82" y1="26.51" x2="23.18" y2="26.51" stroke="#ffffff" stroke-width="0.2" opacity=".35"/>
+<text x="12.82" y="29.73" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="0.85" font-weight="600" fill="#ffffff" text-anchor="start" letter-spacing="0.00" opacity="0.8">Спирт. Беречь от огня</text>
+<text x="12.82" y="31.01" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="0.85" font-weight="600" fill="#ffffff" text-anchor="start" letter-spacing="0.00" opacity="0.8">и детей.</text>
+<text x="12.82" y="33.05" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="0.85" font-weight="600" fill="#ffffff" text-anchor="start" letter-spacing="0.00" opacity="0.8">Розлив AROMIO из</text>
+<text x="12.82" y="34.32" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="0.85" font-weight="600" fill="#ffffff" text-anchor="start" letter-spacing="0.00" opacity="0.8">оригинала.</text>
+<g transform="rotate(90 32.00 40.48)">
+<text x="7.82" y="40.83" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="1.00" font-weight="800" fill="#ffffff" text-anchor="start" letter-spacing="0.30" opacity="1">AROMIO · 1 мл · ДЕКАНТ</text>
+</g>
+<g transform="rotate(90 60.00 40.48)">
+<text x="35.82" y="40.83" font-family="Nunito, 'Trebuchet MS', sans-serif" font-size="1.00" font-weight="800" fill="#ffffff" text-anchor="start" letter-spacing="0.30" opacity="1">AROMIO · 1 мл · ДЕКАНТ</text>
+</g>
+<path d="M11.00,14.48 L67.00,14.48 L67.00,66.48 L11.00,66.48 L3.00,64.88 L3.00,16.08 Z" fill="none" stroke="#111318" stroke-width="0.25"/>
+<path d="M11.00,14.48 L11.00,4.54 Q11.00,3.00 12.54,3.00 L23.46,3.00 Q25.00,3.00 25.00,4.54 L25.00,14.48" fill="none" stroke="#111318" stroke-width="0.25"/>
+<path d="M11.00,66.48 L11.00,76.42 Q11.00,77.96 12.54,77.96 L23.46,77.96 Q25.00,77.96 25.00,76.42 L25.00,66.48" fill="none" stroke="#111318" stroke-width="0.25"/>
+<path d="M39.00,14.48 L39.00,4.54 Q39.00,3.00 40.54,3.00 L51.46,3.00 Q53.00,3.00 53.00,4.54 L53.00,14.48" fill="none" stroke="#111318" stroke-width="0.25"/>
+<path d="M39.00,66.48 L39.00,76.42 Q39.00,77.96 40.54,77.96 L51.46,77.96 Q53.00,77.96 53.00,76.42 L53.00,66.48" fill="none" stroke="#111318" stroke-width="0.25"/>
+<path d="M25.20,14.48 L25.90,7.59 L38.10,7.59 L38.80,14.48" fill="none" stroke="#111318" stroke-width="0.25"/>
+<path d="M25.20,66.48 L25.90,73.37 L38.10,73.37 L38.80,66.48" fill="none" stroke="#111318" stroke-width="0.25"/>
+<path d="M53.20,14.48 L53.90,7.59 L66.10,7.59 L66.80,14.48" fill="none" stroke="#111318" stroke-width="0.25"/>
+<path d="M53.20,66.48 L53.90,73.37 L66.10,73.37 L66.80,66.48" fill="none" stroke="#111318" stroke-width="0.25"/>
+<line x1="11.00" y1="14.48" x2="67.00" y2="14.48" stroke="#111318" stroke-width="0.18" stroke-dasharray="1.4 1.1"/>
+<line x1="11.00" y1="66.48" x2="67.00" y2="66.48" stroke="#111318" stroke-width="0.18" stroke-dasharray="1.4 1.1"/>
+<line x1="11.00" y1="14.48" x2="11.00" y2="66.48" stroke="#111318" stroke-width="0.18" stroke-dasharray="1.4 1.1"/>
+<line x1="25.00" y1="14.48" x2="25.00" y2="66.48" stroke="#111318" stroke-width="0.18" stroke-dasharray="1.4 1.1"/>
+<line x1="39.00" y1="14.48" x2="39.00" y2="66.48" stroke="#111318" stroke-width="0.18" stroke-dasharray="1.4 1.1"/>
+<line x1="53.00" y1="14.48" x2="53.00" y2="66.48" stroke="#111318" stroke-width="0.18" stroke-dasharray="1.4 1.1"/>
+<text x="3.00" y="83.56" font-family="monospace" font-size="1.25" fill="#111318">AROMIO · декант 1 мл · 14×14×52 мм · пробник-капля, Ø7 × 45 мм · вылет 3 мм · 1:1</text>
+</svg>
