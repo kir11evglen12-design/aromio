@@ -7125,3 +7125,428 @@ body { background: var(--ground); }
 .hx-tile .hx-name { margin-top: auto; padding-top: 8px; }
 .hx-tile .hx-meta { margin-top: auto; }
 .hx-tile .hx-name + .hx-meta { margin-top: 2px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ЖИВОПИСНАЯ ТЕМА
+
+   Фон — та самая картина: зелёное поле, написанное мастихином, с
+   цветами по краям. Всё остальное подстраивается под неё: тёмная
+   краска вместо белого текста, бумага с фактурой вместо стекла, цвета
+   взяты с самих цветов на холсте — жёлтый, розовый, синий, белила.
+
+   Белый текст здесь читаться не может, поэтому правило «все буквы
+   белые» переворачивается: --w и его оттенки становятся тёмной краской,
+   и весь текстовый слой переезжает разом, а не селектор за селектором.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* холст */
+  --canvas:      #8cbb4e;
+  --canvas-deep: #6f9b3a;
+
+  /* краска, которой пишут поверх */
+  --ink-1: #1e2a16;   /* основной текст */
+  --ink-2: #3c4d2e;   /* второй план */
+  --ink-3: #5d6f4a;   /* третий план, подписи */
+
+  /* бумага под текстом */
+  --paper-1: #f7f3e6;
+  --paper-2: #ece5d2;
+  --paper-3: #ded4bb;
+
+  /* цвета с самого холста */
+  --fl-yellow: #e8b62c;
+  --fl-pink:   #e07b9f;
+  --fl-blue:   #4f8fd6;
+  --fl-violet: #7b76c9;
+  --fl-white:  #fbfaf5;
+
+  /* перекрашиваем токены, на которых держится весь текстовый слой */
+  --w:   var(--ink-1);
+  --w-2: var(--ink-2);
+  --w-3: var(--ink-3);
+  --line-w: rgb(30 46 22 / 20%);
+  --line:   rgb(30 46 22 / 18%);
+
+  --ground:   var(--canvas);
+  --ground-2: var(--paper-1);
+  --ground-3: var(--paper-2);
+
+  --paper: var(--canvas);
+  --color-paper: var(--canvas);
+  --ink: var(--ink-1);
+  --color-ink: var(--ink-1);
+  --muted: var(--ink-3);
+  --color-muted: var(--ink-3);
+
+  /* зелень кнопок уходит в травяную, чтобы не спорить с холстом */
+  --go:   #3f7a23;
+  --go-2: #55993a;
+
+  --red:    #c8443f;
+  --sig-up: #c8443f;
+  --blue-t: #2f6aa8;
+  --sig-info: #2f6aa8;
+  --sig-down: #3f7a23;
+
+  --birch:      var(--paper-1);
+  --birch-2:    var(--paper-2);
+  --birch-line: rgb(30 46 22 / 24%);
+  --birch-ink:  var(--ink-1);
+  --birch-ink-2: var(--ink-2);
+}
+
+/* ── холст ──────────────────────────────────────────────────────────── */
+
+body {
+  background:
+    url("../assets/paint/meadow.webp") center top / cover no-repeat fixed,
+    var(--canvas);
+  color: var(--ink-1);
+}
+
+/* фактура мастихина поверх всего: очень тихо, но плоских заливок
+   больше нигде не остаётся */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: url("../assets/paint/impasto.webp") repeat;
+  background-size: 320px 320px;
+  mix-blend-mode: multiply;
+  opacity: .14;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body { background-attachment: fixed; }
+}
+
+/* Проволочная сетка была фоном тёмной темы — на холсте ей места нет, и
+   она всё равно перекрывала его собой (fixed-слой на z-index -1). */
+.backdrop { display: none; }
+
+/* Фон вешаем отдельным слоем: background-attachment: fixed на body
+   ведёт себя по-разному, когда страница длиной в тридцать экранов. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: url("../assets/paint/meadow.webp") center center / cover no-repeat, var(--canvas);
+}
+
+body { background: var(--canvas); }
+
+/* ── Хром: стекло было белым по тёмному, теперь бумага по холсту ────── */
+
+.header {
+  background: rgb(247 243 230 / 82%);
+  border-bottom-color: var(--line-w);
+}
+
+.header.is-compact {
+  background: rgb(247 243 230 / 94%);
+  box-shadow: 0 12px 30px -22px rgb(20 34 14 / 40%);
+}
+
+.mbar { background: rgb(247 243 230 / 94%); border-top: 1px solid var(--line-w); }
+
+/* поля, чипы и мелкие кнопки: светлая бумага с краем-мазком */
+.sbar, .search-field, .lx-search input, .cl-note input,
+.filter, .cl-sort-btn, .hx-letter, .icon-btn, .cmp-btn, .cw-rail-btn,
+.picker-chip, .hero-chip, .cl-recent-chip, .sd-tool, .sd-chip, .sd-hit,
+.cw-tile, .cw-select, .cw-icon, .cw-find, .sbar-btn, .card-chip, .cw-tag,
+input, select, textarea {
+  background: rgb(251 249 240 / 78%);
+  border-color: var(--line-w);
+  color: var(--ink-1);
+}
+
+.filter:hover, .cl-sort-btn:hover, .hx-letter:hover:not(:disabled),
+.icon-btn:hover, .picker-chip:hover, .hero-chip:hover {
+  background: rgb(251 249 240 / 96%);
+}
+
+/* выбранное — травяная краска, а не белила */
+.filter.is-active, .cl-sort-btn.is-on, .hx-letter.is-on,
+.filter--house.is-active, .cw-icon.is-on {
+  background: var(--go);
+  border-color: var(--go);
+  color: #fbfaf5;
+}
+
+.filter.is-active i, .filter--house.is-active i { color: rgb(255 255 255 / 78%); }
+.filter--house.is-active::before { background: #fbfaf5; }
+
+/* шторка, окно каталога, меню — лист бумаги на холсте */
+.drawer, .cw, .menu, .cmd, .profile-page, .product-page {
+  background: var(--paper-1);
+  color: var(--ink-1);
+}
+
+.scrim { background: rgb(24 38 16 / 46%); }
+
+/* таблички фактов и панели */
+.pitch-fact, .stat, .spec div, .pp-calc, .mk-table, .order-card {
+  background: var(--paper-1);
+  border-color: var(--line-w);
+}
+
+::placeholder { color: var(--ink-3) !important; }
+::selection { background: var(--fl-yellow); color: var(--ink-1); }
+
+/* ── Мазки: фактура и неровный край ─────────────────────────────────────
+   Плоская заливка выдаёт экран. Кладём ту же фактуру мастихина на бумагу
+   и слегка сбиваем радиусы: угол, у которого горизонтальный и
+   вертикальный радиусы разные, читается как проведённый рукой, а не
+   поставленный циркулем. */
+
+/* фактуру держит один общий слой поверх страницы (body::after): плитка
+   в 280 px, помноженная на карточку в 310, читалась не холстом, а
+   мраморной плитой. */
+
+.card {
+  border-radius: 22px 17px 24px 19px / 19px 24px 17px 22px;
+}
+
+.cw-card, .hx-tile, .sd-tool, .pitch-fact {
+  border-radius: 20px 16px 22px 18px / 18px 22px 16px 20px;
+}
+
+.card .card-cta, .cw-cta, .more-btn, .btn, .btn--buy, .pp-cta {
+  border-radius: 16px 12px 17px 13px / 13px 17px 12px 16px;
+}
+
+.card .card-cart, .cw-cart, .pp-add, .card-size, .hx-letter, .cw-tile {
+  border-radius: 13px 10px 14px 11px / 11px 14px 10px 13px;
+}
+
+.hx-mark { border-radius: 14px 11px 15px 12px / 12px 15px 11px 14px; }
+
+/* верх плитки скруглён по карточке — иначе шов на углу */
+.card .card-media { border-radius: 22px 17px 0 0 / 19px 24px 0 0; }
+
+/* ── Сезон за флаконом становится живописью, а не фотографией ───────── */
+
+.card .card-season {
+  filter: saturate(.5) contrast(.8) brightness(1.22);
+  opacity: .7;
+}
+
+.card .card-season::after {
+  background:
+    radial-gradient(130% 85% at 50% 10%, rgb(250 247 235 / 46%), transparent 72%),
+    linear-gradient(180deg, rgb(140 187 78 / 22%) 0%, rgb(247 243 230 / 26%) 50%, rgb(63 122 35 / 20%) 100%);
+}
+
+/* плашка дома и снимок флакона — бумага, а не чёрный прямоугольник */
+.card .photo--dark {
+  background: rgb(247 243 230 / 82%);
+  box-shadow: 0 14px 28px rgb(30 46 22 / 22%), inset 0 0 0 1px rgb(30 46 22 / 10%);
+}
+
+.card .card-media:not(.media--photo) .card-media-in .plate { opacity: .62; }
+
+/* подписи на плитке: тёмная краска по бумаге */
+.card .card-top .card-label {
+  background: rgb(250 247 236 / 88%);
+  color: var(--ink-1);
+}
+
+.card .card-top .card-label--sale { background: var(--red); color: #fff; }
+
+.card .card-mini {
+  background: rgb(250 247 236 / 84%);
+  color: var(--ink-2);
+}
+
+.card .plate .pl-meta { background: rgb(250 247 236 / 86%); }
+.card .plate .pl-line { color: var(--ink-1); text-shadow: none; }
+
+/* Монограммная плашка на светлой карточке должна быть светлой: тёмный
+   прямоугольник посреди бумаги — дыра, а не флакон. */
+.card .plate:not(.photo) {
+  background:
+    linear-gradient(168deg, color-mix(in srgb, var(--tint) 30%, #f7f3e6), color-mix(in srgb, var(--tint) 48%, #ded4bb));
+  box-shadow: 0 12px 26px rgb(30 46 22 / 20%), inset 0 0 0 1px rgb(30 46 22 / 10%);
+}
+
+.card .plate .pl-mono {
+  color: color-mix(in srgb, var(--tint) 62%, #1e2a16);
+  opacity: .5;
+  mix-blend-mode: normal;
+  text-shadow: none;
+}
+
+.card .plate .pl-grid {
+  background:
+    repeating-linear-gradient(90deg, rgb(30 46 22 / 7%) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(0deg, rgb(30 46 22 / 7%) 0 1px, transparent 1px 26px);
+}
+
+.card .card-media:not(.media--photo) .card-media-in .plate { opacity: .92; }
+
+/* выбранный объём — травяная краска: чёрная пилюля осталась от тёмной темы */
+.card .card-size.is-on, .pp-buy-ml.is-on {
+  background: var(--go);
+  border-color: var(--go);
+  color: #fbfaf5;
+}
+
+/* ── Тёмные полосы становятся густой зеленью, а не чёрным ───────────────
+   В живописи тёмное место — не дыра, а та же краска гуще. Эти секции
+   держат ритм страницы, поэтому остаются контрастными, но переезжают в
+   тёмно-травяной, а текст на них — в белила. */
+
+.section--dark, .showcase--alt, .picker, .manifest,
+.split-panel--dark, .ticker--dark, .footer, .preloader {
+  background: linear-gradient(168deg, #2f4a1c, #1f3413);
+  color: var(--fl-white);
+}
+
+.section--dark *, .showcase--alt *, .picker *, .manifest *,
+.split-panel--dark *, .ticker--dark *, .footer * {
+  --w:   #fbfaf5;
+  --w-2: rgb(251 250 245 / 78%);
+  --w-3: rgb(251 250 245 / 58%);
+  --ink-1: #fbfaf5;
+  --ink-2: rgb(251 250 245 / 78%);
+  --ink-3: rgb(251 250 245 / 58%);
+  --line-w: rgb(251 250 245 / 20%);
+  --birch-ink: #fbfaf5;
+  --blue-t: #a8cdf5;
+  --muted: rgb(251 250 245 / 58%);
+}
+
+/* поля и чипы внутри тёмных полос — светлое стекло, а не бумага */
+.section--dark .filter, .picker .picker-chip, .manifest .filter,
+.section--dark input, .picker input, .footer input,
+.section--dark .cl-sort-btn, .footer .link-u {
+  background: rgb(251 250 245 / 10%);
+  border-color: rgb(251 250 245 / 22%);
+  color: #fbfaf5;
+}
+
+.preloader { background: linear-gradient(168deg, #2f4a1c, #16250d); }
+
+/* ── Кино: окно из чёрного стекла становится окном в сад ────────────── */
+
+.cn-port-inner {
+  background:
+    radial-gradient(120% 86% at 50% 2%, rgb(251 250 245 / 40%), transparent 60%),
+    radial-gradient(80% 60% at 18% 88%, rgb(232 182 44 / 24%), transparent 64%),
+    repeating-linear-gradient(104deg, rgb(251 250 245 / 10%) 0 1px, transparent 1px 38px),
+    linear-gradient(180deg, #59913a, #27401a 82%);
+}
+
+.cn-port-frame {
+  border-color: rgb(251 250 245 / 42%);
+  box-shadow: inset 0 0 180px rgb(24 40 14 / 58%), inset 0 0 30px rgb(251 250 245 / 10%);
+}
+
+/* ── Крупная надпись на холсте ───────────────────────────────────────
+   «Запах решает» была написана приглушённой краской по приглушённому
+   фону и почти пропадала. На холсте её держат белила с тенью — так же,
+   как художник ставит светлое пятно поверх зелени. */
+.sp-line {
+  color: #fbfaf5;
+  text-shadow: 0 6px 26px rgb(24 40 14 / 45%), 0 1px 0 rgb(24 40 14 / 22%);
+}
+
+/* .cn-ghost — водяной знак под надписью, а не вторая надпись: белила
+   превращали его в сплошное пятно поверх строки */
+.cn-ghost { color: rgb(251 250 245 / 16%); text-shadow: none; }
+
+/* Третий план на холсте почти сливался с зеленью — краску гущаем.
+   Светлая бумага контрастнее холста, поэтому там можно чуть тише. */
+:root {
+  --ink-2: #2c3b1e;
+  --ink-3: #435531;
+  --w-2: var(--ink-2);
+  --w-3: var(--ink-3);
+}
+
+.card, .cw-card, .hx-tile, .drawer, .cw, .pitch-fact, .sd-tool, .product-page {
+  --ink-3: #5d6f4a;
+  --w-3: #5d6f4a;
+}
+
+/* Карточка в окне каталога осталась от розовой тёмной темы: тёмная
+   краска по тёмной подложке не читается. Переводим её на ту же бумагу,
+   что и витринную плитку. */
+.cw-card {
+  background: linear-gradient(168deg, var(--paper-1), var(--paper-2));
+  border-color: var(--birch-line);
+}
+
+.cw-card .cw-name, .cw-card .cw-price b { color: var(--ink-1); }
+.cw-card .cw-price span { color: var(--ink-3); }
+.cw-card .cw-media { background: rgb(30 46 22 / 6%); }
+.cw-card .cw-tag { background: rgb(30 46 22 / 8%); color: var(--ink-2); }
+.cw-card .cw-tag--sale { background: var(--red); color: #fff; }
+.cw-card .cw-fact, .cw-card .cw-facts span { color: var(--ink-2); }
+.cw .cw-side, .cw .cw-head { color: var(--ink-1); }
+
+/* подпись на светлой плашке — тёмной краской везде, не только в плитке */
+.plate .pl-line { color: var(--ink-1); text-shadow: none; }
+.plate .pl-type { color: var(--ink-3); }
+
+/* Плашка светлеет везде, а не только в витринной плитке: в окне
+   каталога, в поиске, в сравнении она оставалась тёмной, и по ней шёл
+   тёмный текст. */
+.plate:not(.photo) {
+  background:
+    linear-gradient(168deg, color-mix(in srgb, var(--tint) 30%, #f7f3e6), color-mix(in srgb, var(--tint) 48%, #ded4bb));
+  box-shadow: 0 12px 26px rgb(30 46 22 / 20%), inset 0 0 0 1px rgb(30 46 22 / 10%);
+}
+
+.plate .pl-mono {
+  color: color-mix(in srgb, var(--tint) 62%, #1e2a16);
+  opacity: .5;
+  mix-blend-mode: normal;
+  text-shadow: none;
+}
+
+.card .plate .pl-mono { opacity: .46; }
+
+.plate .pl-grid {
+  background:
+    repeating-linear-gradient(90deg, rgb(30 46 22 / 7%) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(0deg, rgb(30 46 22 / 7%) 0 1px, transparent 1px 26px);
+}
+
+.plate .pl-line { color: var(--ink-1); text-shadow: none; }
+.plate .pl-type { color: var(--ink-3); }
+
+/* снимок на чёрном фоне тоже переезжает на бумагу везде */
+.photo--dark { background: rgb(247 243 230 / 78%); }
+
+/* Сцены под флаконом были чёрными нишами тёмной темы — на бумаге это
+   дыры. Кладём в них разбавленную зелень холста. */
+.pp-visual, .showcase-holder, .pp-media, .cmp-media, .picker-stage {
+  background:
+    radial-gradient(120% 80% at 50% 14%, rgb(251 250 245 / 60%), transparent 62%),
+    linear-gradient(170deg, #cfe0b4, #a9c485);
+  border-color: var(--line-w);
+}
+
+.pp-visual .photo--dark, .showcase-holder .photo--dark, .cmp-media .photo--dark {
+  background: rgb(247 243 230 / 70%);
+}
+
+/* счётчик на «Ещё» был мятным по светло-зелёному — почти не виден */
+.more-btn { background: linear-gradient(168deg, var(--go-2), var(--go)); border-color: transparent; color: #fbfaf5; }
+.more-btn i { color: rgb(251 250 245 / 80%); }
+.more-btn:hover { background: linear-gradient(168deg, #63a845, #35691d); }
+.more-btn:hover i { color: rgb(251 250 245 / 92%); }
+
+/* нижняя панель телефона стала бумажной, а подписи на ней остались
+   светлыми — переводим их в краску */
+.mbar, .mbar a, .mbar button, .mbar span, .mbar svg { color: var(--ink-2); }
+.mbar .is-on, .mbar a.is-on span, .mbar button.is-on span { color: var(--go); }
+.mbar svg { stroke: currentColor; }
+
+/* плашка была почти непрозрачной и закрывала сезон целиком */
+.card .card-media:not(.media--photo) .card-media-in .plate { opacity: .82; }
