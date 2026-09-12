@@ -42,16 +42,16 @@ export default function ProductCard({ product: p }: { product: Product }) {
     <article className="card" data-flip-id={p.id} style={{ ["--tint" as string]: p.tint }}>
       <div className="card-top">
         <span className="card-label">{SHORT_TYPE[p.type] ?? p.type}</span>
-        {p.sale ? <span className="card-label card-label--sale">−{p.sale}%</span> : null}
+        {p.sale ? <span className="card-label card-label--sale"><i aria-hidden>↓</i>{p.sale}%</span> : null}
 
-        <button className={"card-mini" + (inCompare ? " is-on" : "")}
+        <button className={"card-mini card-mini--cmp" + (inCompare ? " is-on" : "")}
                 aria-pressed={inCompare}
                 aria-label={`${inCompare ? "Убрать" : "Добавить"} ${p.name} в сравнение`}
                 onClick={e => { e.stopPropagation(); toggleCompare(p.id); }}>
           {inCompare ? <Check size={15} strokeWidth={2.4} /> : <Layers size={15} strokeWidth={1.7} />}
         </button>
 
-        <button className={"card-mini" + (fav ? " is-on" : "")}
+        <button className={"card-mini card-mini--fav" + (fav ? " is-on" : "")}
                 aria-pressed={fav}
                 aria-label={`${fav ? "Убрать" : "Добавить"} ${p.name} в избранное`}
                 onClick={e => { e.stopPropagation(); toggleFavorite(p.id); }}>

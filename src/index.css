@@ -6089,3 +6089,114 @@ body { font-weight: 500; letter-spacing: -0.004em; }
 
 .sd-chip-media .plate,
 .sd-hit-media .plate { padding: 6px; border-radius: 8px; }
+
+/* ============================================================
+   ЦВЕТ СО СМЫСЛОМ
+   Интерфейс остаётся чёрно-белым: цвет получают только знаки, и он
+   всегда что-то означает. Красный — цена вверх и скидка, зелёная —
+   выгода и наличие, синий — сравнение. Кнопки не красим.
+   ============================================================ */
+
+:root {
+  --sig-down: #2fbf6b;   /* дешевле, выгода, в наличии */
+  --sig-up: #ff4d4f;     /* дороже, скидка, удаление */
+  --sig-info: #4b8dff;   /* сравнение, справка */
+}
+
+/* ---------- скидка ---------- */
+
+.card-label--sale,
+.cw-tag--sale,
+.pp-sale-tag {
+  background: var(--sig-up);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.card-label--sale i,
+.cw-tag--sale i,
+.pp-sale-tag i {
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.pp-sale { border-left: 3px solid var(--sig-up); border-radius: 0 16px 16px 0; }
+
+/* ---------- наличие ---------- */
+
+.pp-stock i { background: var(--sig-down) !important; }
+
+/* ---------- избранное и сравнение ---------- */
+
+.card-mini--fav.is-on,
+.cw-heart.is-on,
+.fav-btn.is-on { color: var(--sig-up); }
+
+.card-mini--fav.is-on svg,
+.cw-heart.is-on svg,
+.fav-btn.is-on svg { fill: var(--sig-up); stroke: var(--sig-up); }
+
+.card-mini--cmp.is-on { color: var(--sig-info); }
+.card-mini--cmp.is-on svg { stroke: var(--sig-info); fill: none; }
+
+.card-cmp.is-on, .cw-check.is-on i { border-color: var(--sig-info); }
+
+/* ---------- счётчик корзины ---------- */
+
+.cart-count:not(:empty) { transition: background var(--micro) var(--ease-out); }
+.header .icon-btn .cart-count[data-has="1"],
+.mbar i[data-has="1"] { background: var(--sig-down); color: #06210f; }
+
+/* ---------- стрелки сортировки ---------- */
+
+.cl-sort-btn, .cw-sorts .cl-sort-btn { font-variant-numeric: tabular-nums; }
+
+/* ---------- выгодный объём ---------- */
+
+.size-best {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sig-down) 18%, transparent);
+  color: var(--sig-down);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.size-best i { font-style: normal; font-weight: 900; }
+
+.size.is-on .size-best {
+  background: color-mix(in srgb, var(--sig-down) 24%, transparent);
+}
+
+/* ---------- старая цена ---------- */
+
+.card-price s, .cw-price s, .pp-price s { color: color-mix(in srgb, var(--sig-up) 55%, var(--w-3)); }
+
+/* Плитка объёма теперь несёт ещё и метку выгоды — ей нужна высота и
+   собственная строка, иначе метка вываливалась за рамку. */
+.sizes-row .size {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 2px;
+  min-height: 96px;
+  height: auto;
+  padding: 14px 16px;
+}
+
+.sizes-row .size .size-best { align-self: end; margin-top: 6px; }
+
+@media (max-width: 720px) {
+  .sizes-row .size { min-height: 92px; padding: 12px 12px; }
+  .size-best { font-size: 10.5px; padding: 3px 7px; }
+}

@@ -45,6 +45,14 @@ export default function ProductPage() {
   useEffect(() => { setMl(variantOf(p, 100).ml); }, [p]);
 
   const variant = variantOf(p, ml);
+
+  /* какой флакон дешевле за миллилитр и насколько — считаем, а не назначаем */
+  const perMl = (v: { ml: number; price: number }) => priceNow(p, v) / v.ml;
+  const best = bottles(p).reduce((a, v) => (perMl(v) < perMl(a) ? v : a), bottles(p)[0]);
+  const worst = bottles(p).reduce((a, v) => (perMl(v) > perMl(a) ? v : a), bottles(p)[0]);
+  const bestGain = bottles(p).length > 1
+    ? Math.round((1 - perMl(best) / perMl(worst)) * 100)
+    : 0;
   const story = PRODUCT_STORIES[p.id];
   const house = HOUSE_STORIES[p.brand];
 
@@ -116,6 +124,11 @@ export default function ProductPage() {
                   >
                     <b>{v.ml}<i>мл</i></b>
                     <span>{money(priceNow(p, v))}</span>
+                    {v.ml === best.ml && bestGain >= 3 && (
+                      <em className="size-best">
+                        <i aria-hidden>↓</i>выгоднее на {bestGain}%
+                      </em>
+                    )}
                   </button>
                 ))}
               </div>
@@ -147,7 +160,7 @@ export default function ProductPage() {
 
             {p.sale && (
               <div className="pp-sale pp-anim">
-                <span className="pp-sale-tag">−{p.sale}%</span>
+                <span className="pp-sale-tag"><i aria-hidden>↓</i>{p.sale}%</span>
                 <span>
                   Промо дома до {saleUntil()}: было {money(variant.price)},
                   сейчас {money(priceNow(p, variant))}. В корзину уходит цена со скидкой.

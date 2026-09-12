@@ -27,7 +27,7 @@ export default function MobileBar() {
       <button onClick={() => openDrawer("cart")} data-cart-anchor>
         <span className="mbar-icon">
           <ShoppingBag size={20} strokeWidth={1.5} />
-          {cart.length > 0 && <i data-cart-count>{cart.length}</i>}
+          {cart.length > 0 && <i data-cart-count data-has="1">{cart.length}</i>}
         </span>
         <span>Корзина</span>
       </button>
