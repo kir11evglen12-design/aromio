@@ -6200,3 +6200,48 @@ body { font-weight: 500; letter-spacing: -0.004em; }
   .sizes-row .size { min-height: 92px; padding: 12px 12px; }
   .size-best { font-size: 10.5px; padding: 3px 7px; }
 }
+
+/* ============================================================
+   КАРТОЧКИ: матовый розовый корпус
+   Раньше карточка была прозрачной, и сквозь неё шла сетка фона —
+   товар терялся в ней. Теперь корпус плотный, чуть розовый и матовый:
+   без бликов и без градиентного глянца, чтобы фотография флакона
+   оставалась самым ярким пятном.
+   ============================================================ */
+
+:root {
+  --card-rose: #35242e;
+  --card-rose-2: #3e2b36;
+  --card-rose-line: rgb(255 214 226 / 14%);
+}
+
+.card,
+.cw-card {
+  background: var(--card-rose);
+  border-color: var(--card-rose-line);
+}
+
+.card:hover,
+.cw-card:hover {
+  background: var(--card-rose-2);
+  border-color: rgb(255 214 226 / 26%);
+}
+
+/* внутренние плашки чуть светлее корпуса — иначе они на нём пропадают */
+.card-label,
+.cw-tag:not(.cw-tag--sale) { background: rgb(255 255 255 / 12%); }
+
+.card .card-size { border-color: rgb(255 214 226 / 18%); }
+.card .card-buybar,
+.cw-buy { background: rgb(255 214 226 / 16%); border-top-color: rgb(255 214 226 / 16%); }
+
+.card .card-cart,
+.cw-cart { background: rgb(255 255 255 / 10%); }
+.card .card-cart:hover,
+.cw-cart:hover { background: rgb(255 255 255 / 18%); }
+
+/* На розовом корпусе серый текст садится по контрасту — поднимаем его,
+   чтобы подпись дома и объём читались так же уверенно, как на чёрном. */
+.card .card-line,
+.card .card-price span,
+.cw-card .cw-line { color: rgb(255 255 255 / 62%); }
