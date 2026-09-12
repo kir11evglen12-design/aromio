@@ -10,6 +10,7 @@ import Header from "./components/Header";
 import MobileBar from "./components/MobileBar";
 import Hero from "./components/Hero";
 import Ticker from "./components/Ticker";
+import Cinema from "./components/Cinema";
 import Manifest from "./components/Manifest";
 import Picker from "./components/Picker";
 import Chapters from "./components/Chapters";
@@ -50,6 +51,7 @@ function Shell() {
             а манифест дома идёт следом */}
         <Collection />
         <Hero ready={ready} />
+        <Cinema />
         <Ticker />
         <Showcase />
         <Picker />

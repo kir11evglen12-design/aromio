@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 import Lenis from "lenis";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 export const prefersReducedMotion = (): boolean =>
   typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -327,3 +328,69 @@ export function flyToCart(source: Element | null): void {
       });
     }, () => dot.remove());
 }
+
+/* ============================================================
+   СЦЕНЫ НА СКРОЛЛЕ
+   Страница перестаёт быть лентой и становится последовательностью
+   сцен: секция прикалывается, а внутри неё идёт таймлайн, привязанный
+   к прокрутке. На телефоне прикалывание выключено — там это дорого и
+   мешает, вместо него обычное появление.
+   ============================================================ */
+
+/** SplitText по строкам с маской — заголовок выезжает снизу построчно */
+export function splitReveal(
+  target: string | Element,
+  opts: { trigger?: gsap.DOMTarget; start?: string; stagger?: number; delay?: number } = {}
+): void {
+  if (prefersReducedMotion()) return;
+  const el = typeof target === "string" ? document.querySelector(target) : target;
+  if (!el) return;
+
+  const split = new SplitText(el, { type: "lines", linesClass: "sp-line" });
+  /* каждая строка в своей маске: иначе текст выезжает поверх соседних */
+  split.lines.forEach(line => {
+    const mask = document.createElement("span");
+    mask.className = "sp-mask";
+    line.parentNode?.insertBefore(mask, line);
+    mask.appendChild(line);
+  });
+
+  gsap.from(split.lines, {
+    yPercent: 118,
+    duration: 1.05,
+    ease: "expo.out",
+    stagger: opts.stagger ?? 0.09,
+    delay: opts.delay ?? 0,
+    immediateRender: false,
+    scrollTrigger: {
+      trigger: (opts.trigger ?? el) as gsap.DOMTarget,
+      start: opts.start ?? "top 82%",
+      once: true
+    }
+  });
+}
+
+/**
+ * Прикалывает секцию и возвращает таймлайн, привязанный к прокрутке.
+ * `length` — сколько пикселей прокрутки занимает сцена.
+ */
+export function pinnedScene(
+  section: Element,
+  length: number | (() => number),
+  opts: { scrub?: number } = {}
+): gsap.core.Timeline | null {
+  if (prefersReducedMotion()) return null;
+  return gsap.timeline({
+    scrollTrigger: {
+      trigger: section,
+      start: "top top",
+      end: () => "+=" + (typeof length === "function" ? length() : length),
+      pin: true,
+      pinSpacing: true,
+      scrub: opts.scrub ?? 0.8,
+      anticipatePin: 1
+    }
+  });
+}
+
+export { SplitText };

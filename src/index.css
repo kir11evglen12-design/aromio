@@ -5031,3 +5031,206 @@ body { font-weight: 500; letter-spacing: -0.004em; }
   }
   .fly-dot { display: none; }
 }
+
+/* ============================================================
+   СЦЕНЫ — окно, разъезжающийся заголовок, барабан
+   ============================================================ */
+
+.cinema { position: relative; }
+
+/* маска для построчного выезда заголовка */
+.sp-mask { display: block; overflow: hidden; }
+.sp-line { display: block; will-change: transform; }
+
+/* ---------- сцена 1: окно ---------- */
+
+.cn-window {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.cn-port {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(22% 26% 22% 26% round 120px);
+  overflow: hidden;
+}
+
+.cn-port-inner {
+  position: absolute;
+  inset: -6%;
+  /* внутри окна светлее, чем снаружи — иначе раскрытие не читается
+     на чёрной странице: рамка есть, а «за стеклом» ничего не видно */
+  background:
+    radial-gradient(120% 86% at 50% 2%, rgb(255 255 255 / 46%), transparent 58%),
+    radial-gradient(80% 60% at 18% 88%, rgb(255 255 255 / 22%), transparent 62%),
+    repeating-linear-gradient(104deg, rgb(255 255 255 / 7%) 0 1px, transparent 1px 38px),
+    linear-gradient(180deg, #2b2b33, #0c0c10 78%);
+  will-change: transform;
+}
+
+.cn-port-frame {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(255 255 255 / 30%);
+  /* к краям окна свет уходит — так стекло читается как стекло */
+  box-shadow: inset 0 0 180px rgb(0 0 0 / 72%), inset 0 0 30px rgb(255 255 255 / 6%);
+  pointer-events: none;
+}
+
+.cn-window-copy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  text-align: center;
+  padding-inline: var(--gutter);
+  max-width: 720px;
+  text-shadow: 0 2px 30px rgb(0 0 0 / 55%);
+}
+
+.cn-window-copy h2 {
+  font-size: clamp(34px, 5.6vw, 78px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  margin: 0;
+}
+
+.cn-cta { min-height: 58px; padding-inline: 30px; }
+
+.cn-window-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--w-3);
+}
+
+/* ---------- сцена 2: заголовок расходится ---------- */
+
+.cn-split {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  gap: 26px;
+  padding: clamp(70px, 10vh, 140px) var(--gutter);
+  overflow: hidden;
+}
+
+.cn-ghost {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(140px, 30vw, 460px);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: rgb(255 255 255 / 3.5%);
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform;
+  z-index: 0;
+}
+
+.cn-split-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  /* зазор в середине — то, что делает разъезд читаемым */
+  gap: clamp(24px, 12vw, 220px);
+}
+
+.cn-half {
+  font-size: clamp(44px, 11vw, 168px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  will-change: transform;
+}
+
+.cn-split-mid {
+  position: relative;
+  z-index: 1;
+  max-width: 62ch;
+  margin-inline: auto;
+  text-align: center;
+}
+
+/* ---------- сцена 3: барабан ---------- */
+
+.cn-reel {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  gap: 30px;
+  padding: clamp(70px, 10vh, 140px) var(--gutter);
+  overflow: hidden;
+}
+
+.cn-reel-head { display: grid; gap: 10px; justify-items: center; text-align: center; }
+.cn-reel-head h2 { font-size: clamp(30px, 5vw, 64px); letter-spacing: -0.03em; margin: 0; }
+
+.cn-reel-window {
+  position: relative;
+  height: clamp(180px, 34vh, 300px);
+  overflow: hidden;
+  border-block: 1px solid var(--line-w);
+  /* края строк гаснут — так видно, что список крутится дальше */
+  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+}
+
+.cn-reel-col { will-change: transform; }
+
+.cn-reel-item {
+  height: clamp(60px, 11vh, 100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 3vw, 40px);
+  white-space: nowrap;
+}
+
+.cn-reel-item b {
+  font-size: clamp(26px, 5vw, 58px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.cn-reel-item span { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--w-3); }
+.cn-reel-item em { font-style: normal; font-size: clamp(13px, 1.6vw, 17px); color: var(--w-2); }
+
+.cn-reel-line {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  height: clamp(60px, 11vh, 100px);
+  transform: translateY(-50%);
+  border-block: 1px solid rgb(255 255 255 / 14%);
+  pointer-events: none;
+}
+
+/* ---------- телефон: сцены остаются, прикалывание нет ---------- */
+
+@media (max-width: 859px) {
+  .cn-window { min-height: 76vh; }
+  .cn-port { clip-path: inset(0 0 0 0 round 24px); inset: 14px; }
+  .cn-window-hint { display: none; }
+  .cn-split, .cn-reel { min-height: auto; }
+  .cn-split-row { flex-direction: column; align-items: flex-start; gap: 0; }
+  .cn-reel-window { height: 200px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cn-port { clip-path: inset(0 0 0 0 round 24px); }
+}

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight, Search } from "lucide-react";
-import { byId, products } from "../data/products";
+import { byId, HOUSES, products } from "../data/products";
 import { LEXICON } from "../data/lexicon";
 import { gsap, prefersReducedMotion, revealLines, useGsap } from "../lib/motion";
 import Plate from "./Plate";
@@ -90,7 +90,7 @@ const NOTE_COUNT = new Set(
 
 const FACTS: [string, string][] = [
   [String(products.length), "ароматов"],
-  ["3", "дома"],
+  [String(HOUSES.length), "домов"],
   [String(NOTE_COUNT), "нот"],
   [String(LEXICON.length), "терминов"]
 ];
@@ -132,8 +132,8 @@ export default function Hero({ ready }: { ready: boolean }) {
         </h1>
 
         <p className="lead hero-fade">
-          Dior, Louis Vuitton и Valentino — отобранные ароматы трёх домов.
-          Найдите тот, что станет вашей подписью.
+          Dior, Chanel, Tom Ford, Creed и ещё шесть домов — отобранные ароматы
+          на одной витрине. Найдите тот, что станет вашей подписью.
         </p>
 
         <div className="hero-quick hero-fade">
