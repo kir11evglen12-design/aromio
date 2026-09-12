@@ -6831,3 +6831,114 @@ a:not(.btn):not([class*="cta"]) { color: var(--blue-t); }
   .card .cta-more, .cw-cta .cta-more { display: none; }
   .card .card-cta, .cw-cta { font-size: 12px; letter-spacing: .06em; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Тёмно-зелёная витрина
+
+   Фон остаётся тем же — та же сетка, та же глубина, — но уходит из
+   чёрного в очень тёмный зелёный, а кнопки покупки садятся на пару
+   тонов ниже, чтобы не светить салатовым поверх него.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --ground:   #050e0a;   /* сама страница */
+  --ground-2: #081410;   /* панель, шторка, окно */
+  --ground-3: #0b1a14;   /* плашка внутри панели */
+
+  --paper: var(--ground);
+  --color-paper: var(--ground);
+  --color-paper-2: var(--ground-2);
+
+  /* тёмно-зелёные кнопки */
+  --go: #0d6b35;
+  --go-2: #14853f;
+}
+
+body { background: var(--ground); }
+
+/* поверхности, где чёрный был вписан числом */
+.header.is-compact { background: var(--ground); }
+.pitch-fact { background: var(--ground-2); }
+.card .card-media { background: var(--ground-2); }
+.drawer, .cw, .menu { background: var(--ground-2); }
+.mbar { background: color-mix(in srgb, var(--ground) 92%, transparent); }
+
+/* стеклянные подложки под текстом на флаконе — тоже с зелёным подтоном */
+.card .card-top .card-label { background: color-mix(in srgb, var(--ground) 72%, transparent); }
+.card .card-mini { background: color-mix(in srgb, var(--ground) 62%, transparent); }
+.card .plate .pl-meta { background: color-mix(in srgb, var(--ground) 70%, transparent); }
+.card .photo--dark { background: color-mix(in srgb, var(--ground) 66%, transparent); }
+.card .card-media:not(.media--photo) .card-media-in .plate { opacity: .78; }
+
+/* кнопка покупки: тёмная зелень, белый текст, без свечения */
+.card .card-cta, .cw-cta, .btn--buy, .pp-cta {
+  background: linear-gradient(168deg, var(--go-2), var(--go));
+  box-shadow: 0 10px 24px -16px rgb(5 60 28 / 90%);
+}
+
+.card .card-cta:hover, .cw-cta:hover, .btn--buy:hover, .pp-cta:hover {
+  background: linear-gradient(168deg, #1a9c4d, #0a5b2c);
+}
+
+.card .card-cart, .pp-add {
+  background: rgb(20 133 63 / 14%);
+  border-color: rgb(20 133 63 / 36%);
+  color: #0d6b35;
+}
+
+.cw-cart {
+  background: rgb(20 133 63 / 16%);
+  border-color: rgb(20 133 63 / 38%);
+  color: #2fa35c;
+}
+
+/* «в наличии» и выгода остаются читаемыми на тёмно-зелёном */
+.pp-stock, .cw-stock, .size-best { color: #4ec27a; }
+
+/* ── «Ещё»: следующая десятка ─────────────────────────────────────────
+   Кнопка говорит не только «ещё», но и сколько именно осталось — иначе
+   непонятно, один клик впереди или четыре. */
+.cl-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 26px;
+}
+
+.more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 34px;
+  border: 1px solid rgb(20 133 63 / 45%);
+  border-radius: var(--r-btn);
+  background: linear-gradient(168deg, rgb(20 133 63 / 22%), rgb(13 107 53 / 30%));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out), border-color var(--micro) var(--ease-out);
+}
+
+.more-btn:hover {
+  background: linear-gradient(168deg, var(--go-2), var(--go));
+  border-color: transparent;
+}
+
+.more-btn i {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: none;
+  color: #7fd39d;
+}
+
+.more-btn:hover i { color: rgb(255 255 255 / 82%); }
+
+@media (max-width: 620px) {
+  .cl-more { margin-top: 20px; }
+  .more-btn { width: 100%; justify-content: center; min-height: 52px; padding: 0 20px; font-size: 13px; }
+}

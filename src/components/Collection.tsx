@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { byId, bottles, CATEGORY_LABEL, fromPrice, HOUSES, money, products, SAMPLE_ML } from "../data/products";
 import { plural } from "../lib/auth";
 import type { Category as ProductCategory } from "../data/products";
@@ -18,11 +18,24 @@ const VOLUMES = (() => {
 
 const CHEAPEST = Math.min(...products.map(p => fromPrice(p)));
 
+/* сколько флаконов показываем за раз: полсотни карточек подряд никто не
+   просматривает, а бесконечная лента прячет то, что идёт после неё */
+const PAGE = 10;
+
 export default function Collection() {
   const {
     category, setCategory, openProduct, sort, setSort, noteQuery, recent
   } = useShop();
   const list = visibleProducts(category, sort, noteQuery);
+
+  /* «Ещё» вместо длинной ленты. Смена фильтра начинает счёт заново:
+     иначе после каталога на 51 аромат фильтр на два открывался бы
+     показанным «до 30-го» и кнопки не было бы видно вовсе. */
+  const [shown, setShown] = useState(PAGE);
+  useEffect(() => { setShown(PAGE); }, [category, sort, noteQuery]);
+
+  const page = list.slice(0, shown);
+  const left = list.length - page.length;
 
   const scope = useGsap(() => {
     revealFrom(".collection .section-head > div > *, .filters", { stagger: 0.07 });
@@ -33,7 +46,7 @@ export default function Collection() {
   /* filtering never repaints the grid: what stays travels from its old box
      to the new one, what is new rises in behind it */
   const grid = useRef<HTMLDivElement>(null);
-  useFlip(grid, [category, sort, noteQuery]);
+  useFlip(grid, [category, sort, noteQuery, shown]);
 
   return (
     <section className="section collection" id="collection" ref={scope}>
@@ -111,8 +124,17 @@ export default function Collection() {
       </div>
 
       <div className="grid" ref={grid}>
-        {list.map(p => <ProductCard product={p} key={p.id} />)}
+        {page.map(p => <ProductCard product={p} key={p.id} />)}
       </div>
+
+      {left > 0 && (
+        <div className="cl-more">
+          <button className="more-btn" onClick={() => setShown(n => n + PAGE)}>
+            Ещё
+            <i>{left} {plural(left, "аромат", "аромата", "ароматов")}</i>
+          </button>
+        </div>
+      )}
 
       {list.length === 0 && (
         <p className="empty cl-empty">
