@@ -80,7 +80,7 @@ export default function ProductPage() {
   return (
     <div className={"product-page" + (open && !leaving ? " is-open" : "") + (leaving ? " is-leaving" : "")}
          role="dialog" aria-modal="true"
-         aria-label="Карточка аромата" aria-hidden={!open} ref={panel}>
+         aria-label="Карточка аромата" aria-hidden={!open} inert={!open} ref={panel}>
       <button className="pp-close" onClick={leave} aria-label="Закрыть карточку">
         <X size={17} strokeWidth={1.4} />
       </button>

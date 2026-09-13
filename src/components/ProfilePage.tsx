@@ -55,7 +55,7 @@ export default function ProfilePage() {
 
   return (
     <div className={"product-page" + (profileOpen ? " is-open" : "")} role="dialog" aria-modal="true"
-         aria-label="Личный кабинет" aria-hidden={!profileOpen}>
+         aria-label="Личный кабинет" aria-hidden={!profileOpen} inert={!profileOpen}>
       <button className="pp-close" onClick={closeProfile} aria-label="Закрыть кабинет">
         <X size={17} strokeWidth={1.4} />
       </button>

@@ -122,6 +122,8 @@ export const useShop = (): ShopValue => {
 
 const CART_KEY = "aromioCart";
 const RECENT_KEY = "aromioRecent";
+/* избранное гостя: закладку ставят до того, как решат заводить аккаунт */
+const FAV_KEY = "aromioFavorites";
 
 export function ShopProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartLine[]>(() => {
@@ -139,6 +141,19 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   });
 
   const [user, setUserState] = useState<User | null>(null);
+
+  /* Избранное работает без аккаунта. Прежде сердце открывало
+     регистрацию — и закладку теряли, не успев поставить, хотя рядом
+     сравнение прекрасно жило без входа. Гостевые закладки лежат в
+     браузере и при входе сливаются с теми, что уже в аккаунте. */
+  const [guestFavs, setGuestFavs] = useState<number[]>(() => {
+    try { return JSON.parse(localStorage.getItem(FAV_KEY) ?? "[]") as number[]; }
+    catch { return []; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem(FAV_KEY, JSON.stringify(guestFavs)); } catch { /* приватное окно */ }
+  }, [guestFavs]);
   /* openProfile is called right after sign-in, before the memo that captured
      `user` has re-run, so it reads the account through a ref instead */
   const userRef = useRef<User | null>(null);
@@ -226,6 +241,15 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     if (u) upsertUser(u);
   }, []);
 
+  /* при входе гостевые закладки переезжают в аккаунт и больше не
+     дублируются в браузере */
+  useEffect(() => {
+    if (!user || guestFavs.length === 0) return;
+    const merged = [...new Set([...user.favorites, ...guestFavs])];
+    setGuestFavs([]);
+    if (merged.length !== user.favorites.length) setUser({ ...user, favorites: merged });
+  }, [user, guestFavs, setUser]);
+
   const addToCart = useCallback((id: number, ml?: number) => {
     const product = byId(id);
     const variant = variantOf(product, ml ?? 100);
@@ -284,13 +308,17 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   }, [cart, user, setUser, toast, openAuth]);
 
   const isFavorite = useCallback(
-    (id: number) => !!user && user.favorites.includes(id),
-    [user]
+    (id: number) => (user ? user.favorites : guestFavs).includes(id),
+    [user, guestFavs]
   );
 
   const toggleFavorite = useCallback((id: number) => {
     if (!user) {
-      openAuth("register", "Создайте аккаунт, чтобы сохранять любимые ароматы.");
+      const has = guestFavs.includes(id);
+      setGuestFavs(f => (has ? f.filter(x => x !== id) : [...f, id]));
+      toast(has
+        ? "Удалено из избранного"
+        : "В избранном. Войдите, чтобы оно было и на других устройствах");
       return;
     }
     const has = user.favorites.includes(id);
@@ -299,7 +327,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       favorites: has ? user.favorites.filter(f => f !== id) : [...user.favorites, id]
     });
     toast(has ? "Удалено из избранного" : "Добавлено в избранное");
-  }, [user, setUser, toast, openAuth]);
+  }, [user, guestFavs, setUser, toast]);
 
   const toggleCompare = useCallback((id: number) => {
     setCompare(c => {

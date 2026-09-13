@@ -65,7 +65,7 @@ export default function CartDrawer() {
   };
 
   return (
-    <aside className={"drawer" + (open ? " is-open" : "")} aria-label="Корзина" aria-hidden={!open}
+    <aside className={"drawer" + (open ? " is-open" : "")} aria-label="Корзина" aria-hidden={!open} inert={!open}
            ref={panel}>
       <div className="drawer-head">
         <h3>Корзина</h3>

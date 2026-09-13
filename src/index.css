@@ -8876,9 +8876,6 @@ body::after { opacity: .05; }
   background: linear-gradient(168deg, #16171a, #09090a);
 }
 
-/* в планке осталось два гнезда — зелёное убираем */
-.skin-btn--green { display: none; }
-
 /* ══════════════════════════════════════════════════════════════════════
    ВКЛАДКА «ФИЛЬТРЫ»
 
@@ -9219,3 +9216,128 @@ body::after { opacity: .05; }
 
   .ft-done, .ft-clear { min-height: 46px; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   МЕЛКИЕ НЕУДОБСТВА, НАЙДЕННЫЕ СПЛОШНОЙ ПРОВЕРКОЙ
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Мелкие цели нажатия на телефоне ───────────────────────────────
+   Палец не попадает в кружок 22 px и в полоску 6 px. Увеличиваем не
+   рисунок, а область нажатия: псевдоэлемент растягивает её до сорока
+   четырёх пикселей, а внешне ничего не меняется. */
+@media (max-width: 720px) {
+  .skin-btn, .qt-dot, .ft-x, .link-u, .sd-chip-x, .ft-search-x,
+  .cw-name, .cw-heart {
+    position: relative;
+  }
+
+  /* .card-name сюда не входит: его расширенная зона залезала на снимок
+     флакона сверху и перехватывала нажатия по нему. Имя и так дублирует
+     плитку — она же и остаётся крупной целью. */
+  .skin-btn::after, .qt-dot::after, .ft-x::after,
+  .link-u::after, .sd-chip-x::after, .ft-search-x::after,
+  .cw-name::after, .cw-heart::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+
+  /* у подчёркнутых ссылок ::after уже занят линией — там расширяем
+     отступом, иначе подчёркивание исчезнет */
+  .link-u::after { content: none; }
+  .link-u { padding-block: 10px; }
+
+  .skin { padding: 5px; gap: 4px; }
+  .skin-btn { width: 26px; height: 26px; }
+  .skin-btn i { width: 15px; height: 15px; }
+
+  .qt-dot { height: 8px; }
+  .ft-x { width: 36px; height: 36px; }
+}
+
+/* ── 2. Переполнение на узком экране ──────────────────────────────────
+   Кнопка сортировки вылезала за правый край на семь пикселей, а имя
+   категории — за край карточки: длинное слово не переносится. */
+@media (max-width: 620px) {
+  .cl-tools { width: 100%; }
+  .cl-sort { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+  .cl-sort-btn { flex: 0 1 auto; min-width: 0; }
+}
+
+.card .card-line, .cw-card .cw-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.card .card-line .cat-name, .cw-card .cw-line .cat-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 3. Монограмма обрезалась ─────────────────────────────────────────
+   «LV» в две буквы не влезало в кегль, посчитанный от ширины плашки. */
+.plate .pl-mono {
+  max-width: 92%;
+  overflow: visible;
+  text-align: center;
+  line-height: 1;
+}
+
+.card .plate .pl-mono { font-size: min(calc(var(--bw) * 0.9), 46%); }
+
+/* Две точки темы стояли вплотную: промах по одной попадал в другую и
+   менял тему. Разводим их и делаем крупнее — только на телефоне. */
+@media (max-width: 720px) {
+  .skin { padding: 5px 6px; gap: 8px; }
+  .skin-btn { width: 30px; height: 30px; }
+  .skin-btn i { width: 16px; height: 16px; }
+
+  /* имя и сердце в окне каталога были 44×24 и 20×32 */
+  .cw-name { padding-block: 6px; }
+  .cw-heart { width: 40px; height: 40px; }
+}
+
+/* ── Фокус с клавиатуры ───────────────────────────────────────────────
+   Проверка показала, что у полей ввода и у букв указателя фокус не был
+   виден вовсе: человек, который ходит по сайту табом, не понимал, где
+   он находится. Кольцо ставим одно на всё и только для клавиатуры —
+   :focus-visible не срабатывает от мыши, поэтому нажатия остаются
+   чистыми. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--go-2);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* на тёмном фоне травяная зелень тонет — там кольцо светлее */
+:root[data-theme="black"] :where(a, button, input, select, textarea, [tabindex]):focus-visible,
+.section--dark :where(a, button, input, textarea, [tabindex]):focus-visible,
+.footer :where(a, button, input, [tabindex]):focus-visible {
+  outline-color: #6fe08f;
+}
+
+/* поле внутри рамки: кольцо рисуем на самой рамке, иначе оно режется */
+.search-field:focus-within,
+.sbar:focus-within,
+.ft-search:focus-within,
+.cw-find:focus-within {
+  outline: 2px solid var(--go-2);
+  outline-offset: 2px;
+}
+
+.search-field input:focus-visible,
+.sbar input:focus-visible,
+.ft-search input:focus-visible,
+.cw-find input:focus-visible { outline: none; }
+
+/* две точки темы стояли почти вплотную: 28 px на попадание вместо 32 */
+@media (max-width: 720px) { .skin { gap: 10px; } }
