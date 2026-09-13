@@ -8095,3 +8095,258 @@ input, select, textarea {
    первого экрана, пока панель не прокрутили. Переход в 0.42 s этой
    подсказки не требует, поэтому убираем её. */
 .product-page { will-change: auto; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ФРАНЦУЗСКИЕ СТРОКИ О ЗАПАХЕ
+
+   Оригинал набран крупно и курсивом — это стихи, а не подпись к товару.
+   Подстрочник под ним тише и мельче: он помогает, но не спорит за
+   внимание. Источник назван целиком — стихотворение, сборник, год.
+   ══════════════════════════════════════════════════════════════════ */
+
+.qt-card {
+  margin: 26px 0 0;
+  padding: clamp(26px, 4vw, 54px);
+  border: 1px solid var(--line-w);
+  border-left: 3px solid var(--go);
+  background: var(--paper-1, rgb(255 255 255 / 5%));
+}
+
+.qt-body { display: grid; gap: 18px; }
+
+.qt-fr {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(21px, 3.1vw, 40px);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.24;
+  letter-spacing: -0.01em;
+  color: var(--w);
+  text-wrap: balance;
+}
+
+.qt-ru {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  max-width: 62ch;
+  font-size: clamp(13px, 1.2vw, 15px);
+  line-height: 1.5;
+  color: var(--w-2);
+}
+
+.qt-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-w);
+}
+
+.qt-meta b {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--w);
+}
+
+.qt-meta span { font-size: 13px; font-style: italic; color: var(--blue-t); }
+
+.qt-meta i {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--w-3);
+}
+
+.qt-dots { display: flex; gap: 8px; margin-top: 18px; }
+
+.qt-dot {
+  width: 34px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  background: var(--line-w);
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out);
+}
+
+.qt-dot:hover { background: var(--w-3); }
+.qt-dot.is-on { background: var(--go); }
+.qt-dot:focus-visible { outline: 2px solid var(--go-2); outline-offset: 3px; }
+
+@media (max-width: 620px) {
+  .qt-card { padding: 20px 18px; }
+  .qt-body { gap: 14px; }
+  .qt-dot { width: 26px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   СЛОВАРЬ ВИТРИНЫ: ЯРКИЕ ТАБЛИЧКИ
+
+   Шесть групп — шесть цветов, взятых с того же холста: жёлтый, розовый,
+   синий, фиолетовый, зелёный, красный. Цвет здесь не украшение, а метка
+   группы: по нему находишь нужную табличку, не читая заголовков.
+
+   Текст на цветной плашке всегда тёмный, а не белый: на жёлтом белила
+   исчезают. Поэтому плашка светлая, а цвет держат шапка и левый край.
+   ══════════════════════════════════════════════════════════════════ */
+
+.fr-head { margin-top: 46px; }
+
+.fr-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.6vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--w);
+}
+
+.fr-note {
+  margin: 8px 0 0;
+  max-width: 66ch;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--w-2);
+}
+
+.fr-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.fr-group {
+  --tone: #e8b62c;
+  --tone-soft: #fdf4dd;
+  display: grid;
+  align-content: start;
+  border: 1px solid var(--line-w);
+  border-left: 5px solid var(--tone);
+  background: var(--paper-1, rgb(255 255 255 / 6%));
+  overflow: hidden;
+}
+
+.fr-group--yellow { --tone: #d9a017; --tone-soft: #fdf3da; }
+.fr-group--pink   { --tone: #d4568a; --tone-soft: #fbe6ee; }
+.fr-group--blue   { --tone: #2f6aa8; --tone-soft: #e2edf9; }
+.fr-group--violet { --tone: #6b5fc4; --tone-soft: #e9e6fa; }
+.fr-group--green  { --tone: #3f7a23; --tone-soft: #e6f2dd; }
+.fr-group--red    { --tone: #c0392f; --tone-soft: #fbe4e1; }
+
+.fr-group-title {
+  margin: 0;
+  padding: 11px 16px;
+  background: var(--tone);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.fr-list { margin: 0; padding: 0; list-style: none; }
+
+.fr-word {
+  display: grid;
+  gap: 2px;
+  padding: 11px 16px;
+  border-top: 1px solid var(--line-w);
+}
+
+.fr-word:first-child { border-top: 0; }
+
+/* каждая вторая строка чуть плотнее цветом — глазу проще вести строку */
+.fr-word:nth-child(even) { background: color-mix(in srgb, var(--tone) 8%, transparent); }
+
+.fr-word b {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--w);
+}
+
+.fr-word em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--tone);
+}
+
+.fr-word span { font-size: 13px; line-height: 1.4; color: var(--w-2); }
+
+.fr-word i {
+  font-style: normal;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--w-3);
+}
+
+@media (max-width: 620px) {
+  .fr-groups { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .fr-head { margin-top: 32px; }
+  .fr-word { padding: 10px 13px; }
+}
+
+/* на тёмной теме цветную метку держим ярче, а подложку строк — тише */
+:root[data-theme="black"] .fr-group { background: rgb(243 241 234 / 5%); }
+:root[data-theme="black"] .fr-group--yellow { --tone: #e8b62c; }
+:root[data-theme="black"] .fr-group--pink   { --tone: #ef7ba6; }
+:root[data-theme="black"] .fr-group--blue   { --tone: #6aa6ef; }
+:root[data-theme="black"] .fr-group--violet { --tone: #9b90ef; }
+:root[data-theme="black"] .fr-group--green  { --tone: #4fbf6a; }
+:root[data-theme="black"] .fr-group--red    { --tone: #f0736a; }
+:root[data-theme="black"] .fr-group-title { color: #12130f; }
+
+/* Сетка оставляла дыры: строка выравнивается по самой высокой плитке, а
+   «Семейства» вдвое длиннее «Пирамиды». Колонки складывают плотно. */
+.fr-groups {
+  display: block;
+  columns: 270px;
+  column-gap: 14px;
+}
+
+.fr-group {
+  display: block;
+  break-inside: avoid;
+  margin: 0 0 14px;
+}
+
+@media (max-width: 620px) { .fr-groups { columns: 1; } }
+
+/* ── Строка фактов тоже становится цветной ────────────────────────────
+   Пять одинаковых бежевых табличек читались как один блок. Теперь у
+   каждой своя метка — цифру находишь по цвету, а не по подписи. */
+.pitch { gap: 10px; }
+
+.pitch-fact {
+  --tone: #d9a017;
+  border-left: 5px solid var(--tone);
+  border-top: 1px solid var(--line-w);
+  border-right: 1px solid var(--line-w);
+  border-bottom: 1px solid var(--line-w);
+}
+
+.pitch-fact:nth-child(1) { --tone: #d9a017; }
+.pitch-fact:nth-child(2) { --tone: #2f6aa8; }
+.pitch-fact:nth-child(3) { --tone: #6b5fc4; }
+.pitch-fact:nth-child(4) { --tone: #d4568a; }
+.pitch-fact:nth-child(5) { --tone: #3f7a23; }
+
+.pitch-fact b { color: var(--tone); }
+
+:root[data-theme="black"] .pitch-fact:nth-child(1) { --tone: #e8b62c; }
+:root[data-theme="black"] .pitch-fact:nth-child(2) { --tone: #6aa6ef; }
+:root[data-theme="black"] .pitch-fact:nth-child(3) { --tone: #9b90ef; }
+:root[data-theme="black"] .pitch-fact:nth-child(4) { --tone: #ef7ba6; }
+:root[data-theme="black"] .pitch-fact:nth-child(5) { --tone: #4fbf6a; }

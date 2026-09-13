@@ -19,6 +19,7 @@ import Showcase from "./components/Showcase";
 import SplitGender from "./components/SplitGender";
 import Lines from "./components/Lines";
 import Journal from "./components/Journal";
+import Quotes from "./components/Quotes";
 import Lexicon from "./components/Lexicon";
 import Service from "./components/Service";
 import Compare from "./components/Compare";
@@ -56,6 +57,7 @@ function Shell() {
         <Showcase />
         <Picker />
         <Manifest />
+        <Quotes />
         <Chapters />
         <Journal />
         <SplitGender />
