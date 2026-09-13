@@ -82,7 +82,7 @@ export default function SearchDrawer() {
 
   return (
     <aside className={"drawer drawer--search" + (open ? " is-open" : "")}
-           aria-label="Поиск" aria-hidden={!open}>
+           aria-label="Поиск" aria-hidden={!open} inert={!open}>
       <div className="drawer-head">
         <h3>Поиск</h3>
         <button className="icon-btn" onClick={closeDrawer} aria-label="Закрыть поиск">

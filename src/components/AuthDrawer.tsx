@@ -84,7 +84,7 @@ export default function AuthDrawer() {
   const switchMode = (mode: "login" | "register") => { setAuthMode(mode); setErrors({}); };
 
   return (
-    <aside className={"drawer" + (open ? " is-open" : "")} aria-label="Вход и регистрация" aria-hidden={!open}>
+    <aside className={"drawer" + (open ? " is-open" : "")} aria-label="Вход и регистрация" aria-hidden={!open} inert={!open}>
       <div className="drawer-head">
         <h3>Личный кабинет</h3>
         <button className="icon-btn" onClick={closeDrawer} aria-label="Закрыть">

@@ -92,7 +92,7 @@ export default function CatalogWindow() {
 
   return (
     <div className={"cw" + (catalogOpen ? " is-open" : "")} role="dialog" aria-modal="true"
-         aria-label="Каталог" aria-hidden={!catalogOpen}>
+         aria-label="Каталог" aria-hidden={!catalogOpen} inert={!catalogOpen}>
       <header className="cw-top">
         <div>
           <div className="eyebrow">Каталог</div>

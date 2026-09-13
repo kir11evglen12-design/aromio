@@ -32,7 +32,7 @@ export default function Compare() {
       </div>
 
       <div className={"cmp-panel" + (compareOpen ? " is-open" : "")} role="dialog"
-           aria-modal="true" aria-label="Сравнение ароматов" aria-hidden={!compareOpen}>
+           aria-modal="true" aria-label="Сравнение ароматов" aria-hidden={!compareOpen} inert={!compareOpen}>
         <div className="cmp-inner">
           <div className="cmp-top">
             <div>
