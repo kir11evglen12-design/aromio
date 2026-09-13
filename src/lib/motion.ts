@@ -425,3 +425,134 @@ export function pinnedScene(
 }
 
 export { SplitText };
+
+/* ══════════════════════════════════════════════════════════════════════
+   ШВЕЙЦАРСКИЙ MOTION
+
+   У движения на этой витрине одна подпись: cubic-bezier(.16,1,.3,1) —
+   резкий старт, долгое затухание. Всё, что появляется, появляется этой
+   кривой; всё, что уходит, уходит вдвое быстрее. Больше кривых не
+   заводим: разнобой в easing читается как разнобой в почерке.
+   ══════════════════════════════════════════════════════════════════ */
+
+/**
+ * Линейка вычерчивается слева направо, когда до неё доскроллили.
+ *
+ * В швейцарской школе структуру держит линия, поэтому именно линия и
+ * должна появляться первой — как будто её проводят по листу. Рисуем
+ * через scaleX, а не через width: ширина считается раскладкой на каждом
+ * кадре, transform — нет.
+ */
+export function drawRules(
+  scope: string,
+  opts: { trigger?: string; stagger?: number } = {}
+): void {
+  if (prefersReducedMotion()) return;
+
+  const rules = gsap.utils.toArray<HTMLElement>(scope);
+  if (!rules.length) return;
+
+  gsap.set(rules, { transformOrigin: "left center", scaleX: 0 });
+  gsap.to(rules, {
+    scaleX: 1,
+    duration: 0.8,
+    ease: "power3.out",
+    stagger: opts.stagger ?? 0.06,
+    scrollTrigger: {
+      trigger: opts.trigger ?? rules[0],
+      start: "top 88%",
+      once: true
+    }
+  });
+}
+
+/**
+ * Число досчитывается до своего значения.
+ *
+ * Работает только там, где значение — действительно число: «51 аромат»
+ * досчитается, «30–200 мл» останется как есть. Считать диапазон было бы
+ * враньём в виде анимации.
+ */
+export function countUp(scope: string): void {
+  if (prefersReducedMotion()) return;
+
+  for (const el of gsap.utils.toArray<HTMLElement>(scope)) {
+    const raw = (el.textContent ?? "").trim();
+    /* берём только чистое число, возможно с неразрывными пробелами */
+    const clean = raw.replace(/[\s ]/g, "");
+    if (!/^\d+$/.test(clean)) continue;
+
+    const to = Number(clean);
+    if (!Number.isFinite(to) || to <= 0) continue;
+
+    const box = { v: 0 };
+    gsap.to(box, {
+      v: to,
+      duration: 1.1,
+      ease: "power2.out",
+      scrollTrigger: { trigger: el, start: "top 92%", once: true },
+      onUpdate: () => { el.textContent = String(Math.round(box.v)); },
+      onComplete: () => { el.textContent = raw; }
+    });
+  }
+}
+
+/**
+ * Ячейки сетки поднимаются снизу лесенкой — не все разом и не по одной,
+ * а рядами: глаз читает витрину строками, и появляться она должна так же.
+ */
+export function revealGrid(scope: string, perRow = 4): void {
+  if (prefersReducedMotion()) return;
+
+  const cells = gsap.utils.toArray<HTMLElement>(scope);
+  if (!cells.length) return;
+
+  gsap.set(cells, { opacity: 0, y: 18 });
+  gsap.to(cells, {
+    opacity: 1,
+    y: 0,
+    duration: 0.7,
+    ease: "power3.out",
+    stagger: { each: 0.045, from: "start", grid: [Math.ceil(cells.length / perRow), perRow] },
+    scrollTrigger: { trigger: cells[0], start: "top 92%", once: true }
+  });
+}
+
+/**
+ * Фолио переезжает с плитки на страницу аромата.
+ *
+ * Это подпись всей витрины: номер не исчезает и не появляется заново, а
+ * physически переходит из сетки в поле страницы. Считаем обе рамки и
+ * проигрываем разницу — FLIP, то есть один transform вместо анимации
+ * раскладки. Кегль меняем через scale, а не через font-size: размер
+ * шрифта пересчитывает раскладку на каждом кадре, transform — нет.
+ */
+export function flyFolio(fromEl: HTMLElement | null, toEl: HTMLElement | null): void {
+  if (!fromEl || !toEl || prefersReducedMotion()) return;
+
+  const a = fromEl.getBoundingClientRect();
+  const b = toEl.getBoundingClientRect();
+  if (!a.width || !b.width) return;
+
+  const scale = a.height / b.height;
+  const dx = a.left - b.left;
+  const dy = a.top - b.top;
+
+  toEl.animate(
+    [
+      { transform: `translate(${dx}px, ${dy}px) scale(${scale})`, opacity: 0.55 },
+      { transform: "none", opacity: 1 }
+    ],
+    { duration: dur(560), easing: EASE_OUT, fill: "backwards" }
+  );
+}
+
+/** запоминаем, с какой плитки открыли — чтобы было откуда лететь */
+let folioOrigin: HTMLElement | null = null;
+
+export const setFolioOrigin = (el: HTMLElement | null): void => { folioOrigin = el; };
+export const takeFolioOrigin = (): HTMLElement | null => {
+  const el = folioOrigin;
+  folioOrigin = null;
+  return el;
+};

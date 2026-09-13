@@ -6,17 +6,13 @@ interface Props {
   className?: string;
 }
 
-const MONOGRAM: Record<string, string> = {
-  DIOR: "D",
-  "LOUIS VUITTON": "LV",
-  VALENTINO: "V"
-};
-
 /**
- * The product plate. Where the store owner supplied a real photograph we
- * show it; everywhere else the slot stays deliberately empty — a colour
- * field in the scent's own tint with the house monogram, and no drawn
- * bottle pretending to be one.
+ * Место аромата в сетке.
+ *
+ * Где владелец витрины передал снимок — стоит снимок. Где не передал —
+ * не рисуем флакон и не притворяемся, что он есть: ставим типографский
+ * образец, имя дома крупным гротеском. Пустая ячейка, честно набранная,
+ * выглядит уместнее нарисованного флакона, которого никто не видел.
  */
 export default function Plate({ product, style, className }: Props) {
   if (product.photo) {
@@ -28,18 +24,9 @@ export default function Plate({ product, style, className }: Props) {
   }
 
   return (
-    <div
-      className={"plate " + (className ?? "")}
-      style={{ ...style, ["--tint" as string]: product.tint }}
-    >
-      <div className="pl-field" aria-hidden>
-        <span className="pl-mono">{MONOGRAM[product.brand] ?? product.brand.slice(0, 1)}</span>
-        <span className="pl-grid" />
-      </div>
-      <div className="pl-meta">
-        <span className="pl-line">{product.line}</span>
-        <span className="pl-type">{product.type}</span>
-      </div>
+    <div className={"plate plate--type " + (className ?? "")} style={style} aria-hidden>
+      <span className="plate-house">{product.brand}</span>
+      <span className="plate-line">{product.line}</span>
     </div>
   );
 }

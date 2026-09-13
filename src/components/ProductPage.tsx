@@ -1,11 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowRight, Check, Heart, Layers, ShoppingBag, X } from "lucide-react";
-import { bottles, byId, CATEGORY_LABEL, fromPrice, money, priceList, priceNow, products, samples, saleUntil, season, sprays, variantOf } from "../data/products";
+import { bottles, byId, CATEGORY_LABEL, folio, fromPrice, money, priceList, priceNow, products, samples, saleUntil, season, sprays, variantOf } from "../data/products";
 import { SEASON_IMAGES, SEASON_LABEL } from "../data/seasonImages";
 import { HOUSE_STORIES, PRODUCT_STORIES } from "../data/facts";
 import { plural } from "../lib/auth";
 import { useShop } from "../lib/shop";
-import { animate, dur, ENTER, EXIT, flyToCart, prefersReducedMotion } from "../lib/motion";
+import { animate, dur, ENTER, EXIT, flyFolio, flyToCart, prefersReducedMotion, takeFolioOrigin } from "../lib/motion";
 import Plate from "./Plate";
 import Pyramid from "./Pyramid";
 
@@ -19,6 +19,7 @@ export default function ProductPage() {
 
   /* the page itself travels: it comes in from the right edge */
   const panel = useRef<HTMLDivElement>(null);
+  const folioEl = useRef<HTMLSpanElement>(null);
   const visual = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const [leaving, setLeaving] = useState(false);
@@ -26,6 +27,12 @@ export default function ProductPage() {
   /* панель выезжает с правого края — это делает CSS через класс is-open,
      а содержимое догоняет её чуть позже, поэтому движение читается как
      «панель приехала», а не «страница мигнула» */
+  /* номер переезжает с плитки: он и есть подпись перехода */
+  useLayoutEffect(() => {
+    if (!open) return;
+    flyFolio(takeFolioOrigin(), folioEl.current);
+  }, [open, productId]);
+
   useLayoutEffect(() => {
     if (!open || prefersReducedMotion()) return;
     animate(inner.current,
@@ -93,6 +100,7 @@ export default function ProductPage() {
           </div>
 
           <div className="pp-copy">
+            <span className="pp-folio" ref={folioEl} aria-hidden>{folio(p)}</span>
             <div className="eyebrow pp-anim">{p.brand} — {p.line}</div>
             <h2 className="display pp-name pp-anim">{p.name}</h2>
             <p className="lead pp-anim">{p.desc}</p>

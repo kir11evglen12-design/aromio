@@ -3,7 +3,7 @@ import { byId, bottles, fromPrice, HOUSES, money, products, SAMPLE_ML } from "..
 import { plural } from "../lib/auth";
 import { SORT_LABEL, useShop, visibleProducts } from "../lib/shop";
 import type { Sort } from "../lib/shop";
-import { parallax, revealFrom, useFlip, useGsap } from "../lib/motion";
+import { countUp, drawRules, parallax, revealFrom, revealGrid, useFlip, useGsap } from "../lib/motion";
 import ProductCard from "./ProductCard";
 import SearchBar from "./SearchBar";
 import Filters from "./Filters";
@@ -36,9 +36,14 @@ export default function Collection() {
   const left = list.length - page.length;
 
   const scope = useGsap(() => {
-    revealFrom(".collection .section-head > div > *, .filters", { stagger: 0.07 });
-    /* the headline drifts against the grid as the section passes */
+    revealFrom(".collection .section-head > div > *", { stagger: 0.07 });
+    /* заголовок чуть отстаёт от сетки, пока секция проходит мимо */
     parallax(".collection .section-head > div", { y: -46, trigger: ".collection" });
+    /* линейки вычерчиваются, цифры досчитываются, ячейки встают рядами —
+       три движения одной кривой, в том порядке, в каком глаз читает */
+    drawRules(".collection .pitch, .collection .cl-tools", { trigger: ".collection .pitch" });
+    countUp(".collection .pitch-fact b");
+    revealGrid(".collection .grid > .card");
   }, []);
 
   /* filtering never repaints the grid: what stays travels from its old box

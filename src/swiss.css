@@ -1,0 +1,1643 @@
+/* ══════════════════════════════════════════════════════════════════════
+   AROMIO — ШВЕЙЦАРСКИЙ СЛОЙ
+
+   Парфюмерию принято рисовать тёплой: песок, глина, антиква, зерно. Так
+   выглядит каждый нишевый бренд, и поэтому так выглядеть не стоит.
+   Здесь взята швейцарская школа — белое поле, волосяные линейки, один
+   красный акцент, цифры как часть композиции. Регистр не свечи, а
+   фармакопеи: аптечная точность, в которой 51 аромат с ценами,
+   объёмами и процентами читается без каши.
+
+   Правила слоя, от которых нельзя отступать:
+     • поверхность белая или #f7f7f8 — тёплой бумаги нет;
+     • одна гарнитура, гротеск, и в заголовке, и в тексте;
+     • один акцент — красный #e4002b; всё остальное чёрное и серое;
+     • структуру держат линейки в один пиксель, не тени;
+     • набор слева, композиция асимметричная;
+     • цифры табличные и участвуют в вёрстке наравне с буквами.
+
+   Файл подключается последним и перекрывает прежний слой целиком.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root,
+:root[data-theme="white"],
+:root[data-theme="green"] {
+  --paper:   #ffffff;
+  --paper-2: #f7f7f8;
+  --paper-3: #efeff1;
+
+  --ink:   #111113;
+  --ink-2: #5d5d63;
+  --ink-3: #8e8e95;
+
+  --rule:   #e4e4e7;
+  --rule-2: #d3d3d8;
+
+  --accent:      #e4002b;
+  --accent-ink:  #ffffff;
+
+  /* прежние имена держим живыми: на них завязан весь старый слой */
+  --canvas: var(--paper);
+  --ground: var(--paper);
+  --ground-2: var(--paper);
+  --ground-3: var(--paper-2);
+  --color-paper: var(--paper);
+  --paper-1: var(--paper);
+  --w:   var(--ink);
+  --w-2: var(--ink-2);
+  --w-3: var(--ink-3);
+  --ink-1: var(--ink);
+  --color-ink: var(--ink);
+  --muted: var(--ink-2);
+  --color-muted: var(--ink-2);
+  --line-w: var(--rule);
+  --line: var(--rule);
+  --go:   var(--ink);
+  --go-2: var(--ink);
+  --c-important: var(--accent);
+  --c-save: var(--accent);
+  --c-was:  var(--ink-3);
+  --red:    var(--accent);
+  --sig-up: var(--accent);
+  --blue-t: var(--ink-2);
+  --sig-info: var(--ink-2);
+  --sig-down: var(--ink);
+  --c-women: var(--ink-2);
+  --c-men: var(--ink-2);
+  --c-unisex: var(--ink-2);
+  --c-niche: var(--ink-2);
+  --birch: var(--paper);
+  --birch-2: var(--paper-2);
+  --birch-line: var(--rule);
+  --birch-ink: var(--ink);
+  --birch-ink-2: var(--ink-2);
+  --sand: var(--accent);
+  --chip: var(--ink);
+
+  /* Одна гарнитура на всё. Helvetica Neue стоит на всех устройствах
+     Apple, Arial — на Windows; Liberation Sans повторяет метрики Arial
+     в Linux. Ни антиквы, ни второй гарнитуры: у швейцарской школы
+     заголовок и текст набраны одним. */
+  --font-swiss: "Helvetica Neue", Helvetica, Inter, "Liberation Sans",
+                Arial, system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-swiss);
+  --font-display: var(--font-swiss);
+
+  /* модуль вёрстки: всё кратно четырём */
+  --u: 4px;
+  --gutter-sw: clamp(16px, 3.2vw, 56px);
+
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-in: cubic-bezier(.5, 0, .75, 0);
+
+  --r-pill: 0;
+  --r-btn: 0;
+  --r-card: 0;
+  --r-tile: 0;
+}
+
+/* ── чёрная тема: та же система, вывернутая ─────────────────────────── */
+:root[data-theme="black"] {
+  --paper:   #0a0a0b;
+  --paper-2: #111113;
+  --paper-3: #17171a;
+
+  --ink:   #f4f4f6;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+
+  --rule:   #26262b;
+  --rule-2: #34343a;
+
+  --accent: #ff2f4d;
+  --accent-ink: #0a0a0b;
+
+  --canvas: var(--paper);
+  --ground: var(--paper);
+  --ground-2: var(--paper);
+  --ground-3: var(--paper-2);
+  --color-paper: var(--paper);
+  --paper-1: var(--paper);
+  --w: var(--ink); --w-2: var(--ink-2); --w-3: var(--ink-3);
+  --ink-1: var(--ink); --color-ink: var(--ink);
+  --muted: var(--ink-2); --color-muted: var(--ink-2);
+  --line-w: var(--rule); --line: var(--rule);
+  --go: var(--ink); --go-2: var(--ink);
+  --c-important: var(--accent);
+  --c-save: var(--accent);
+  --c-was: var(--ink-3);
+  --red: var(--accent); --sig-up: var(--accent);
+  --blue-t: var(--ink-2); --sig-info: var(--ink-2); --sig-down: var(--ink);
+  --c-women: var(--ink-2); --c-men: var(--ink-2);
+  --c-unisex: var(--ink-2); --c-niche: var(--ink-2);
+  --birch: var(--paper); --birch-2: var(--paper-2);
+  --birch-line: var(--rule); --birch-ink: var(--ink); --birch-ink-2: var(--ink-2);
+  --chip: var(--ink);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ОСНОВАНИЕ
+   ══════════════════════════════════════════════════════════════════ */
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-swiss);
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* зерно и холст были из другой школы — швейцарская поверхность чистая */
+body::before { background: var(--paper) !important; }
+body::after { content: none !important; }
+.backdrop { display: none !important; }
+
+/* скругления сняты везде: сетку держит прямой угол */
+*, *::before, *::after { border-radius: 0 !important; }
+
+/* кроме круглых по назначению: кружок остаётся кружком */
+.icon-btn, .card-mini, .fav-btn, .cmp-btn, .avatar, .cw-heart,
+.skin, .skin-btn, .skin-btn i, .pp-close, .cw-close, .cat-dot,
+.cart-count, .ft-badge, .qt-dot, .sd-chip-x, .ft-x, .bf-clear,
+.cw-rail-btn, .cursor, .cursor-dot { border-radius: 999px !important; }
+
+.card, .cw-card, .hx-tile, .pitch-fact, .fr-group, .qt-card,
+.ft-panel, .drawer, .cw, .plate, .photo, .hx-mark, .sd-tool,
+.card-media, .card-media-in, .ft-search, .search-field, .sbar,
+input, select, textarea, .btn, .card-cta, .cw-cta, .more-btn,
+.ft-btn, .cl-sort-btn, .filter, .hx-letter, .ft-cat, .ft-done,
+.ft-clear, .card-try, .card-cart, .cw-cart, .pp-add, .size,
+.cw-tile, .cw-select, .cw-icon, .cw-find { border-radius: 0 !important; }
+
+::selection { background: var(--accent); color: var(--accent-ink); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ТИПОГРАФИКА
+
+   Один гротеск, четыре ступени. Заголовок набран плотно и крупно, с
+   отрицательным разрядом: так швейцарская школа ставит крупный кегль.
+   ══════════════════════════════════════════════════════════════════ */
+
+.display, h1, h2, h3 {
+  font-family: var(--font-swiss);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.96;
+  color: var(--ink);
+  text-transform: none;
+}
+
+.display {
+  font-size: clamp(38px, 7.4vw, 104px);
+  max-width: 16ch;
+}
+
+.display em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.section-head { align-items: end; }
+
+.eyebrow, .ft-block-title, .fr-group-title, .sizes-head .eyebrow,
+.cl-count, .hx-meta, .qt-meta i, .card-label, .cw-tag {
+  font-family: var(--font-swiss);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.lead {
+  font-size: clamp(14px, 1.15vw, 17px);
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 52ch;
+  letter-spacing: -0.005em;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ЛИНЕЙКИ
+
+   Структуру держит линия в один пиксель. Тени сняты: в швейцарской
+   школе плоскость не приподнимают, её размечают.
+   ══════════════════════════════════════════════════════════════════ */
+
+.card, .cw-card, .hx-tile, .pitch-fact, .drawer, .cw, .ft-panel,
+.qt-card, .fr-group, .sd-tool, .btn, .more-btn, .ft-btn,
+.cl-sort-btn, .filter, .hx-letter, .ft-cat, .size, .card-try {
+  box-shadow: none !important;
+}
+
+.section {
+  padding-block: clamp(56px, 7vw, 116px);
+  border-top: 1px solid var(--rule);
+}
+
+.section:first-of-type { border-top: 0; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ШАПКА
+   ══════════════════════════════════════════════════════════════════ */
+
+.header {
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.header.is-compact {
+  background: var(--paper);
+  border-bottom-color: var(--rule-2);
+  box-shadow: none;
+}
+
+.brand small {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.nav .link-u {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+}
+
+/* красная черта выезжает под ссылкой — единственное место, где акцент
+   работает украшением, и именно поэтому он там один */
+.nav .link-u::after {
+  background: var(--accent);
+  height: 1px;
+}
+
+.icon-btn {
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.icon-btn:hover { background: var(--paper-2); border-color: var(--rule-2); }
+
+.cart-count[data-has="1"] { background: var(--accent); color: var(--accent-ink); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   СТРОКА ФАКТОВ — разлинованная таблица, а не пять плиток
+   ══════════════════════════════════════════════════════════════════ */
+
+.pitch {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin-top: clamp(28px, 4vw, 56px);
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+}
+
+.pitch-fact {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 14px 16px 16px 0;
+  border: 0;
+  border-left: 1px solid var(--rule);
+  background: none;
+}
+
+.pitch-fact:first-child { border-left: 0; }
+.pitch-fact:not(:first-child) { padding-left: 16px; }
+
+.pitch-fact b {
+  font-size: clamp(20px, 2.3vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.pitch-fact span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+@media (max-width: 760px) {
+  .pitch { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pitch-fact { border-top: 1px solid var(--rule); padding: 11px 12px 12px; }
+  .pitch-fact:first-child, .pitch-fact:nth-child(2) { border-top: 0; }
+  .pitch-fact:nth-child(odd) { border-left: 0; padding-left: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ПОИСК И УПРАВЛЕНИЕ
+   ══════════════════════════════════════════════════════════════════ */
+
+.sbar, .search-field, .ft-search, .cw-find {
+  border: 1px solid var(--rule);
+  background: var(--paper);
+}
+
+.sbar:focus-within, .search-field:focus-within,
+.ft-search:focus-within, .cw-find:focus-within {
+  border-color: var(--ink);
+  outline: none;
+}
+
+.sbar input, .search-field input, .ft-search input {
+  font-family: var(--font-swiss);
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.cl-tools {
+  gap: 0;
+  margin-top: clamp(20px, 2.6vw, 34px);
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding-block: 0;
+}
+
+.ft-btn, .cl-sort-btn {
+  min-height: 46px;
+  padding: 0 18px;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  background: none;
+  color: var(--ink-2);
+  font-family: var(--font-swiss);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: color .2s var(--ease), background .2s var(--ease);
+}
+
+.ft-btn { padding-left: 0; font-weight: 700; color: var(--ink); }
+.ft-btn:hover, .cl-sort-btn:hover { background: var(--paper-2); color: var(--ink); }
+
+.cl-sort-btn.is-on, .ft-btn.is-on {
+  color: var(--accent);
+  background: none;
+}
+
+.cl-sort { gap: 0; }
+
+.cl-count {
+  margin-left: auto;
+  padding-right: 0;
+  color: var(--ink-3);
+}
+
+.ft-badge { background: var(--accent); color: var(--accent-ink); }
+
+.ft-reset {
+  min-height: 26px;
+  border: 1px solid var(--accent);
+  background: none;
+  color: var(--accent);
+  font-size: 10px;
+}
+
+.ft-reset:hover { background: var(--accent); color: var(--accent-ink); }
+
+/* панель фильтров */
+.ft-panel {
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  box-shadow: none;
+}
+
+.ft-head, .ft-block, .ft-foot { border-color: var(--rule); }
+.ft-head b { color: var(--ink); }
+
+.ft-cat {
+  min-height: 36px;
+  border: 1px solid var(--rule);
+  background: none;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ft-cat i { color: var(--ink-3); }
+.ft-cat:hover { border-color: var(--ink); }
+
+.ft-cat.is-on,
+.ft-cat--women.is-on, .ft-cat--men.is-on,
+.ft-cat--unisex.is-on, .ft-cat--niche.is-on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.ft-cat.is-on i { color: var(--paper); opacity: .6; }
+
+.ft-row:hover { background: var(--paper-2); }
+.ft-row.is-on { background: none; }
+.ft-row.is-on .ft-name { color: var(--accent); }
+.ft-mark { border: 1px solid var(--rule); }
+.ft-row.is-on .ft-mark { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.ft-done { background: var(--ink); color: var(--paper); }
+.ft-done:hover { background: var(--accent); }
+.ft-clear { border: 1px solid var(--rule); color: var(--ink-2); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ВИТРИНА — разлинованная сетка
+
+   Плитки не парят и не отбрасывают тень: они лежат ячейками в сетке,
+   разделённые волосяной линейкой. Это и есть швейцарская структура.
+   ══════════════════════════════════════════════════════════════════ */
+
+.grid {
+  gap: 0;
+  border-top: 1px solid var(--ink);
+  border-left: 1px solid var(--rule);
+  margin-top: clamp(20px, 2.6vw, 34px);
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  aspect-ratio: auto;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  overflow: hidden;
+  transition: background .3s var(--ease);
+}
+
+.card:hover { background: var(--paper-2); border-color: var(--rule); }
+
+/* ── фолио: номер аромата как элемент композиции ───────────────────── */
+.card-folio {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  z-index: 3;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  transition: color .3s var(--ease);
+}
+
+.card:hover .card-folio { color: var(--accent); }
+
+/* ── верхняя строка: концентрация слева, скидка справа ─────────────── */
+.card .card-top {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 10px 0;
+  min-height: 28px;
+}
+
+.card .card-top .card-label {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.card .card-top .card-label--sale {
+  padding: 2px 6px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  letter-spacing: 0.04em;
+}
+
+.card .card-top .card-label--sale i { display: none; }
+
+/* ── снимок ─────────────────────────────────────────────────────────── */
+.card .card-media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 6px 14px 14px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  min-height: 0;
+}
+
+.card .card-media-in,
+.card .card-media-in:has(.photo--dark),
+.card .card-media-in:has(.plate:not(.photo)) {
+  width: min(100%, 190px);
+  height: auto;
+  aspect-ratio: 3 / 4;
+  max-width: 100%;
+}
+
+.card .photo, .card .photo--dark {
+  inset: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  animation: none;
+}
+
+.card .photo img, .card .photo--dark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: normal;
+  padding: 0;
+  transition: transform .7s var(--ease);
+}
+
+.card:hover .photo img, .card:hover .photo--dark img { transform: scale(1.045); }
+
+/* плашка без снимка: серое поле с инициалом дома, без градиентов */
+.card .plate:not(.photo) {
+  background: var(--paper-2);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  opacity: 1;
+}
+
+.card .plate .pl-mono {
+  color: var(--ink-3);
+  opacity: .5;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.card .plate .pl-grid { background: none; }
+.card .plate .pl-meta { display: none; }
+
+/* ── кружки сравнения и избранного ─────────────────────────────────── */
+.card-tools { top: 8px; right: 10px; gap: 4px; }
+
+.card .card-mini {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: color .2s var(--ease);
+}
+
+.card .card-mini:hover { color: var(--ink); background: none; }
+.card .card-mini--fav.is-on { color: var(--accent); }
+.card .card-mini--cmp.is-on { color: var(--ink); }
+
+/* ── подпись ────────────────────────────────────────────────────────── */
+.card .card-body {
+  display: grid;
+  gap: 3px;
+  padding: 0 14px 10px;
+  border-top: 1px solid var(--rule);
+  padding-top: 11px;
+}
+
+.card .card-line {
+  display: flex;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.card .card-line .cat-dot { display: none; }
+.card .card-line .cat-name { color: var(--ink-3); font-weight: 700; }
+
+.card .card-name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink);
+  text-align: left;
+}
+
+.card .card-row { margin-top: 5px; }
+
+.card .card-price {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-wrap: nowrap;
+}
+
+.card .card-price b {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.card .card-price s { font-size: 11px; color: var(--ink-3); }
+.card .card-save { font-size: 11px; font-weight: 700; color: var(--accent); }
+
+/* ── действия: пробник линейкой, флакон чёрной кнопкой ─────────────── */
+.card-try {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-top: 1px solid var(--rule);
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color .2s var(--ease), background .2s var(--ease);
+}
+
+.card-try:hover { background: var(--paper-3); color: var(--ink); border-style: solid; }
+
+.card-try-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.card-try-price { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.card .card-buybar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+  background: none;
+}
+
+.card .card-cta {
+  min-height: 42px;
+  border: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-swiss);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: none;
+  transition: background .2s var(--ease);
+}
+
+.card .card-cta:hover { background: var(--accent); color: var(--accent-ink); }
+
+.card .card-cart {
+  min-height: 42px;
+  min-width: 42px;
+  border: 0;
+  border-left: 1px solid var(--rule);
+  background: none;
+  color: var(--ink-2);
+}
+
+.card .card-cart:hover { background: var(--paper-3); color: var(--ink); }
+
+/* «Ещё» — одна линейка во всю ширину, а не пилюля */
+.cl-more { margin-top: 0; }
+
+.more-btn {
+  width: 100%;
+  min-height: 56px;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  color: var(--ink);
+  font-family: var(--font-swiss);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.more-btn:hover { background: var(--paper-2); border-color: var(--rule); }
+.more-btn i { color: var(--ink-3); letter-spacing: 0.02em; text-transform: none; font-weight: 500; }
+.more-btn:hover i { color: var(--ink-2); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   КАРТОЧКА ТОВАРА
+   ══════════════════════════════════════════════════════════════════ */
+
+.product-page { background: var(--paper); }
+
+.product-page .pp-visual,
+.showcase-holder, .pp-media, .cmp-media, .picker-stage {
+  background: var(--paper-2);
+  border: 0;
+  border-right: 1px solid var(--rule);
+}
+
+.product-page .pp-visual .photo img,
+.product-page .pp-visual .photo--dark img { object-fit: contain; padding: 8%; }
+
+.pp-folio {
+  position: absolute;
+  top: clamp(80px, 9vh, 120px);
+  left: 0;
+  font-size: clamp(40px, 5vw, 76px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--rule-2);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  user-select: none;
+}
+
+.pp-name { letter-spacing: -0.04em; }
+
+.pp-close {
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.pp-close:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.sizes-row .size, .samples .size--sample {
+  border: 1px solid var(--rule);
+  background: none;
+}
+
+.sizes-row .size.is-on, .samples .size--sample.is-on {
+  border-color: var(--ink);
+  background: var(--paper-2);
+}
+
+.size b { letter-spacing: -0.02em; }
+.size-best { color: var(--accent); background: none; padding: 0; font-weight: 700; }
+
+.pp-buy .btn--buy, .pp-cta, .cw-cta, .btn--solid {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  border: 0;
+  box-shadow: none;
+  font-family: var(--font-swiss);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pp-buy .btn--buy:hover, .pp-cta:hover, .cw-cta:hover, .btn--solid:hover {
+  background: var(--accent) !important;
+  color: var(--accent-ink) !important;
+}
+
+.pp-sale {
+  border-left: 2px solid var(--accent);
+  background: none;
+  padding-left: 14px;
+}
+
+.pp-sale-tag { background: var(--accent); color: var(--accent-ink); }
+.pp-sale b { color: var(--accent); }
+
+.pp-season {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  padding: 12px 0;
+}
+
+.pp-season img { filter: grayscale(1) contrast(1.05); transition: filter .5s var(--ease); }
+.pp-season:hover img { filter: grayscale(0) contrast(1); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ОКНО КАТАЛОГА, УКАЗАТЕЛЬ, СЛОВАРЬ — та же разлиновка
+   ══════════════════════════════════════════════════════════════════ */
+
+.cw { background: var(--paper); }
+.cw-card {
+  border: 0;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+.cw-card:hover { background: var(--paper-2); }
+.cw-card .cw-media { background: none; }
+.cw-card .cw-line { color: var(--ink-3); }
+.cw-card .cw-tag { background: none; color: var(--ink-3); border: 1px solid var(--rule); }
+.cw-card .cw-tag--sale { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+.hx-tile {
+  border: 0;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  transform: none !important;
+}
+.hx-tile:hover { background: var(--paper-2); }
+.hx-grid { gap: 0; border-top: 1px solid var(--ink); border-left: 1px solid var(--rule); }
+.hx-mark { background: var(--paper-2); border: 0; }
+.hx-word { color: var(--ink); font-family: var(--font-swiss); font-weight: 700; letter-spacing: 0.02em; }
+.hx-count { background: none; color: var(--ink-3); font-size: 10px; }
+.hx-meta { color: var(--ink-3); }
+
+.hx-letter {
+  border: 1px solid var(--rule);
+  background: none;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.hx-letter:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); background: none; }
+.hx-letter.is-on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+.fr-group {
+  border: 0;
+  border-top: 1px solid var(--ink);
+  background: none;
+}
+.fr-group-title { background: none; color: var(--ink); padding: 10px 0 8px; }
+.fr-group--yellow, .fr-group--pink, .fr-group--blue,
+.fr-group--violet, .fr-group--green, .fr-group--red { --tone: var(--ink-2); }
+.fr-word { padding: 9px 0; border-top: 1px solid var(--rule); background: none !important; }
+.fr-word em { color: var(--accent); }
+
+.qt-card {
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  padding: clamp(22px, 3vw, 40px) 0;
+}
+.qt-fr { font-family: var(--font-swiss); font-style: normal; font-weight: 600; letter-spacing: -0.03em; }
+.qt-meta span { color: var(--ink-3); font-style: normal; }
+.qt-dot { background: var(--rule-2); }
+.qt-dot.is-on { background: var(--accent); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ТЁМНЫЕ ПОЛОСЫ — чёрные, без градиента
+   ══════════════════════════════════════════════════════════════════ */
+
+.section--dark, .showcase--alt, .picker, .manifest,
+.split-panel--dark, .ticker--dark, .footer, .preloader {
+  background: var(--ink) !important;
+  color: var(--paper);
+}
+
+.section--dark *, .showcase--alt *, .picker *, .manifest *,
+.split-panel--dark *, .ticker--dark *, .footer * {
+  --ink: var(--paper);
+  --w: var(--paper);
+  --w-2: rgb(255 255 255 / 62%);
+  --w-3: rgb(255 255 255 / 42%);
+  --ink-2: rgb(255 255 255 / 62%);
+  --ink-3: rgb(255 255 255 / 42%);
+  --rule: rgb(255 255 255 / 16%);
+  --line-w: rgb(255 255 255 / 16%);
+}
+
+:root[data-theme="black"] .section--dark,
+:root[data-theme="black"] .showcase--alt,
+:root[data-theme="black"] .picker,
+:root[data-theme="black"] .manifest,
+:root[data-theme="black"] .split-panel--dark,
+:root[data-theme="black"] .ticker--dark,
+:root[data-theme="black"] .footer,
+:root[data-theme="black"] .preloader {
+  background: var(--paper-2) !important;
+  color: var(--ink);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ФОКУС
+   ══════════════════════════════════════════════════════════════════ */
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ТЕЛЕФОН
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 720px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card .card-media { padding: 4px 10px 10px; }
+  .card .card-body { padding: 9px 10px 8px; }
+  .card .card-name { font-size: 14px; }
+  .card .card-price b { font-size: 15px; }
+  .card-try { padding: 0 10px; min-height: 32px; }
+  .card .card-cta { font-size: 10px; letter-spacing: 0.06em; }
+  .cl-tools { flex-wrap: wrap; }
+  .ft-btn, .cl-sort-btn { min-height: 42px; padding: 0 12px; font-size: 11px; }
+  .cl-count { width: 100%; padding-block: 8px; border-top: 1px solid var(--rule); margin-left: 0; }
+  .mbar { background: var(--paper); border-top: 1px solid var(--rule); }
+  .mbar, .mbar a, .mbar button, .mbar span, .mbar svg { color: var(--ink-2); }
+  .pp-folio { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ЕДИНЫЙ ТОН ВИТРИНЫ
+
+   Снимки пришли из разных источников: часть на белом, часть на чёрном.
+   На белом поле чёрные кадры читались как дыры, и сетка разваливалась.
+   Классический приём редакционной вёрстки решает это одним движением:
+   в каталоге всё серое, цвет включается на наведении и на самой
+   карточке товара. Разнобой исчезает, а цвет становится наградой за
+   внимание, а не шумом.
+   ══════════════════════════════════════════════════════════════════ */
+
+.card .photo img,
+.card .photo--dark img,
+.cw-card .photo img,
+.cw-card .photo--dark img {
+  filter: grayscale(1) contrast(1.04);
+  transition: filter .5s var(--ease), transform .7s var(--ease);
+}
+
+.card:hover .photo img,
+.card:hover .photo--dark img,
+.cw-card:hover .photo img,
+.cw-card:hover .photo--dark img { filter: grayscale(0) contrast(1); }
+
+/* снимок на чёрном получает ту же светлую подложку, что и остальные —
+   тогда все ячейки сетки одного веса */
+.card .photo--dark, .cw-card .photo--dark {
+  background: var(--paper-2);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+.card .photo--dark img, .cw-card .photo--dark img {
+  padding: 6%;
+  mix-blend-mode: multiply;
+}
+
+:root[data-theme="black"] .card .photo--dark img,
+:root[data-theme="black"] .cw-card .photo--dark img { mix-blend-mode: screen; }
+
+/* ── Плашка без снимка: типографский образец, а не пустой квадрат ────
+   Прежде там был почти невидимый инициал. Пустое место в каталоге
+   честнее заполнить тем, что мы точно знаем, — именем дома, набранным
+   крупно и обрезанным рамкой ячейки. */
+.card .plate:not(.photo), .cw-card .plate:not(.photo) {
+  display: grid;
+  place-items: center;
+  padding: 12%;
+  background: var(--paper-2);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+.card .plate .pl-field, .cw-card .plate .pl-field { position: static; display: contents; }
+.card .plate .pl-grid, .cw-card .plate .pl-grid { display: none; }
+
+.card .plate .pl-mono, .cw-card .plate .pl-mono {
+  font-family: var(--font-swiss);
+  font-size: clamp(34px, 4.4vw, 62px) !important;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  color: var(--ink-3);
+  opacity: .34;
+  max-width: none;
+  transition: opacity .4s var(--ease), color .4s var(--ease);
+}
+
+.card:hover .plate .pl-mono { opacity: .5; color: var(--ink-2); }
+
+/* ── Цена: один акцент, а не три ────────────────────────────────────
+   Красная плашка со скидкой уже кричит; вторая красная цифра рядом с
+   ней спорит с ней же. Выгода в рублях остаётся, но говорит тише. */
+.card .card-save, .cw-card .card-save { color: var(--ink-3); font-weight: 600; }
+
+/* строка фактов лежит на чистом поле, её держат линейки */
+.pitch, .pitch-fact { background: none !important; }
+
+/* ── Типографская плашка ─────────────────────────────────────────────
+   Имя дома набрано во всю ячейку и прижато к низу, под ним — линия.
+   Ячейка без снимка перестаёт быть дырой и становится страницей
+   каталога: там, где нет фотографии, работает шрифт.
+   ══════════════════════════════════════════════════════════════════ */
+
+.plate--type {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 12px;
+  background: var(--paper-2);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  overflow: hidden;
+  animation: none;
+}
+
+.plate-house {
+  font-family: var(--font-swiss);
+  font-size: clamp(15px, 1.9vw, 25px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+  hyphens: manual;
+}
+
+.plate-line {
+  padding-top: 6px;
+  border-top: 1px solid var(--rule-2);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card:hover .plate-house { color: var(--ink); }
+
+/* на крупных сценах образец набирается крупнее */
+.pp-visual .plate--type, .showcase-holder .plate--type, .cmp-media .plate--type {
+  padding: clamp(16px, 2vw, 34px);
+}
+
+.pp-visual .plate-house { font-size: clamp(26px, 4vw, 58px); color: var(--ink-2); }
+.pp-visual .plate-line { font-size: 11px; }
+
+.sd-hit-media .plate--type, .sd-chip-media .plate--type { padding: 5px; }
+.sd-hit-media .plate-house, .sd-chip-media .plate-house { font-size: 9px; letter-spacing: -0.02em; }
+.sd-hit-media .plate-line, .sd-chip-media .plate-line { display: none; }
+
+/* плашки отбрасывали мягкую тень из прежнего слоя — в швейцарской школе
+   плоскость не приподнимают */
+.plate, .photo, .photo--dark, .card-media-in { box-shadow: none; }
+.plate--type, .card .photo--dark, .cw-card .photo--dark { box-shadow: inset 0 0 0 1px var(--rule); }
+.plate, .photo { animation: none !important; }
+
+/* ── Остатки прежнего слоя ───────────────────────────────────────────
+   Плашка на крупной сцене красилась оттенком аромата, корзина рядом с
+   кнопкой оставалась мятной, а «в наличии» горело красным — красный
+   здесь занят скидкой и важным, наличие им кричать не должно. */
+.pp-visual .plate, .pp-visual .plate--type,
+.showcase-holder .plate, .cmp-media .plate, .picker-stage .plate {
+  background: var(--paper-2) !important;
+  box-shadow: inset 0 0 0 1px var(--rule) !important;
+}
+
+.pp-add, .cw-cart, .card .card-cart {
+  background: none !important;
+  border-color: var(--rule) !important;
+  color: var(--ink-2) !important;
+}
+
+.pp-add:hover, .cw-cart:hover, .card .card-cart:hover {
+  background: var(--paper-2) !important;
+  color: var(--ink) !important;
+}
+
+.pp-stock, .cw-stock { color: var(--ink) !important; }
+.pp-stock i { background: var(--ink) !important; }
+
+.fav-btn, .cmp-btn { border: 1px solid var(--rule); background: none; color: var(--ink-2); }
+.fav-btn:hover, .cmp-btn:hover { border-color: var(--ink); color: var(--ink); }
+.fav-btn.is-on { color: var(--accent); border-color: var(--accent); }
+.fav-btn.is-on svg { fill: var(--accent); stroke: var(--accent); }
+.cmp-btn.is-on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+.pp-calc { border: 1px solid var(--rule); background: none; }
+.pp-calc-val { letter-spacing: -0.03em; }
+.pp-calc input[type=range] { accent-color: var(--ink); }
+
+.size-best { font-size: 10px; letter-spacing: 0.02em; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ПИРАМИДА НОТ — РАЗЛИНОВАННАЯ ДИАГРАММА
+
+   Пирамиду принято рисовать треугольником из кружков. Треугольник врёт:
+   ноты не сужаются кверху, они разворачиваются во времени. Швейцарская
+   школа рисует время шкалой, поэтому здесь три регистра, разделённые
+   линейкой, с подписью слева и сроком справа — как раскладка в
+   аптечной карте. Снимки сырья остаются: они настоящие и их видно.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pyramid {
+  display: grid;
+  gap: 0;
+  margin-top: 6px;
+  border-top: 1px solid var(--ink);
+}
+
+.p-tier {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.9fr) minmax(0, 2.4fr);
+  gap: clamp(12px, 2vw, 28px);
+  align-items: start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+
+/* номер регистра стоит в поле, как колонцифра */
+.p-tier::before {
+  content: attr(data-tier);
+  position: absolute;
+  top: 17px;
+  left: 0;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.p-step {
+  display: block;
+  padding-left: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.p-legend {
+  display: grid;
+  gap: 2px;
+  padding-left: 20px;
+}
+
+.p-legend b {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.p-legend i {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.p-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  --tile: 64px !important;
+}
+
+.p-note { margin: 0; display: grid; gap: 5px; justify-items: center; }
+
+.p-tile {
+  width: var(--tile);
+  height: var(--tile);
+  padding: 0;
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+  overflow: hidden;
+  cursor: default;
+  transition: border-color .25s var(--ease);
+}
+
+.p-tile.has-story { cursor: pointer; }
+.p-tile.has-story:hover, .p-tile.is-open { border-color: var(--ink); }
+
+.p-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.05);
+  transition: filter .45s var(--ease);
+}
+
+.p-tile:hover img, .p-tile.is-open img { filter: grayscale(0); }
+
+/* нота без снимка: не кружок с цветом, а инициал в рамке */
+.p-tile:not(.has-photo) { display: grid; place-items: center; background: var(--paper-2); }
+.p-tile:not(.has-photo)::after {
+  content: "";
+  width: 7px;
+  height: 1px;
+  background: var(--ink-3);
+}
+
+.p-note figcaption {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+  text-align: center;
+  max-width: var(--tile);
+  line-height: 1.25;
+}
+
+.p-fact {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  padding: 10px 0 2px 20px;
+  border-top: 1px solid var(--rule);
+}
+
+.p-fact p { font-size: 13px; line-height: 1.5; color: var(--ink-2); margin: 0; }
+
+.p-missing {
+  padding: 16px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+}
+
+.p-missing p { font-size: 13px; color: var(--ink-2); max-width: 56ch; }
+
+@media (max-width: 720px) {
+  .p-tier { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .p-row { --tile: 56px !important; gap: 8px; }
+  .p-fact { padding-left: 0; }
+}
+
+/* подпись регистра стоит в разметке после снимков, а по сетке должна
+   идти первой — левая колонка держит рубрикацию, правая содержание */
+.p-tier > .p-legend, .p-tier > .p-step { order: -1; text-align: left; justify-items: start; }
+.p-tier > .p-row { order: 0; }
+.p-tier > .p-fact { order: 1; }
+
+.p-legend b, .p-legend i, .p-step { text-align: left; }
+
+/* ── Выравнивание диаграммы ───────────────────────────────────────────
+   Подписи приходили по центру из прежнего слоя, снимки прижимались
+   вправо, а номер регистра печатался дважды: моим псевдоэлементом и
+   самим компонентом. Оставляем один — тот, что в разметке. */
+.pyramid .p-tier::before { content: none; }
+
+.pyramid .p-tier > .p-legend,
+.pyramid .p-tier > .p-step {
+  order: -1;
+  justify-items: start;
+  justify-content: start;
+  text-align: left;
+  padding-left: 0;
+}
+
+.pyramid .p-legend b,
+.pyramid .p-legend i,
+.pyramid .p-legend span,
+.pyramid .p-step { text-align: left; display: block; }
+
+.pyramid .p-legend i, .pyramid .p-legend span { color: var(--ink-3); }
+.pyramid .p-legend b { color: var(--ink); }
+
+.pyramid .p-row { justify-content: flex-start; align-items: flex-start; }
+.pyramid .p-note { justify-items: start; }
+.pyramid .p-note figcaption { text-align: left; }
+
+/* Центрировал не текст, а сами ячейки: justify-items на регистре ставил
+   и подпись, и ряд снимков по центру колонок. Прижимаем к началу. */
+.pyramid, .pyramid .p-tier { justify-items: start; }
+.pyramid .p-tier > * { justify-self: start; width: 100%; }
+
+/* плашка-образец на странице товара занимает поле целиком, а не висит
+   маленьким прямоугольником посреди пустоты */
+@media (min-width: 900px) {
+  .product-page .pp-visual .plate--type {
+    position: absolute;
+    inset: 0;
+    padding: clamp(28px, 3.4vw, 64px);
+  }
+  .product-page .pp-visual .card-media-in,
+  .product-page .pp-visual > .plate--type { width: 100%; height: 100%; }
+  .product-page .pp-visual .plate-house { font-size: clamp(36px, 5.2vw, 84px); }
+}
+
+/* Сцена под флаконом красилась тёплым градиентом из прежнего слоя —
+   правило там адресное, с атрибутом темы, поэтому перебиваем адресно. */
+:root .product-page .pp-visual,
+:root[data-theme="white"] .pp-visual,
+:root[data-theme="green"] .pp-visual,
+:root[data-theme="white"] .showcase-holder,
+:root[data-theme="white"] .pp-media,
+:root[data-theme="white"] .cmp-media,
+:root[data-theme="white"] .picker-stage,
+.showcase-holder, .pp-media, .cmp-media, .picker-stage {
+  background: var(--paper-2) !important;
+}
+
+:root[data-theme="black"] .product-page .pp-visual,
+:root[data-theme="black"] .showcase-holder,
+:root[data-theme="black"] .pp-media,
+:root[data-theme="black"] .cmp-media,
+:root[data-theme="black"] .picker-stage { background: var(--paper-2) !important; }
+
+/* и образец занимает всю сцену, а не висит прямоугольником по центру */
+@media (min-width: 900px) {
+  :root .product-page .pp-visual .plate--type {
+    position: absolute !important;
+    inset: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 899px) {
+  :root .product-page .pp-visual .plate--type {
+    position: absolute !important;
+    inset: 0 !important;
+    width: auto !important;
+    height: auto !important;
+  }
+}
+
+/* Прежний слой подменял третий план внутри карточек оливковым — он и
+   давал зелёный подтон подписям, тегам и сердцу в каталоге. Возвращаем
+   системный серый: цвет в этой школе назначается один раз у корня. */
+.card, .cw-card, .hx-tile, .drawer, .cw, .pitch-fact,
+.sd-tool, .product-page, .ft-panel, .qt-card, .fr-group {
+  --ink-3: var(--ink-3, #8e8e95);
+  --w-3: var(--ink-3);
+}
+
+:root .card, :root .cw-card, :root .hx-tile, :root .drawer, :root .cw,
+:root .pitch-fact, :root .sd-tool, :root .product-page {
+  --ink-3: #8e8e95;
+  --w-3: #8e8e95;
+}
+
+:root[data-theme="black"] .card, :root[data-theme="black"] .cw-card,
+:root[data-theme="black"] .hx-tile, :root[data-theme="black"] .drawer,
+:root[data-theme="black"] .cw, :root[data-theme="black"] .pitch-fact,
+:root[data-theme="black"] .sd-tool, :root[data-theme="black"] .product-page {
+  --ink-3: #71717a;
+  --w-3: #71717a;
+}
+
+/* ── Последние пятна прежних тем ──────────────────────────────────────
+   Тёплое свечение за заголовком, зелёное окно «кино», песочная подложка
+   разворота и салатовая шторка. Всё это красило поле сверх системы. */
+
+.hero-glow, .split-bg, .bd-veil { display: none !important; }
+
+.cn-port-inner {
+  background:
+    linear-gradient(180deg, var(--paper-2) 0%, var(--paper-3) 100%) !important;
+}
+
+.cn-port-frame {
+  border-color: var(--rule-2) !important;
+  box-shadow: inset 0 0 0 1px var(--rule) !important;
+}
+
+.mk-card {
+  background: none !important;
+  border: 1px solid var(--rule);
+}
+
+.mk-row { border-top: 1px solid var(--rule); }
+.mk-track { background: var(--paper-3) !important; }
+.mk-fill { background: var(--ink) !important; }
+.mk-val { color: var(--ink) !important; font-variant-numeric: tabular-nums; }
+
+.scrim { background: rgb(17 17 19 / 42%) !important; }
+
+/* крупная надпись «кино» набирается тем же гротеском, а не белилами
+   поверх зелени */
+.sp-line { color: var(--ink); text-shadow: none; }
+.cn-ghost { color: var(--rule); text-shadow: none; }
+.cn-window-copy h2, .cn-reel-head h2 { color: var(--ink); }
+.cn-window-hint { color: var(--ink-3); }
+
+/* плашка на крупных сценах всё ещё красилась оттенком аромата */
+.hero .plate, .hero .plate--type,
+.showcase .plate, .showcase-holder .plate,
+.chapters-visual .plate, .picker-stage .plate, .cmp-media .plate {
+  background: var(--paper-2) !important;
+  box-shadow: inset 0 0 0 1px var(--rule) !important;
+}
+
+.hero .plate-house, .showcase .plate-house { color: var(--ink-2); }
+
+/* подсказка «листайте» ложилась на строку цифр внизу первого экрана */
+.hero-scroll, .hero-hint, .scroll-hint {
+  margin-top: 18px;
+  position: static;
+}
+
+.hero-facts, .hero .hero-stats { padding-bottom: 8px; }
+
+/* ── Плашка-образец: гасим всё, что красило её из прежних тем ─────────
+   Градиент по оттенку аромата и приглушённая прозрачность приходили из
+   правил с атрибутом темы — они специфичнее обычного класса, поэтому
+   перебиваем адресно, а не надеемся на порядок файлов. */
+:root .plate--type,
+:root[data-theme="white"] .plate--type,
+:root[data-theme="green"] .plate--type,
+:root[data-theme="black"] .plate--type,
+:root .card .card-media .card-media-in .plate--type,
+:root .card .card-media:not(.media--photo) .card-media-in .plate--type {
+  background-image: none !important;
+  background-color: var(--paper-2) !important;
+  opacity: 1 !important;
+  box-shadow: inset 0 0 0 1px var(--rule) !important;
+}
+
+:root .plate--type .plate-house { color: var(--ink-2) !important; }
+:root .plate--type .plate-line { color: var(--ink-3) !important; border-top-color: var(--rule-2) !important; }
+
+/* и прежние правила по монограмме больше ни на что не влияют */
+:root .plate--type .pl-mono, :root .plate--type .pl-field,
+:root .plate--type .pl-grid, :root .plate--type .pl-meta { display: none !important; }
+
+/* ── Телефон: разбор по находкам ─────────────────────────────────────── */
+
+/* кнопки в строке поиска остались кремовыми от прежней темы */
+.sbar-btn, .sbar button, .search-field button, .cw-icon, .cw-tile {
+  background: none !important;
+  border: 1px solid var(--rule) !important;
+  color: var(--ink-2) !important;
+}
+
+.sbar-btn:hover, .cw-icon:hover { background: var(--paper-2) !important; color: var(--ink) !important; }
+.cw-icon.is-on { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; }
+
+@media (max-width: 720px) {
+  /* надзаголовок уезжал под шапку: у секции не было отступа под неё */
+  .collection { padding-top: clamp(74px, 12vw, 96px); }
+
+  /* верхняя строка плитки упиралась в кружки справа */
+  .card .card-top { padding-right: 62px; justify-content: flex-start; }
+
+  /* панель управления занимала три строки — собираем в две */
+  .cl-tools { row-gap: 0; }
+  .cl-tools .ft { flex: 0 0 auto; }
+  .cl-sort { flex: 1 1 auto; }
+  .cl-sort-btn { flex: 1 1 0; text-align: center; justify-content: center; }
+}
+
+/* ── Заголовок первого экрана ───────────────────────────────────────── */
+.hero { padding-top: clamp(84px, 11vw, 120px); }
+
+/* ── Верхняя строка плитки ────────────────────────────────────────────
+   Она лежала внутри поля снимка, а поле центрирует своих детей — из-за
+   этого концентрация и скидка съезжали к середине. Вынимаем строку из
+   потока: она принадлежит ячейке, а не снимку. */
+.card .card-media { position: relative; }
+
+.card .card-top {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  right: 10px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 0;
+  min-height: 0;
+}
+
+/* концентрация схлопывалась в ноль, когда рядом появлялась скидка:
+   у неё стояло flex: 0 1 auto с обрезкой по многоточию */
+.card .card-top .card-label {
+  flex: none !important;
+  min-width: auto !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap;
+}
+
+.card .card-tools { top: 6px; right: 8px; z-index: 4; }
+.card .card-folio { z-index: 4; }
+
+@media (max-width: 720px) {
+  .card .card-top { right: 66px; }
+}
+
+/* ── Строка поиска ────────────────────────────────────────────────────
+   Поле сжималось до 224 px, и подсказка обрывалась на полуслове. */
+.sbar input, .search-field input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.sbar { display: flex; align-items: center; gap: 10px; }
+.sbar > * { min-width: 0; }
+
+/* Старое правило прятало концентрацию, когда рядом появлялась скидка:
+   в прежней плитке им вдвоём было тесно. Теперь строка вынесена из
+   потока и места хватает обоим. */
+.card-top:has(.card-label--sale) .card-label:not(.card-label--sale) {
+  display: inline-block !important;
+}
+
+/* Фолио и концентрация встали друг на друга: оба прижаты к левому краю.
+   Номер остаётся на месте — он часть сетки, — а строка меток начинается
+   после него. */
+.card .card-top { left: 44px; }
+
+@media (max-width: 720px) {
+  .card .card-top { left: 40px; right: 66px; }
+}
+
+/* три кнопки в строке поиска съедали место у самого поля, и подсказка
+   обрывалась на полуслове */
+@media (max-width: 720px) {
+  .sbar-btn, .sbar button { width: 36px; height: 36px; min-width: 36px; }
+  .sbar { gap: 6px; padding-right: 8px; }
+  .sbar input { font-size: 13px; }
+}
+
+/* ── Прелоадер ────────────────────────────────────────────────────────
+   Он красится чернилами, и вся типографика внутри — тоже чернилами:
+   логотип пропадал на своём же фоне. Внутри прелоадера чернила и бумага
+   меняются местами, как в любой тёмной полосе. */
+.preloader {
+  background: var(--ink) !important;
+  color: var(--paper);
+}
+
+.preloader * {
+  --ink: var(--paper);
+  --w: var(--paper);
+  --ink-2: rgb(255 255 255 / 62%);
+  --w-2: rgb(255 255 255 / 62%);
+  --ink-3: rgb(255 255 255 / 42%);
+  --w-3: rgb(255 255 255 / 42%);
+  --rule: rgb(255 255 255 / 20%);
+  --line-w: rgb(255 255 255 / 20%);
+}
+
+.preloader .brand-mark, .preloader svg { color: var(--paper); fill: currentColor; }
+.pre-claim { color: rgb(255 255 255 / 62%) !important; }
+.pre-bar, .preloader .bar { background: rgb(255 255 255 / 22%); }
+.pre-bar > *, .preloader .bar > * { background: var(--paper); }
+
+:root[data-theme="black"] .preloader { background: var(--paper-2) !important; }
+:root[data-theme="black"] .preloader * { --ink: #f4f4f6; --w: #f4f4f6; }
+
+/* ── Две регрессии, найденные проверкой после редизайна ───────────────
+
+   1. Кружки сравнения и избранного ужались до 24 px: в швейцарской
+      плитке они стали тише, но пальцем в них перестало попадать.
+      Рисунок оставляем, область нажатия возвращаем.
+
+   2. У полей ввода кольцо фокуса пропало: новый слой заменил его
+      подсветкой рамки, а рамка — не кольцо, её не видно тому, кто идёт
+      табом. Возвращаем кольцо на саму обёртку. */
+
+@media (max-width: 720px) {
+  .card .card-mini { position: relative; }
+  .card .card-mini::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.sbar:focus-within, .search-field:focus-within,
+.ft-search:focus-within, .cw-find:focus-within {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 1px;
+  border-color: var(--ink);
+}
+
+/* кружки стояли в четырёх пикселях друг от друга: промах по одному
+   попадал в другой — сравнение вместо избранного */
+@media (max-width: 720px) { .card .card-tools { gap: 10px; } }

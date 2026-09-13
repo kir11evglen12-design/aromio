@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { ArrowRight, Search } from "lucide-react";
 import { byId, HOUSES, products } from "../data/products";
 import { LEXICON } from "../data/lexicon";
+import { plural } from "../lib/auth";
 import { gsap, prefersReducedMotion, revealLines, useGsap } from "../lib/motion";
 import Plate from "./Plate";
 import { useShop } from "../lib/shop";
@@ -132,8 +133,12 @@ export default function Hero({ ready }: { ready: boolean }) {
         </h1>
 
         <p className="lead hero-fade">
-          Dior, Chanel, Tom Ford, Creed и ещё шесть домов — отобранные ароматы
-          на одной витрине. Найдите тот, что станет вашей подписью.
+          {/* число домов считается из каталога: «ещё шесть» было верно,
+              когда домов было десять, и стало враньём, когда их стало
+              двадцать три */}
+          Dior, Chanel, Tom Ford, Creed и ещё{" "}
+          {HOUSES.length - 4} {plural(HOUSES.length - 4, "дом", "дома", "домов")} на
+          одной витрине. Пробник от 1 мл — чтобы узнать аромат на себе, а не у тестера.
         </p>
 
         <div className="hero-quick hero-fade">
