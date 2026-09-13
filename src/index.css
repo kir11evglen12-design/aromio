@@ -8778,3 +8778,444 @@ input, select, textarea {
 
   .product-page .pp-buy .fav-btn { flex: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ЗЕЛЁНОЙ ТЕМЫ БОЛЬШЕ НЕТ
+
+   Холст с цветами убран: базовой становится светлая бумага, второй
+   остаётся чёрная. Токены не переписываем по всему файлу — задаём их
+   заново здесь, у корня, и тогда переезжает всё сразу.
+
+   Селектор [data-theme="green"] оставлен нарочно: у кого зелёная была
+   сохранена в браузере, тот получит белую, а не сломанную страницу.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root,
+:root[data-theme="white"],
+:root[data-theme="green"] {
+  --canvas: #f4f2ec;
+  --ground: #f4f2ec;
+  --paper: #f4f2ec;
+  --color-paper: #f4f2ec;
+  --paper-1: #fdfcf8;
+  --paper-2: #f2efe7;
+  --paper-3: #e4e0d4;
+  --ground-2: #fdfcf8;
+  --ground-3: #f2efe7;
+
+  --ink-1: #17181a;
+  --ink-2: #3a3d40;
+  --ink-3: #6a6e72;
+  --w: #17181a;
+  --w-2: #3a3d40;
+  --w-3: #6a6e72;
+  --ink: #17181a;
+  --color-ink: #17181a;
+  --muted: #6a6e72;
+  --color-muted: #6a6e72;
+
+  --line-w: rgb(20 22 24 / 16%);
+  --line: rgb(20 22 24 / 14%);
+
+  --go: #1d6f3a;
+  --go-2: #24924b;
+
+  --birch: #fdfcf8;
+  --birch-2: #f2efe7;
+  --birch-line: rgb(20 22 24 / 18%);
+  --birch-ink: #17181a;
+  --birch-ink-2: #3a3d40;
+}
+
+/* картина с цветами уходит; фактура бумаги остаётся, но совсем тихо */
+body::before,
+:root[data-theme="white"] body::before,
+:root[data-theme="green"] body::before {
+  background: var(--canvas);
+}
+
+body::after { opacity: .05; }
+
+:root[data-theme="white"] .pp-visual,
+:root[data-theme="green"] .pp-visual,
+:root .pp-visual,
+:root .showcase-holder,
+:root .pp-media,
+:root .cmp-media,
+:root .picker-stage {
+  background: linear-gradient(170deg, #eceae2, #dcd9cf);
+}
+
+:root .section--dark,
+:root .showcase--alt,
+:root .picker,
+:root .manifest,
+:root .split-panel--dark,
+:root .ticker--dark,
+:root .footer,
+:root .preloader {
+  background: linear-gradient(168deg, #232527, #131415);
+}
+
+:root[data-theme="black"] .pp-visual,
+:root[data-theme="black"] .showcase-holder,
+:root[data-theme="black"] .pp-media,
+:root[data-theme="black"] .cmp-media,
+:root[data-theme="black"] .picker-stage {
+  background: linear-gradient(170deg, #1b1b1f, #0e0e10);
+}
+
+:root[data-theme="black"] .section--dark,
+:root[data-theme="black"] .showcase--alt,
+:root[data-theme="black"] .picker,
+:root[data-theme="black"] .manifest,
+:root[data-theme="black"] .split-panel--dark,
+:root[data-theme="black"] .ticker--dark,
+:root[data-theme="black"] .footer,
+:root[data-theme="black"] .preloader {
+  background: linear-gradient(168deg, #16171a, #09090a);
+}
+
+/* в планке осталось два гнезда — зелёное убираем */
+.skin-btn--green { display: none; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ВКЛАДКА «ФИЛЬТРЫ»
+
+   Снаружи осталось то, чем пользуются постоянно: поиск и цена. Всё
+   остальное — бренд и категория — живёт внутри панели. Рядом с кнопкой
+   стоит метка выбранного: фильтр, о котором забыли, хуже отсутствующего.
+   ══════════════════════════════════════════════════════════════════ */
+
+.cl-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.cl-tools .cl-count { margin-left: auto; }
+
+.ft { position: relative; display: inline-flex; align-items: center; gap: 8px; }
+
+.ft-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line-w);
+  border-radius: var(--r-tile);
+  background: rgb(251 249 240 / 80%);
+  color: var(--w);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .03em;
+  cursor: pointer;
+  transition: border-color var(--micro) var(--ease-out), background var(--micro) var(--ease-out);
+}
+
+.ft-btn:hover { background: rgb(251 249 240 / 98%); }
+.ft.is-open .ft-btn, .ft-btn.is-on { border-color: var(--go); }
+
+.ft-badge {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--go);
+  color: #fff;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.ft-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--go) 40%, var(--line-w));
+  border-radius: var(--r-tile);
+  background: color-mix(in srgb, var(--go) 10%, transparent);
+  color: var(--go);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ft-reset:hover { background: color-mix(in srgb, var(--go) 20%, transparent); }
+
+.ft-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 40;
+  width: min(340px, 92vw);
+  border: 1px solid var(--line-w);
+  border-radius: var(--r-tile);
+  background: var(--paper-1, #fdfcf8);
+  box-shadow: 0 28px 54px -26px rgb(16 20 14 / 55%);
+  overflow: hidden;
+}
+
+.ft-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line-w);
+}
+
+.ft-head b { font-size: 12px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; color: var(--w); }
+
+.ft-x {
+  display: grid;
+  place-items: center;
+  width: 28px; height: 28px;
+  padding: 0; border: 0; border-radius: 999px;
+  background: none; color: var(--w-3); cursor: pointer;
+}
+
+.ft-block { padding: 12px 14px; border-bottom: 1px solid var(--line-w); }
+
+.ft-block-title {
+  margin-bottom: 9px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--w-3);
+}
+
+.ft-cats { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.ft-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--line-w);
+  border-radius: var(--r-tile);
+  background: none;
+  color: var(--w);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ft-cat i { font-style: normal; font-size: 10px; font-weight: 800; color: var(--w-3); }
+
+.ft-cat--women.is-on  { background: var(--c-women);  border-color: var(--c-women);  color: #0b0b0c; }
+.ft-cat--men.is-on    { background: var(--c-men);    border-color: var(--c-men);    color: #fff; }
+.ft-cat--unisex.is-on { background: var(--c-unisex); border-color: var(--c-unisex); color: #fff; }
+.ft-cat--niche.is-on  { background: var(--c-niche);  border-color: var(--c-niche);  color: #fff; }
+.ft-cat.is-on i { color: inherit; opacity: .75; }
+
+.ft-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-w);
+  border-radius: var(--r-tile);
+  color: var(--w-3);
+}
+
+.ft-search input {
+  flex: 1 1 auto; min-width: 0;
+  border: 0; background: none; outline: none;
+  color: var(--w); font-size: 13px;
+}
+
+.ft-search-x {
+  display: grid; place-items: center;
+  width: 20px; height: 20px;
+  padding: 0; border: 0; border-radius: 999px;
+  background: none; color: var(--w-3); cursor: pointer;
+}
+
+.ft-list { max-height: 38vh; margin-top: 8px; overflow-y: auto; overscroll-behavior: contain; }
+
+.ft-row {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 6px;
+  border: 0;
+  border-top: 1px solid var(--line-w);
+  background: none;
+  color: var(--w);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ft-row:first-child { border-top: 0; }
+.ft-row:hover { background: color-mix(in srgb, var(--go) 10%, transparent); }
+.ft-row.is-on { background: color-mix(in srgb, var(--go) 16%, transparent); }
+
+.ft-mark {
+  display: grid; place-items: center;
+  width: 17px; height: 17px;
+  border: 1px solid var(--line-w);
+  border-radius: 4px;
+  color: #fff;
+}
+
+.ft-row.is-on .ft-mark { background: var(--go); border-color: var(--go); }
+
+.ft-name {
+  font-size: 12px; font-weight: 700; letter-spacing: .02em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.ft-count { font-style: normal; font-size: 11px; font-weight: 800; color: var(--w-3); }
+.ft-empty { margin: 0; padding: 12px 6px; font-size: 12px; color: var(--w-3); }
+
+.ft-foot { display: flex; gap: 8px; padding: 11px 14px; }
+
+.ft-clear {
+  flex: 0 0 auto;
+  min-height: 40px; padding: 0 14px;
+  border: 1px solid var(--line-w);
+  border-radius: var(--r-tile);
+  background: none; color: var(--w-2);
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+
+.ft-done {
+  flex: 1 1 auto;
+  min-height: 40px;
+  border: 0;
+  border-radius: var(--r-tile);
+  background: linear-gradient(168deg, var(--go-2), var(--go));
+  color: #fff;
+  font-size: 12px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+}
+
+:root[data-theme="black"] .ft-btn { background: rgb(243 241 234 / 6%); }
+:root[data-theme="black"] .ft-panel { background: #17181a; }
+
+@media (max-width: 620px) {
+  .ft-btn { min-height: 40px; padding: 0 13px; }
+  .ft-panel { width: min(320px, 94vw); }
+  .cl-tools .cl-count { margin-left: 0; }
+}
+
+/* ── Выгода в рублях ──────────────────────────────────────────────────
+   Процент абстрактен, рубли — нет. Ставим сумму рядом с ценой тем же
+   ярко-зелёным, которым помечена скидка: у цвета уже есть эта работа. */
+.card-save {
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .02em;
+  color: var(--c-save);
+  white-space: nowrap;
+}
+
+.card .card-price { flex-wrap: wrap; row-gap: 0; }
+
+.pp-sale b { color: var(--c-save); font-weight: 900; }
+
+@media (max-width: 620px) {
+  .card-save { font-size: 10px; }
+}
+
+/* Плашка стала ниже, когда под ней появилась кнопка пробника, и подпись
+   линии начала обрезаться: «MISS DI…». Уменьшаем кегль и разряд, а на
+   совсем узкой плитке снимаем подпись вовсе — монограмма всё равно
+   опознаётся, а имя стоит строкой ниже. */
+.card .plate .pl-meta { max-width: calc(100% - 8px); padding: 4px 9px; }
+.card .plate .pl-line { font-size: 10px; letter-spacing: .06em; }
+
+@media (max-width: 1180px) {
+  .card .plate .pl-meta { display: none; }
+}
+
+/* Плашка скидки в чёрной теме оставалась красной от прежнего правила —
+   а красный здесь занят важным. Скидка везде ярко-зелёная, старая цена
+   везде красная: у каждого цвета одна работа. */
+:root[data-theme="black"] .card .card-top .card-label--sale,
+:root[data-theme="black"] .cw-card .cw-tag--sale,
+:root[data-theme="black"] .pp-sale-tag,
+.card .card-top .card-label--sale,
+.cw-card .cw-tag--sale,
+.pp-sale-tag,
+.sale-badge {
+  background: var(--c-save);
+  color: #fff;
+}
+
+/* ── Фильтры на телефоне: шторка снизу ────────────────────────────────
+   Выпадающая панель на узком экране упиралась в нижнюю панель: было
+   видно только «Кому», а список брендов и кнопки уходили за край. На
+   телефоне это шторка снизу на всю ширину, как в приложениях: заголовок
+   сверху, список посередине прокруткой, кнопки прибиты к низу. */
+@media (max-width: 720px) {
+  .ft-panel {
+    position: fixed;
+    inset: auto 0 0 0;
+    top: auto;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 86vh;
+    border: 0;
+    border-top: 1px solid var(--line-w);
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -22px 44px -20px rgb(16 20 14 / 55%);
+    animation: ft-up .26s cubic-bezier(.16, 1, .3, 1) both;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  @keyframes ft-up {
+    from { transform: translateY(100%); }
+    to   { transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ft-panel { animation: none; }
+  }
+
+  /* тёмная подложка: за шторкой страница должна отойти на второй план */
+  .ft.is-open::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1190;
+    background: rgb(16 20 14 / 46%);
+    animation: ft-fade .2s linear both;
+  }
+
+  @keyframes ft-fade { from { opacity: 0; } to { opacity: 1; } }
+
+  .ft-head { padding: 14px 16px; }
+  .ft-head b { font-size: 13px; }
+  .ft-block { flex: 0 0 auto; padding: 12px 16px; }
+  .ft-block:last-of-type { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .ft-list { flex: 1 1 auto; max-height: none; }
+  .ft-cat { min-height: 40px; font-size: 13px; }
+  .ft-row { padding: 11px 6px; }
+  .ft-name { font-size: 13px; }
+
+  .ft-foot {
+    flex: 0 0 auto;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--line-w);
+    background: inherit;
+  }
+
+  .ft-done, .ft-clear { min-height: 46px; }
+}

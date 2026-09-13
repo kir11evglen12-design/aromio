@@ -88,6 +88,9 @@ export default function ProductCard({ product: p }: { product: Product }) {
           <div className="card-price">
             <b>{money(priceNow(p, variant))}</b>
             {list !== undefined ? <s>{money(list)}</s> : null}
+            {list !== undefined
+              ? <u className="card-save">−{money(list - priceNow(p, variant))}</u>
+              : null}
           </div>
 
           <div className="card-sizes" role="radiogroup" aria-label={`Объём — ${p.name}`}>

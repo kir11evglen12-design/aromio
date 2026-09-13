@@ -1,15 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { byId, bottles, CATEGORY_LABEL, fromPrice, HOUSES, money, products, SAMPLE_ML } from "../data/products";
+import { byId, bottles, fromPrice, HOUSES, money, products, SAMPLE_ML } from "../data/products";
 import { plural } from "../lib/auth";
-import type { Category as ProductCategory } from "../data/products";
 import { SORT_LABEL, useShop, visibleProducts } from "../lib/shop";
 import type { Sort } from "../lib/shop";
 import { parallax, revealFrom, useFlip, useGsap } from "../lib/motion";
 import ProductCard from "./ProductCard";
 import SearchBar from "./SearchBar";
-import BrandFilter from "./BrandFilter";
-
-const FILTERS: (ProductCategory | "all")[] = ["all", "women", "men", "unisex", "niche"];
+import Filters from "./Filters";
 
 /* обе цифры считаются из каталога, поэтому разойтись с витриной не могут */
 const VOLUMES = (() => {
@@ -25,7 +22,7 @@ const PAGE = 10;
 
 export default function Collection() {
   const {
-    category, setCategory, openProduct, sort, setSort, noteQuery, recent
+    category, openProduct, sort, setSort, noteQuery, recent
   } = useShop();
   const list = visibleProducts(category, sort, noteQuery);
 
@@ -91,25 +88,17 @@ export default function Collection() {
 
       <SearchBar />
 
-      <div className="cl-filters">
-        <BrandFilter />
-
-        <div className="filters" role="group" aria-label="Фильтр по категориям">
-        {FILTERS.map(c => (
-          <button key={c}
-                  className={"filter" + (category === c ? " is-active" : "")}
-                  onClick={() => setCategory(c)}>
-            {CATEGORY_LABEL[c]}
-          </button>
-        ))}
-        </div>
-      </div>
-
       <div className="cl-tools">
-        <div className="cl-sort" role="group" aria-label="Сортировка">
-          {(Object.keys(SORT_LABEL) as Sort[]).map(k => (
+        <Filters />
+
+        {/* снаружи остаётся только цена: ею пользуются чаще всего */}
+        {/* только цена: нажатие по активной снимает сортировку и
+            возвращает порядок по дому — иначе к нему не вернуться */}
+        <div className="cl-sort" role="group" aria-label="Сортировка по цене">
+          {(["price-asc", "price-desc"] as Sort[]).map(k => (
             <button key={k} className={"cl-sort-btn" + (sort === k ? " is-on" : "")}
-                    onClick={() => setSort(k)}>{SORT_LABEL[k]}</button>
+                    aria-pressed={sort === k}
+                    onClick={() => setSort(sort === k ? "house" : k)}>{SORT_LABEL[k]}</button>
           ))}
         </div>
 
