@@ -12,13 +12,13 @@ import { CATEGORY_TONE } from "../data/categoryTone";
 import { useShop } from "../lib/shop";
 import Plate from "./Plate";
 
-type Sort = "house" | "asc" | "desc" | "name";
+/* «по названию» здесь тоже лишнее: рядом стоит строка поиска */
+type Sort = "house" | "asc" | "desc";
 
 const SORTS: [Sort, string][] = [
   ["house", "По дому"],
   ["asc", "↓ Сначала дешевле"],
-  ["desc", "↑ Сначала дороже"],
-  ["name", "По названию"]
+  ["desc", "↑ Сначала дороже"]
 ];
 
 const CATS: Category[] = ["women", "men", "unisex", "niche"];
@@ -78,7 +78,6 @@ export default function CatalogWindow() {
     switch (sort) {
       case "asc":  return [...out].sort((a, b) => fromPrice(a) - fromPrice(b));
       case "desc": return [...out].sort((a, b) => fromPrice(b) - fromPrice(a));
-      case "name": return [...out].sort((a, b) => a.name.localeCompare(b.name, "ru"));
       default:     return out;
     }
   }, [houses, cats, types, maxPrice, samplesOnly, sort, q]);

@@ -8491,3 +8491,290 @@ input, select, textarea {
 
 /* нажатая кнопка чуть проседает — руке отвечает не только цвет */
 .skin-btn:active i { transform: scale(.84); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ФИЛЬТР ПО БРЕНДУ
+
+   Двадцать три чипа поперёк экрана занимали четыре строки и оттесняли
+   товар вниз. Теперь это одна кнопка со счётчиком, а список домов живёт
+   внутри — с поиском и числом ароматов, как в фильтрах маркетплейса.
+   ══════════════════════════════════════════════════════════════════ */
+
+.cl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.bf { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+
+.bf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line-w);
+  border-radius: var(--r-tile);
+  background: rgb(251 249 240 / 78%);
+  color: var(--w);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color var(--micro) var(--ease-out), background var(--micro) var(--ease-out);
+}
+
+.bf-btn:hover { background: rgb(251 249 240 / 96%); }
+.bf.is-open .bf-btn, .bf-btn.is-on { border-color: var(--go); }
+
+.bf-btn-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--w-3);
+}
+
+.bf-btn-value { font-weight: 800; letter-spacing: .01em; }
+.bf-btn.is-on .bf-btn-value { color: var(--go); }
+.bf.is-open svg { transform: rotate(180deg); }
+.bf-btn svg { transition: transform var(--micro) var(--ease-out); }
+
+.bf-clear {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line-w);
+  border-radius: 999px;
+  background: none;
+  color: var(--c-important);
+  cursor: pointer;
+}
+
+.bf-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 40;
+  width: min(330px, 88vw);
+  border: 1px solid var(--line-w);
+  border-radius: var(--r-tile);
+  background: var(--paper-1, #fdfcf8);
+  box-shadow: 0 26px 50px -26px rgb(20 34 14 / 60%);
+  overflow: hidden;
+}
+
+.bf-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line-w);
+  color: var(--w-3);
+}
+
+.bf-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--w);
+  font-size: 13px;
+  outline: none;
+}
+
+.bf-search-x {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--w-3);
+  cursor: pointer;
+}
+
+.bf-list { max-height: 44vh; overflow-y: auto; overscroll-behavior: contain; }
+
+.bf-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-top: 1px solid var(--line-w);
+  background: none;
+  color: var(--w);
+  text-align: left;
+  cursor: pointer;
+}
+
+.bf-row:first-child { border-top: 0; }
+.bf-row:hover { background: color-mix(in srgb, var(--go) 10%, transparent); }
+.bf-row.is-on { background: color-mix(in srgb, var(--go) 16%, transparent); }
+
+.bf-mark {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--line-w);
+  border-radius: 4px;
+  color: #fff;
+}
+
+.bf-row.is-on .bf-mark { background: var(--go); border-color: var(--go); }
+
+.bf-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bf-count {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--w-3);
+}
+
+.bf-empty { margin: 0; padding: 16px 12px; font-size: 13px; color: var(--w-3); }
+
+:root[data-theme="black"] .bf-btn { background: rgb(243 241 234 / 6%); }
+:root[data-theme="black"] .bf-panel { background: #17181a; }
+
+@media (max-width: 620px) {
+  .cl-filters { gap: 8px; }
+  .bf-btn { min-height: 40px; padding: 0 11px; }
+  .bf-panel { width: min(300px, 92vw); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ПРОБНИК — ГЛАВНОЕ ПРЕДЛОЖЕНИЕ
+
+   Отлив стоит в разы меньше флакона, и с него начинают почти все. Прежде
+   он был спрятан внутрь карточки товара: чтобы его найти, нужно было
+   открыть аромат и доскроллить. Теперь он вынесен на саму плитку
+   отдельной кнопкой, а на карточке товара идёт перед флаконами.
+   ══════════════════════════════════════════════════════════════════ */
+
+.card-try {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: calc(100% - 16px);
+  min-height: 34px;
+  margin: 0 8px;
+  padding: 0 10px;
+  border: 1px dashed color-mix(in srgb, var(--go) 55%, transparent);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--go) 10%, transparent);
+  color: var(--go);
+  cursor: pointer;
+  transition: background var(--micro) var(--ease-out), border-color var(--micro) var(--ease-out);
+}
+
+.card-try:hover {
+  background: color-mix(in srgb, var(--go) 20%, transparent);
+  border-style: solid;
+}
+
+.card-try-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-try-price { font-size: 13px; font-weight: 900; white-space: nowrap; }
+
+/* место под кнопку берём из квадрата: строка объёмов на плитке лишняя,
+   её роль теперь у самой кнопки и у карточки товара */
+.card { grid-template-rows: minmax(0, 1fr) auto auto auto; }
+.card .card-sizes { display: none; }
+.card .card-buybar { padding-top: 6px; }
+
+/* заголовок раздела отливов на карточке товара — с меткой */
+.eyebrow--hot {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--go) !important;
+}
+
+.eyebrow--hot::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--c-save);
+}
+
+.samples .size--sample {
+  border-color: color-mix(in srgb, var(--go) 40%, var(--line-w));
+  background: color-mix(in srgb, var(--go) 7%, transparent);
+}
+
+.samples .size--sample.is-on {
+  border-color: var(--go);
+  background: color-mix(in srgb, var(--go) 16%, transparent);
+}
+
+/* зачёркнутая цена в плитках объёма — та же красная, что и везде */
+.sizes-row .size span s {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--c-was);
+}
+
+@media (max-width: 620px) {
+  .card-try { min-height: 32px; margin: 0 6px; width: calc(100% - 12px); padding: 0 8px; }
+  .card-try-label { font-size: 10px; letter-spacing: .04em; }
+  .card-try-price { font-size: 12px; }
+}
+
+/* ── Строка покупки на карточке товара ────────────────────────────────
+   Колонка текста стала уже, когда снимок ушёл во весь экран: цена,
+   кнопка и три круга перестали помещаться в одну линию, и подпись
+   «Купить сейчас — 100 мл» обрезалась по краям кнопки.
+
+   Цена уходит на свою строку: крупная цифра и под ней широкая кнопка
+   читаются лучше, чем то и другое, зажатое в один ряд. */
+@media (min-width: 900px) {
+  .product-page .pp-buy {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    align-items: center;
+    gap: 12px;
+    row-gap: 16px;
+  }
+
+  .product-page .pp-buy .pp-price {
+    grid-column: 1 / -1;
+    font-size: clamp(30px, 3vw, 44px);
+    line-height: 1;
+  }
+
+  .product-page .pp-buy .btn--buy {
+    grid-column: 1;
+    width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .product-page .pp-buy .fav-btn { flex: none; }
+}

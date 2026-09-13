@@ -23,13 +23,13 @@ export interface CartLine {
 let lineSeq = 0;
 const nextUid = (): string => `l${++lineSeq}`;
 export type Filter = "all" | Product["category"] | House;
-export type Sort = "house" | "price-asc" | "price-desc" | "name";
+/* сортировки по названию нет: имя ищут поиском, а не листают по алфавиту */
+export type Sort = "house" | "price-asc" | "price-desc";
 
 export const SORT_LABEL: Record<Sort, string> = {
   house: "По дому",
   "price-asc": "↓ Сначала дешевле",
-  "price-desc": "↑ Сначала дороже",
-  name: "По названию"
+  "price-desc": "↑ Сначала дороже"
 };
 
 interface ShopValue {
@@ -490,7 +490,6 @@ export const visibleProducts = (
   switch (sort) {
     case "price-asc":  return [...list].sort((a, b) => priced(a) - priced(b));
     case "price-desc": return [...list].sort((a, b) => priced(b) - priced(a));
-    case "name":       return [...list].sort((a, b) => a.name.localeCompare(b.name, "ru"));
     default:           return list;
   }
 };
