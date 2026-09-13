@@ -1,11 +1,14 @@
 import { useEffect, useRef } from "react";
-import { X } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 import { money } from "../data/products";
 import { useShop } from "../lib/shop";
 import { animate, dur, EXIT, prefersReducedMotion, STEP, useFlip } from "../lib/motion";
 
 export default function CartDrawer() {
-  const { drawer, closeDrawer, cart, cartTotal, removeFromCart, restoreToCart, checkout, toast } = useShop();
+  const {
+    drawer, closeDrawer, cart, cartTotal, cartCount,
+    removeFromCart, decFromCart, incInCart, restoreToCart, checkout, toast
+  } = useShop();
   const open = drawer === "cart";
 
   const panel = useRef<HTMLElement>(null);
@@ -68,7 +71,7 @@ export default function CartDrawer() {
     <aside className={"drawer" + (open ? " is-open" : "")} aria-label="Корзина" aria-hidden={!open} inert={!open}
            ref={panel}>
       <div className="drawer-head">
-        <h3>Корзина</h3>
+        <h3>Корзина{cartCount > 0 ? <i className="drawer-n">{cartCount}</i> : null}</h3>
         <button className="icon-btn" onClick={closeDrawer} aria-label="Закрыть корзину">
           <X size={17} strokeWidth={1.4} />
         </button>
@@ -79,13 +82,30 @@ export default function CartDrawer() {
           ? <p className="empty">Пока пусто. Выберите аромат из коллекции.</p>
           : cart.map((line, i) => (
               <div className="row" data-flip-id={line.uid} key={line.uid}>
-                <div>
+                <div className="row-text">
                   <div className="row-name">{line.product.name}</div>
                   <div className="row-sub">
                     {line.product.brand} — {line.ml} мл — {money(line.price)}
+                    {line.qty > 1 && <> × {line.qty} = <b>{money(line.price * line.qty)}</b></>}
                   </div>
                 </div>
-                <button onClick={e => drop(e, i)}>Удалить</button>
+
+                {/* количество меняют здесь: прежде два нажатия по «в корзину»
+                    давали две одинаковые строки и изменить их было нельзя */}
+                <div className="row-qty" role="group"
+                     aria-label={`Количество — ${line.product.name}, ${line.ml} мл`}>
+                  <button className="qty-btn" onClick={() => decFromCart(i)}
+                          aria-label={line.qty > 1 ? "Убрать одну штуку" : "Убрать из корзины"}>
+                    <Minus size={14} strokeWidth={2.4} />
+                  </button>
+                  <span className="qty-val" aria-live="polite">{line.qty}</span>
+                  <button className="qty-btn" onClick={() => incInCart(i)}
+                          aria-label="Добавить ещё одну штуку">
+                    <Plus size={14} strokeWidth={2.4} />
+                  </button>
+                </div>
+
+                <button className="row-drop" onClick={e => drop(e, i)}>Удалить</button>
               </div>
             ))}
       </div>

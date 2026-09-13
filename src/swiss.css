@@ -1641,3 +1641,214 @@ input, select, textarea, .btn, .card-cta, .cw-cta, .more-btn,
 /* кружки стояли в четырёх пикселях друг от друга: промах по одному
    попадал в другой — сравнение вместо избранного */
 @media (max-width: 720px) { .card .card-tools { gap: 10px; } }
+
+/* ══════════════════════════════════════════════════════════════════════
+   КОЛИЧЕСТВО В КОРЗИНЕ
+
+   Два нажатия по «в корзину» давали две одинаковые строки: количество
+   нельзя было ни увидеть, ни изменить — только удалить одну из них.
+   Теперь одна строка со счётчиком и двумя кнопками.
+   ══════════════════════════════════════════════════════════════════ */
+
+.drawer-body .row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.row-text { min-width: 0; }
+.row-sub b { font-weight: 700; color: var(--ink); }
+
+.row-qty {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--rule);
+}
+
+.qty-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background .16s var(--ease), color .16s var(--ease);
+}
+
+.qty-btn:hover { background: var(--paper-2); color: var(--ink); }
+
+.qty-val {
+  min-width: 26px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.row-drop {
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+
+.row-drop:hover { color: var(--accent); }
+
+.drawer-n {
+  margin-left: 8px;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 620px) {
+  .drawer-body .row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 8px; }
+  .row-drop { grid-column: 2; justify-self: end; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ФОТОГРАФИИ НЕ ТРОГАЕМ
+
+   Обесцвечивание в каталоге сводило разнобой источников, но оно же
+   съедало то, ради чего снимок и сделан. Возвращаем цвет везде: на
+   плитке, в окне каталога, в пирамиде нот, в кадре времени года.
+   ══════════════════════════════════════════════════════════════════ */
+
+.card .photo img, .card .photo--dark img,
+.cw-card .photo img, .cw-card .photo--dark img,
+.p-tile img, .pp-season img, .hx-mark img,
+.sd-hit-media img, .sd-chip-media img {
+  filter: none !important;
+}
+
+.card .photo--dark img, .cw-card .photo--dark img { mix-blend-mode: normal !important; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ЦВЕТ ВОЗВРАЩАЕТСЯ
+
+   Швейцарская школа держит один акцент, и в чистом виде она оставляла
+   витрину чёрно-бело-красной. Но у цвета здесь есть работа, о которой
+   договаривались: он различает категории и показывает выгоду. Строгость
+   остаётся в структуре — линейки, прямой угол, одна гарнитура, — а цвет
+   возвращается туда, где он что-то значит, и только туда.
+
+     красный    — важное: удалить, счётчик корзины, избранное
+     жёлтый     — женские
+     синий      — мужские
+     зелёный    — унисекс
+     фиолетовый — нишевая
+     ярко-зелёный — выгода: плашка скидки, «в наличии», экономия
+     чёрный/белый — названия и цены
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --c-important: #d92b1f;
+  --c-women:  #c78a00;
+  --c-men:    #1f5fa8;
+  --c-unisex: #2c7a34;
+  --c-niche:  #6b4fbf;
+  --c-save:   #15903c;
+  --c-was:    #8e8e95;
+}
+
+:root[data-theme="black"] {
+  --c-important: #ff5147;
+  --c-women:  #e8b62c;
+  --c-men:    #6aa6ef;
+  --c-unisex: #4fbf6a;
+  --c-niche:  #9b90ef;
+  --c-save:   #35c76a;
+  --c-was:    #71717a;
+}
+
+/* ── категории: точка и слово своим цветом ──────────────────────────── */
+.card .card-line .cat-dot, .cw-card .cw-line .cat-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--cat, var(--ink-3));
+}
+
+.cat-women  { --cat: var(--c-women); }
+.cat-men    { --cat: var(--c-men); }
+.cat-unisex { --cat: var(--c-unisex); }
+.cat-niche  { --cat: var(--c-niche); }
+
+.card .card-line .cat-name,
+.cw-card .cw-line .cat-name { color: var(--cat, var(--ink-3)); font-weight: 700; }
+
+.ft-cat--women.is-on  { background: var(--c-women);  border-color: var(--c-women);  color: #fff; }
+.ft-cat--men.is-on    { background: var(--c-men);    border-color: var(--c-men);    color: #fff; }
+.ft-cat--unisex.is-on { background: var(--c-unisex); border-color: var(--c-unisex); color: #fff; }
+.ft-cat--niche.is-on  { background: var(--c-niche);  border-color: var(--c-niche);  color: #fff; }
+
+/* ── выгода: ярко-зелёная плашка, серая старая цена ─────────────────── */
+.card .card-top .card-label--sale,
+.cw-card .cw-tag--sale,
+.pp-sale-tag, .sale-badge {
+  background: var(--c-save) !important;
+  color: #fff !important;
+  border-color: var(--c-save) !important;
+}
+
+.card .card-save, .cw-card .card-save { color: var(--c-save); font-weight: 700; }
+.card .card-price s, .cw-card .cw-price s, .pp-price s { color: var(--c-was); }
+.size-best, .pp-stock, .cw-stock { color: var(--c-save) !important; }
+.pp-stock i { background: var(--c-save) !important; }
+.pp-sale { border-left-color: var(--c-save); }
+.pp-sale b { color: var(--c-save); }
+
+/* ── важное: красный ────────────────────────────────────────────────── */
+.cart-count[data-has="1"], .mbar i[data-cart-count] {
+  background: var(--c-important) !important;
+  color: #fff !important;
+}
+
+.row-drop:hover, .drawer-body .row > button:hover { color: var(--c-important); }
+.card-mini--fav.is-on, .fav-btn.is-on { color: var(--c-important) !important; }
+.card-mini--fav.is-on svg, .fav-btn.is-on svg { fill: var(--c-important); stroke: var(--c-important); }
+.fav-btn.is-on { border-color: var(--c-important) !important; }
+
+/* сравнение — синее, как мужская категория: это тоже «отнести к группе» */
+.card-mini--cmp.is-on { color: var(--c-men) !important; }
+.cmp-btn.is-on { background: var(--c-men); border-color: var(--c-men); color: #fff; }
+
+/* красная черта под ссылкой в шапке остаётся красной: это не категория,
+   а указание «вы здесь» */
+.nav .link-u::after { background: var(--c-important); }
+:where(a, button, input, select, textarea, [tabindex]):focus-visible { outline-color: var(--c-men); }
+
+/* Прежний блок токенов записан списком, где есть :root[data-theme="white"]
+   — такой селектор специфичнее простого :root, поэтому цветные значения
+   не доезжали. Повторяем список целиком. */
+:root,
+:root[data-theme="white"],
+:root[data-theme="green"] {
+  --c-important: #d92b1f;
+  --c-women:  #c78a00;
+  --c-men:    #1f5fa8;
+  --c-unisex: #2c7a34;
+  --c-niche:  #6b4fbf;
+  --c-save:   #15903c;
+  --c-was:    #8e8e95;
+}
+
+:root[data-theme="black"] {
+  --c-important: #ff5147;
+  --c-women:  #e8b62c;
+  --c-men:    #6aa6ef;
+  --c-unisex: #4fbf6a;
+  --c-niche:  #9b90ef;
+  --c-save:   #35c76a;
+  --c-was:    #71717a;
+}

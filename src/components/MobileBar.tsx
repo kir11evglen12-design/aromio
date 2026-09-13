@@ -7,7 +7,7 @@ import { useShop } from "../lib/shop";
  * of the screen instead, above the home indicator.
  */
 export default function MobileBar() {
-  const { cart, openDrawer, openProfile, openCatalog, drawer, productId, profileOpen, catalogOpen } = useShop();
+  const { cartCount, openDrawer, openProfile, openCatalog, drawer, productId, profileOpen, catalogOpen } = useShop();
 
   /* an overlay owns the screen while it is up; the bar would sit on top of it */
   const hidden = drawer !== null || productId !== null || profileOpen || catalogOpen;
@@ -27,7 +27,7 @@ export default function MobileBar() {
       <button onClick={() => openDrawer("cart")} data-cart-anchor>
         <span className="mbar-icon">
           <ShoppingBag size={20} strokeWidth={1.5} />
-          {cart.length > 0 && <i data-cart-count data-has="1">{cart.length}</i>}
+          {cartCount > 0 && <i data-cart-count data-has="1">{cartCount}</i>}
         </span>
         <span>Корзина</span>
       </button>

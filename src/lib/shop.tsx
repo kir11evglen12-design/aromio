@@ -13,12 +13,18 @@ type Drawer = "cart" | "search" | "auth" | null;
 
 /** a chosen bottle: the fragrance plus the volume the shopper picked */
 export interface CartLine {
-  /** stable per line, so two identical bottles stay two separate rows */
+  /** свой у каждой строки — по нему работают FLIP и отмена удаления */
   uid: string;
   product: Product;
   ml: number;
+  /** цена за одну штуку; строка стоит price × qty */
   price: number;
+  /** сколько таких флаконов в строке */
+  qty: number;
 }
+
+/** строка стоит цену, умноженную на количество */
+export const lineTotal = (l: CartLine): number => l.price * l.qty;
 
 let lineSeq = 0;
 const nextUid = (): string => `l${++lineSeq}`;
@@ -37,6 +43,9 @@ interface ShopValue {
   cartTotal: number;
   addToCart: (id: number, ml?: number) => void;
   removeFromCart: (index: number) => void;
+  decFromCart: (index: number) => void;
+  incInCart: (index: number) => void;
+  cartCount: number;
   restoreToCart: (index: number, line: CartLine) => void;
   /** «Купить сейчас»: кладёт в корзину и сразу открывает её на оформлении */
   buyNow: (id: number, ml?: number) => void;
@@ -128,12 +137,14 @@ const FAV_KEY = "aromioFavorites";
 export function ShopProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartLine[]>(() => {
     try {
-      const raw = JSON.parse(localStorage.getItem(CART_KEY) ?? "[]") as { id: number; ml?: number }[];
-      /* ids and volumes are stored; prices are re-read so they never go stale */
-      return raw.map(({ id, ml }) => {
+      const raw = JSON.parse(localStorage.getItem(CART_KEY) ?? "[]") as { id: number; ml?: number; qty?: number }[];
+      /* храним номер, объём и количество; цену перечитываем, чтобы она
+         не устаревала вслед за промо */
+      return raw.map(({ id, ml, qty }) => {
         const product = byId(id);
         const variant = variantOf(product, ml ?? product.variants[0].ml);
-        return { uid: nextUid(), product, ml: variant.ml, price: priceNow(product, variant) };
+        return { uid: nextUid(), product, ml: variant.ml,
+                 price: priceNow(product, variant), qty: Math.max(1, qty ?? 1) };
       });
     } catch {
       return [];
@@ -200,7 +211,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(CART_KEY, JSON.stringify(cart.map(l => ({ id: l.product.id, ml: l.ml }))));
+      localStorage.setItem(CART_KEY, JSON.stringify(cart.map(l => ({ id: l.product.id, ml: l.ml, qty: l.qty }))));
     } catch {
       /* ignore */
     }
@@ -253,9 +264,35 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const addToCart = useCallback((id: number, ml?: number) => {
     const product = byId(id);
     const variant = variantOf(product, ml ?? 100);
-    setCart(c => [...c, { uid: nextUid(), product, ml: variant.ml, price: priceNow(product, variant) }]);
+
+    /* Тот же аромат в том же объёме — это не вторая строка, а вторая
+       штука. Прежде два нажатия давали две одинаковые строки, и
+       количество нельзя было ни увидеть, ни изменить — только удалить
+       одну из них. */
+    setCart(c => {
+      const i = c.findIndex(l => l.product.id === product.id && l.ml === variant.ml);
+      if (i >= 0) {
+        const next = [...c];
+        next[i] = { ...next[i], qty: next[i].qty + 1 };
+        return next;
+      }
+      return [...c, { uid: nextUid(), product, ml: variant.ml,
+                      price: priceNow(product, variant), qty: 1 }];
+    });
+
     toast(`${product.brand} ${product.name}, ${variant.ml} мл — в корзине`);
   }, [toast]);
+
+  /** −1 к строке; на нуле строка уходит целиком */
+  const decFromCart = useCallback((index: number) => {
+    setCart(c => c.flatMap((l, i) =>
+      i !== index ? [l] : (l.qty > 1 ? [{ ...l, qty: l.qty - 1 }] : [])));
+  }, []);
+
+  /** +1 к строке */
+  const incInCart = useCallback((index: number) => {
+    setCart(c => c.map((l, i) => (i === index ? { ...l, qty: l.qty + 1 } : l)));
+  }, []);
 
   const removeFromCart = useCallback((index: number) => {
     setCart(c => c.filter((_, i) => i !== index));
@@ -293,10 +330,10 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const order: Order = {
       id: "ARO-" + Math.floor(Math.random() * 90000 + 10000),
       date: new Date().toISOString(),
-      items: cart.map(l => ({
+      items: cart.flatMap(l => Array.from({ length: l.qty }, () => ({
         name: l.product.name, brand: l.product.brand, price: l.price, volume: `${l.ml} мл`
-      })),
-      total: cart.reduce((sum, l) => sum + l.price, 0),
+      }))),
+      total: cart.reduce((sum, l) => sum + lineTotal(l), 0),
       status: "Принят"
     };
 
@@ -397,9 +434,12 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<ShopValue>(() => ({
     cart,
-    cartTotal: cart.reduce((sum, l) => sum + l.price, 0),
+    cartTotal: cart.reduce((sum, l) => sum + lineTotal(l), 0),
+    cartCount: cart.reduce((sum, l) => sum + l.qty, 0),
     addToCart,
     removeFromCart,
+    decFromCart,
+    incInCart,
     restoreToCart,
     buyNow,
     checkout,
@@ -458,7 +498,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     toastUndo,
     runUndo
   }), [
-    cart, addToCart, removeFromCart, restoreToCart, buyNow, checkout, user, setUser, signOut, saveProfile,
+    cart, addToCart, removeFromCart, decFromCart, incInCart, restoreToCart, buyNow, checkout, user, setUser, signOut, saveProfile,
     isFavorite, toggleFavorite, drawer, authIntro, openAuth, authMode, productId,
     profileOpen, category, sort, noteQuery, compare, toggleCompare, compareOpen,
     recent, shelf, addToShelf, removeFromShelf, reminders, addReminder,
