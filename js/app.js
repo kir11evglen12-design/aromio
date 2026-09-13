@@ -60,8 +60,39 @@
     });
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") utils.closePanels();
+      if (e.key === "Escape") {
+        utils.closePanels();
+        return;
+      }
+      if (e.key === "Tab") trapFocusInOpenPanel(e);
     });
+  }
+
+  const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  // Without this, Tab walks straight past an open drawer/modal into the
+  // dimmed page behind it — the backdrop is visual only, nothing stopped
+  // keyboard focus from reaching content that's supposed to be inert.
+  function trapFocusInOpenPanel(e) {
+    const panel = document.querySelector(".drawer.open, .overlay.open, .modal.open, .mobile-nav.open");
+    if (!panel) return;
+
+    const focusable = utils.$$(FOCUSABLE_SELECTOR, panel).filter((el) => el.getClientRects().length > 0);
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    } else if (!panel.contains(document.activeElement)) {
+      e.preventDefault();
+      first.focus();
+    }
   }
 
   function syncFavButtons() {
