@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Check, Heart, Layers, ShoppingBag } from "lucide-react";
 import {
-  bottles, CATEGORY_LABEL, money, priceList, priceNow, SHORT_TYPE, variantOf
+  bottles, CATEGORY_LABEL, money, priceList, priceNow, samples, SHORT_TYPE, variantOf
 } from "../data/products";
 import type { Product } from "../data/products";
 import { CATEGORY_TONE } from "../data/categoryTone";
@@ -22,6 +22,10 @@ export default function ProductCard({ product: p }: { product: Product }) {
   const inCompare = compare.includes(p.id);
   const fav = isFavorite(p.id);
 
+  /* самый дешёвый отлив — им аромат и пробуют, поэтому он вынесен
+     отдельной кнопкой, а не спрятан внутрь карточки товара */
+  const trial = samples(p).reduce((a, v) => (priceNow(p, v) < priceNow(p, a) ? v : a), samples(p)[0]);
+
   const media = useRef<HTMLDivElement>(null);
   const open = () => { setSharedOrigin(media.current); openProduct(p.id); };
 
@@ -34,6 +38,11 @@ export default function ProductCard({ product: p }: { product: Product }) {
   const buy = (e: React.MouseEvent) => {
     e.stopPropagation();
     buyNow(p.id, ml);
+  };
+
+  const tryIt = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    buyNow(p.id, trial.ml);
   };
 
   return (
@@ -92,6 +101,11 @@ export default function ProductCard({ product: p }: { product: Product }) {
           </div>
         </div>
       </div>
+
+      <button className="card-try" onClick={tryIt}>
+        <span className="card-try-label">Пробник {trial.ml} мл</span>
+        <span className="card-try-price">{money(priceNow(p, trial))}</span>
+      </button>
 
       <div className="card-buybar">
         <button className="card-cta" onClick={buy}>Купить<span className="cta-more"> сейчас</span></button>

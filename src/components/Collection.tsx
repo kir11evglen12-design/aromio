@@ -7,6 +7,7 @@ import type { Sort } from "../lib/shop";
 import { parallax, revealFrom, useFlip, useGsap } from "../lib/motion";
 import ProductCard from "./ProductCard";
 import SearchBar from "./SearchBar";
+import BrandFilter from "./BrandFilter";
 
 const FILTERS: (ProductCategory | "all")[] = ["all", "women", "men", "unisex", "niche"];
 
@@ -90,17 +91,10 @@ export default function Collection() {
 
       <SearchBar />
 
-      <div className="filters houses" role="group" aria-label="Фильтр по домам">
-        {HOUSES.map(h => (
-          <button key={h}
-                  className={"filter filter--house" + (category === h ? " is-active" : "")}
-                  onClick={() => setCategory(h)}>
-            {h}<i>{products.filter(p => p.brand === h).length}</i>
-          </button>
-        ))}
-      </div>
+      <div className="cl-filters">
+        <BrandFilter />
 
-      <div className="filters" role="group" aria-label="Фильтр по категориям">
+        <div className="filters" role="group" aria-label="Фильтр по категориям">
         {FILTERS.map(c => (
           <button key={c}
                   className={"filter" + (category === c ? " is-active" : "")}
@@ -108,6 +102,7 @@ export default function Collection() {
             {CATEGORY_LABEL[c]}
           </button>
         ))}
+        </div>
       </div>
 
       <div className="cl-tools">

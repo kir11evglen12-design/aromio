@@ -118,10 +118,30 @@ export default function ProductPage() {
 
             <div className="pp-anim"><Pyramid product={p} /></div>
 
+            <div className="samples pp-anim">
+              <div className="sizes-head">
+                <span className="eyebrow eyebrow--hot">Пробники — начните отсюда</span>
+                <span className="sizes-hint">Отлив из того же флакона: аромат раскрывается на коже за день, а не за минуту у тестера</span>
+              </div>
+              <div className="sizes-row">
+                {samples(p).map(v => (
+                  <button key={v.ml}
+                          className={"size size--sample" + (v.ml === ml ? " is-on" : "")}
+                          onClick={() => setMl(v.ml)}>
+                    <b>{v.ml}<i>мл</i></b>
+                    <span>
+                      {money(priceNow(p, v))}
+                      {priceList(p, v) !== undefined && <s>{money(v.price)}</s>}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="sizes pp-anim" role="radiogroup" aria-label="Объём флакона">
               <div className="sizes-head">
                 <span className="eyebrow">Объём</span>
-                <span className="sizes-hint">{variant.ml} мл — {money(variant.price)}</span>
+                <span className="sizes-hint">{variant.ml} мл — {money(priceNow(p, variant))}</span>
               </div>
               <div className="sizes-row">
                 {bottles(p).map(v => (
@@ -133,29 +153,15 @@ export default function ProductPage() {
                     onClick={() => setMl(v.ml)}
                   >
                     <b>{v.ml}<i>мл</i></b>
-                    <span>{money(priceNow(p, v))}</span>
+                    <span>
+                      {money(priceNow(p, v))}
+                      {priceList(p, v) !== undefined && <s>{money(v.price)}</s>}
+                    </span>
                     {v.ml === best.ml && bestGain >= 3 && (
                       <em className="size-best">
                         <i aria-hidden>↓</i>выгоднее на {bestGain}%
                       </em>
                     )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="samples pp-anim">
-              <div className="sizes-head">
-                <span className="eyebrow">Пробники</span>
-                <span className="sizes-hint">Отлив из флакона — попробовать, прежде чем брать целиком</span>
-              </div>
-              <div className="sizes-row">
-                {samples(p).map(v => (
-                  <button key={v.ml}
-                          className={"size size--sample" + (v.ml === ml ? " is-on" : "")}
-                          onClick={() => setMl(v.ml)}>
-                    <b>{v.ml}<i>мл</i></b>
-                    <span>{money(v.price)}</span>
                   </button>
                 ))}
               </div>
