@@ -1,12 +1,12 @@
 import { useRef, useState } from "react";
 import { Check, Heart, Layers, ShoppingBag } from "lucide-react";
 import {
-  bottles, CATEGORY_LABEL, money, priceList, priceNow, samples, SHORT_TYPE, variantOf
+  bottles, CATEGORY_LABEL, folio, money, priceList, priceNow, samples, SHORT_TYPE, variantOf
 } from "../data/products";
 import type { Product } from "../data/products";
 import { CATEGORY_TONE } from "../data/categoryTone";
 import { useShop } from "../lib/shop";
-import { flyToCart, setSharedOrigin } from "../lib/motion";
+import { flyToCart, setFolioOrigin, setSharedOrigin } from "../lib/motion";
 import Plate from "./Plate";
 
 /**
@@ -27,7 +27,13 @@ export default function ProductCard({ product: p }: { product: Product }) {
   const trial = samples(p).reduce((a, v) => (priceNow(p, v) < priceNow(p, a) ? v : a), samples(p)[0]);
 
   const media = useRef<HTMLDivElement>(null);
-  const open = () => { setSharedOrigin(media.current); openProduct(p.id); };
+  const folioEl = useRef<HTMLSpanElement>(null);
+
+  const open = () => {
+    setSharedOrigin(media.current);
+    setFolioOrigin(folioEl.current);
+    openProduct(p.id);
+  };
 
   const add = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -48,6 +54,7 @@ export default function ProductCard({ product: p }: { product: Product }) {
   return (
     <article className="card" data-flip-id={p.id}
              style={{ ["--tint" as string]: p.tint }}>
+      <span className="card-folio" ref={folioEl} aria-hidden>{folio(p)}</span>
       <button className={"card-media" + (p.photo ? " media--photo" : "")}
               onClick={open} aria-label={`Открыть ${p.brand} ${p.name}`}>
         <span className="card-top">

@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import "./swiss.css";
 import App from "./App";
 
 /* the visitor's "calm mode" choice survives a reload */

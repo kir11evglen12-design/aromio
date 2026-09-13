@@ -826,3 +826,12 @@ export const fromPrice = (p: Product): number =>
 
 export const variantOf = (p: Product, ml: number): Variant =>
   p.variants.find(v => v.ml === ml) ?? samples(p).find(v => v.ml === ml) ?? p.variants[0];
+
+/**
+ * Фолио — двузначный номер аромата на витрине. Считается от порядка в
+ * каталоге, а не берётся из id: id может быть разреженным, а номер
+ * должен идти подряд, чтобы по нему можно было назвать аромат вслух.
+ */
+const folioMap = new Map(products.map((p, i) => [p.id, String(i + 1).padStart(2, "0")]));
+
+export const folio = (p: Product): string => folioMap.get(p.id) ?? "00";
