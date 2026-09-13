@@ -4,6 +4,7 @@ import {
   bottles, CATEGORY_LABEL, money, priceList, priceNow, SHORT_TYPE, variantOf
 } from "../data/products";
 import type { Product } from "../data/products";
+import { CATEGORY_TONE } from "../data/categoryTone";
 import { useShop } from "../lib/shop";
 import { flyToCart, setSharedOrigin } from "../lib/motion";
 import Plate from "./Plate";
@@ -67,7 +68,11 @@ export default function ProductCard({ product: p }: { product: Product }) {
       </div>
 
       <div className="card-body">
-        <div className="card-line">{p.brand} · {CATEGORY_LABEL[p.category]}</div>
+        <div className={"card-line " + CATEGORY_TONE[p.category]}>
+          {p.brand}
+          {" · "}
+          <span className="cat-name"><i className="cat-dot" aria-hidden />{CATEGORY_LABEL[p.category]}</span>
+        </div>
         <button className="card-name" onClick={open} title={p.name}>{p.name}</button>
 
         <div className="card-row">

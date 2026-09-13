@@ -8,6 +8,7 @@ import { flyToCart, setSharedOrigin, useFlip } from "../lib/motion";
 import Wordmark from "./Wordmark";
 
 import { plural } from "../lib/auth";
+import { CATEGORY_TONE } from "../data/categoryTone";
 import { useShop } from "../lib/shop";
 import Plate from "./Plate";
 
@@ -253,7 +254,11 @@ function Row({ product: p, onOpen, onBuy, onAdd, fav, onFav }: {
       </button>
 
       <div className="cw-card-body">
-        <div className="cw-line">{p.brand} · {CATEGORY_LABEL[p.category]}</div>
+        <div className={"cw-line " + CATEGORY_TONE[p.category]}>
+          {p.brand}
+          {" · "}
+          <span className="cat-name"><i className="cat-dot" aria-hidden />{CATEGORY_LABEL[p.category]}</span>
+        </div>
         <button className="cw-name" onClick={() => onOpen(media.current)}>{p.name}</button>
 
         <div className="cw-price">
