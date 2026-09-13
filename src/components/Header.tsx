@@ -21,7 +21,7 @@ export function scrollToId(id: string) {
 }
 
 export default function Header() {
-  const { cart, user, openDrawer, openProfile, openCatalog, setCategory, setPaletteOpen } = useShop();
+  const { cartCount, user, openDrawer, openProfile, openCatalog, setCategory, setPaletteOpen } = useShop();
   const [compact, setCompact] = useState(false);
   const [menu, setMenu] = useState(false);
 
@@ -73,7 +73,7 @@ export default function Header() {
           <button className="icon-btn" onClick={() => openDrawer("cart")} aria-label="Корзина"
                   data-cart-anchor>
             <ShoppingBag size={19} strokeWidth={1.3} />
-            <span className="cart-count" data-cart-count data-has={cart.length ? "1" : "0"}>{cart.length}</span>
+            <span className="cart-count" data-cart-count data-has={cartCount ? "1" : "0"}>{cartCount}</span>
           </button>
 
           <button className="burger" onClick={() => setMenu(m => !m)}
