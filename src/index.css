@@ -8350,3 +8350,144 @@ input, select, textarea {
 :root[data-theme="black"] .pitch-fact:nth-child(3) { --tone: #9b90ef; }
 :root[data-theme="black"] .pitch-fact:nth-child(4) { --tone: #ef7ba6; }
 :root[data-theme="black"] .pitch-fact:nth-child(5) { --tone: #4fbf6a; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   СИСТЕМА ЦВЕТА: У КАЖДОГО ЦВЕТА ОДНА РАБОТА
+
+   красный          — важное: что нужно знать до покупки и что необратимо
+   зелёный/синий/жёлтый — категории: унисекс, мужские, женские
+   чёрный/белый     — названия: имя аромата, заголовок, цена
+   ярко-зелёный + красный — скидка: выгода зелёная, старая цена красная
+
+   Всё остальное цвета не получает. Если цветным становится всё, цвет
+   перестаёт что-либо значить — это и была прежняя беда витрины.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --c-important: #cf2f28;   /* важное */
+  --c-women:  #d9a017;      /* жёлтый */
+  --c-men:    #2f6aa8;      /* синий */
+  --c-unisex: #3f7a23;      /* зелёный */
+  --c-niche:  #6b5fc4;      /* четвёртой категории названного цвета нет —
+                               берём соседний из той же палитры холста */
+  --c-save:   #17a047;      /* ярко-зелёный: сколько выгадал */
+  --c-was:    #cf2f28;      /* красный: сколько стоило раньше */
+}
+
+:root[data-theme="black"] {
+  --c-important: #f0564e;
+  --c-women:  #e8b62c;
+  --c-men:    #6aa6ef;
+  --c-unisex: #4fbf6a;
+  --c-niche:  #9b90ef;
+  --c-save:   #2fd067;
+  --c-was:    #f0564e;
+}
+
+/* ── красный: важное ────────────────────────────────────────────────── */
+
+.pp-sale-note, .cw-left, .pp-left,
+.drawer-body .row > button,
+.cart-count[data-has="1"],
+.form-error, .field-error, .empty--error {
+  color: var(--c-important);
+}
+
+.cart-count[data-has="1"] { background: var(--c-important); color: #fff; }
+.card-mini--fav.is-on, .fav-btn.is-on { color: var(--c-important); }
+.card-mini--fav.is-on svg, .fav-btn.is-on svg { fill: var(--c-important); stroke: var(--c-important); }
+
+/* ── зелёный, синий, жёлтый: категории ──────────────────────────────── */
+
+.card .card-line, .cw-card .cw-line { color: var(--w-3); }
+
+.card-line b, .cw-line b { color: inherit; }
+
+/* категория внутри строки дома красится своим цветом */
+.cat-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 5px;
+  border-radius: 999px;
+  background: var(--cat, var(--w-3));
+  vertical-align: 1px;
+}
+
+.cat-women  { --cat: var(--c-women); }
+.cat-men    { --cat: var(--c-men); }
+.cat-unisex { --cat: var(--c-unisex); }
+.cat-niche  { --cat: var(--c-niche); }
+
+.card .card-line .cat-name, .cw-card .cw-line .cat-name { color: var(--cat, var(--w-3)); font-weight: 800; }
+
+.filters:not(.houses) .filter:nth-child(2).is-active { background: var(--c-women);  border-color: var(--c-women);  color: #0b0b0c; }
+.filters:not(.houses) .filter:nth-child(3).is-active { background: var(--c-men);    border-color: var(--c-men);    color: #fff; }
+.filters:not(.houses) .filter:nth-child(4).is-active { background: var(--c-unisex); border-color: var(--c-unisex); color: #fff; }
+.filters:not(.houses) .filter:nth-child(5).is-active { background: var(--c-niche);  border-color: var(--c-niche);  color: #fff; }
+
+/* ── чёрный/белый: названия ─────────────────────────────────────────── */
+
+.card .card-name, .cw-card .cw-name, .pp-name,
+.card .card-price b, .cw-card .cw-price b, .pp-price,
+.hx-name, .sd-hit-text b, .row-name, .display, h2, h3 {
+  color: var(--w);
+}
+
+/* синим больше не подсвечиваем дом: это название, а не категория */
+.hx-meta, .sd-hit-text i, .sd-chip-text i, .drawer-body .row .row-sub { color: var(--w-3); }
+
+/* ── скидка: ярко-зелёная выгода, красная старая цена ───────────────── */
+
+.card .card-top .card-label--sale,
+.cw-card .cw-tag--sale,
+.pp-sale-tag,
+.sale-badge {
+  background: var(--c-save);
+  color: #fff;
+}
+
+.card .card-price s, .cw-card .cw-price s, .pp-price s { color: var(--c-was); }
+
+.size-best, .pp-stock, .cw-stock { color: var(--c-save); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   СМЕНА ТЕМЫ: НОВАЯ РАЗЛИВАЕТСЯ КРУГОМ ИЗ НАЖАТОЙ КНОПКИ
+
+   Браузер держит два кадра — «до» и «после». Старый оставляем лежать
+   неподвижно, новый вырезаем растущим кругом с центром в кнопке. Круг
+   идёт до дальнего угла экрана, поэтому не важно, где стоит планка.
+   ══════════════════════════════════════════════════════════════════ */
+
+@supports (view-transition-name: none) {
+  html.vt-skin::view-transition-old(root),
+  html.vt-skin::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  /* старый кадр лежит снизу и не двигается */
+  html.vt-skin::view-transition-old(root) { z-index: 0; }
+
+  /* новый — сверху, и его открывает круг */
+  html.vt-skin::view-transition-new(root) {
+    z-index: 1;
+    animation: vt-wipe .62s cubic-bezier(.16, 1, .3, 1) both;
+  }
+
+  @keyframes vt-wipe {
+    from { clip-path: circle(0 at var(--vt-x) var(--vt-y)); }
+    to   { clip-path: circle(var(--vt-r) at var(--vt-x) var(--vt-y)); }
+  }
+
+  /* кромка круга светится, пока он идёт: край видно, и переход читается
+     как налитая краска, а не как подмена картинки */
+  html.vt-skin::view-transition-group(root) { isolation: isolate; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.vt-skin::view-transition-new(root) { animation: none; }
+  }
+}
+
+/* нажатая кнопка чуть проседает — руке отвечает не только цвет */
+.skin-btn:active i { transform: scale(.84); }
