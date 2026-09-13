@@ -1,36 +1,34 @@
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 
-export type Skin = "white" | "green" | "black";
+export type Skin = "white" | "black";
 
 const SKINS: { id: Skin; label: string; title: string }[] = [
   { id: "white", label: "Белый", title: "Белая тема" },
-  { id: "green", label: "Зелёный", title: "Зелёная тема" },
   { id: "black", label: "Чёрный", title: "Чёрная тема" }
 ];
 
 const KEY = "aromio:skin";
 
+/** зелёной темы больше нет — у кого она сохранена, тот получает белую */
 const read = (): Skin => {
   try {
     const v = localStorage.getItem(KEY);
-    if (v === "white" || v === "green" || v === "black") return v;
+    if (v === "black") return "black";
   } catch { /* приватное окно — берём тему по умолчанию */ }
-  return "green";
+  return "white";
 };
 
 const reduced = () =>
   typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
- * Переключатель темы — деталь из металла: планка со шлифовкой, три
+ * Переключатель темы — деталь из металла: планка со шлифовкой, два
  * гнезда, выбранное вдавлено внутрь.
  *
  * Сама смена не мигает, а разливается: новая тема выходит кругом из той
- * кнопки, которую нажали, и накрывает страницу. Делает это View
- * Transitions — браузер снимает кадр «до», мы рисуем поверх круг
- * растущего радиуса. Где такого API нет, тема просто меняется: это не
- * украшение, без которого что-то сломается.
+ * кнопки, которую нажали. Делает это View Transitions; где такого API
+ * нет и при включённом «меньше движения» тема просто меняется.
  */
 export default function ThemeSwitch() {
   const [skin, setSkin] = useState<Skin>(read);
@@ -64,10 +62,7 @@ export default function ThemeSwitch() {
 
     /* Внутри колбэка DOM должен измениться СИНХРОННО: браузер снимает
        кадр «после» сразу по возврату. Обычный setState отложен, поэтому
-       на момент снимка тема была ещё старой и переход выходил пустым.
-       Атрибут пишем руками — от него и зависят все цвета, — а состояние
-       кнопки досылаем flushSync, чтобы вдавленное гнездо переехало тем
-       же кадром. */
+       на момент снимка тема была бы ещё старой. */
     const t = start(() => {
       root.dataset.theme = next;
       flushSync(() => setSkin(next));

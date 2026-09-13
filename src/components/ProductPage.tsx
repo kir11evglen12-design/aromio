@@ -178,8 +178,9 @@ export default function ProductPage() {
               <div className="pp-sale pp-anim">
                 <span className="pp-sale-tag"><i aria-hidden>↓</i>{p.sale}%</span>
                 <span>
-                  Промо дома до {saleUntil()}: было {money(variant.price)},
-                  сейчас {money(priceNow(p, variant))}. В корзину уходит цена со скидкой.
+                  Промо до {saleUntil()}: было {money(variant.price)}, сейчас{" "}
+                  {money(priceNow(p, variant))} — <b>выгода {money(variant.price - priceNow(p, variant))}</b>.
+                  В корзину уходит цена со скидкой.
                 </span>
               </div>
             )}

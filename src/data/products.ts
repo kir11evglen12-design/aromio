@@ -117,7 +117,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 2, name: "Homme Intense", brand: "DIOR", price: 12990, sale: 10, category: "men",
+    id: 2, name: "Homme Intense", brand: "DIOR", price: 12990, sale: 20, category: "men",
     variants: [{ ml: 50, price: 8090 }, { ml: 100, price: 12990 }, { ml: 125, price: 15790 }],
     line: "HOMME", tint: "#6a5a66", type: "Eau de Parfum",
     desc: "Пудровый ирис, вписанный в тёплую древесную оправу — самый «костюмный» аромат дома.",
@@ -128,7 +128,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 3, name: "Miss Dior", brand: "DIOR", price: 13490, sale: 10, category: "women",
+    id: 3, name: "Miss Dior", brand: "DIOR", price: 13490, sale: 20, category: "women",
     variants: [{ ml: 50, price: 8390 }, { ml: 100, price: 13490 }, { ml: 125, price: 16490 }],
     line: "MISS DIOR", tint: "#d98fa0", type: "Eau de Parfum",
     desc: "Цветочный шипр нового поколения: роза центифолия, подсвеченная бергамотом и пачули.",
@@ -139,7 +139,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 4, name: "J’adore", brand: "DIOR", price: 13990, sale: 10, category: "women",
+    id: 4, name: "J’adore", brand: "DIOR", price: 13990, sale: 20, category: "women",
     variants: [{ ml: 50, price: 8690 }, { ml: 100, price: 13990 }, { ml: 125, price: 17090 }],
     line: "J’ADORE", tint: "#d9b45a", type: "Eau de Parfum",
     desc: "Золотой цветочный букет: иланг-иланг, дамасская роза и жасмин самбак в одной ноте.",
@@ -152,7 +152,7 @@ export const products: Product[] = [
 
   /* ---------------- LOUIS VUITTON ---------------- */
   {
-    id: 5, name: "Imagination", brand: "LOUIS VUITTON", price: 33900, sale: 15, category: "men",
+    id: 5, name: "Imagination", brand: "LOUIS VUITTON", price: 33900, sale: 25, category: "men",
     variants: [{ ml: 100, price: 33890 }, { ml: 200, price: 52490 }],
     line: "LES PARFUMS", tint: "#6fcac0", type: "Eau de Parfum",
     photo: shotImagination, photoDark: true,
@@ -164,7 +164,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 6, name: "Ombre Nomade", brand: "LOUIS VUITTON", price: 42900, sale: 15, category: "niche",
+    id: 6, name: "Ombre Nomade", brand: "LOUIS VUITTON", price: 42900, sale: 25, category: "niche",
     variants: [{ ml: 100, price: 42890 }, { ml: 200, price: 66490 }],
     line: "LES PARFUMS", tint: "#6b2f2a", type: "Eau de Parfum",
     desc: "Плотный уд с розой и ладаном: самый узнаваемый ночной аромат дома, шлейф читается через комнату.",
@@ -175,7 +175,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 7, name: "Attrape-Rêves", brand: "LOUIS VUITTON", price: 33900, sale: 20, category: "women",
+    id: 7, name: "Attrape-Rêves", brand: "LOUIS VUITTON", price: 33900, sale: 30, category: "women",
     variants: [{ ml: 100, price: 33890 }, { ml: 200, price: 52490 }],
     line: "LES PARFUMS", tint: "#8d5fa0", type: "Eau de Parfum",
     desc: "Пион и личи на пачулевой подушке — сладкий, но не приторный цветочный шлейф.",
@@ -199,7 +199,7 @@ export const products: Product[] = [
 
   /* ---------------- VALENTINO ---------------- */
   {
-    id: 9, name: "Uomo Born In Roma", brand: "VALENTINO", price: 9990, sale: 5, category: "men",
+    id: 9, name: "Uomo Born In Roma", brand: "VALENTINO", price: 9990, sale: 15, category: "men",
     variants: [{ ml: 50, price: 6190 }, { ml: 100, price: 9990 }, { ml: 150, price: 13990 }],
     line: "BORN IN ROMA", tint: "#9fb050", type: "Eau de Toilette",
     photo: shotUomoRoma, photoDark: true,
@@ -211,7 +211,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 10, name: "Uomo", brand: "VALENTINO", price: 10490, sale: 10, category: "men",
+    id: 10, name: "Uomo", brand: "VALENTINO", price: 10490, sale: 20, category: "men",
     variants: [{ ml: 50, price: 6490 }, { ml: 100, price: 10490 }, { ml: 150, price: 14690 }],
     line: "UOMO", tint: "#c08a5a", type: "Eau de Toilette",
     photo: shotUomo, photoDark: true,
@@ -235,7 +235,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 12, name: "Voce Viva", brand: "VALENTINO", price: 10990, sale: 25, category: "women",
+    id: 12, name: "Voce Viva", brand: "VALENTINO", price: 10990, sale: 35, category: "women",
     variants: [{ ml: 50, price: 6790 }, { ml: 100, price: 10990 }, { ml: 150, price: 15390 }],
     line: "VOCE VIVA", tint: "#e0c46a", type: "Eau de Parfum",
     desc: "Светлый цветочно-гурманский аромат: апельсиновый цвет и ваниль с кристальным мускусом.",
@@ -250,7 +250,7 @@ export const products: Product[] = [
      Фотографии предоставлены магазином. Там, где состав нам не передали,
      он не выдуман: карточка честно говорит, что нот пока нет.           */
   {
-    id: 13, name: "Fahrenheit", brand: "DIOR", price: 12490, sale: 20, category: "men",
+    id: 13, name: "Fahrenheit", brand: "DIOR", price: 12490, sale: 30, category: "men",
     variants: [{ ml: 50, price: 8290 }, { ml: 100, price: 12490 }, { ml: 200, price: 19890 }],
     line: "FAHRENHEIT", tint: "#b8522a", type: "Eau de Toilette",
     photo: shotFahrenheit, photoDark: true,
@@ -262,7 +262,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 14, name: "Eyes", brand: "LOUIS VUITTON", price: 34900, sale: 15, category: "unisex",
+    id: 14, name: "Eyes", brand: "LOUIS VUITTON", price: 34900, sale: 25, category: "unisex",
     variants: [{ ml: 100, price: 34890 }, { ml: 200, price: 53490 }],
     line: "LES PARFUMS", tint: "#9a8ef0", type: "Eau de Parfum",
     photo: shotEyes, photoDark: true,
@@ -278,7 +278,7 @@ export const products: Product[] = [
     notes: { top: "", heart: "", base: "" }, notesUnknown: true
   },
   {
-    id: 16, name: "Donna", brand: "VALENTINO", price: 11290, sale: 5, category: "women",
+    id: 16, name: "Donna", brand: "VALENTINO", price: 11290, sale: 15, category: "women",
     variants: [{ ml: 50, price: 6990 }, { ml: 100, price: 11290 }, { ml: 150, price: 15790 }],
     line: "DONNA", tint: "#d9c9a3", type: "Eau de Parfum",
     photo: shotDonna, photoDark: true,
@@ -286,7 +286,7 @@ export const products: Product[] = [
     notes: { top: "", heart: "", base: "" }, notesUnknown: true
   },
   {
-    id: 17, name: "Donna Born In Roma", brand: "VALENTINO", price: 11690, sale: 15, category: "women",
+    id: 17, name: "Donna Born In Roma", brand: "VALENTINO", price: 11690, sale: 25, category: "women",
     variants: [{ ml: 50, price: 7290 }, { ml: 100, price: 11690 }, { ml: 150, price: 16290 }],
     line: "BORN IN ROMA", tint: "#e8398f", type: "Eau de Parfum",
     photo: shotDonnaRoma, photoDark: true,
@@ -294,7 +294,7 @@ export const products: Product[] = [
     notes: { top: "", heart: "", base: "" }, notesUnknown: true
   },
   {
-    id: 18, name: "Donna Purple", brand: "VALENTINO", price: 11690, sale: 10, category: "women",
+    id: 18, name: "Donna Purple", brand: "VALENTINO", price: 11690, sale: 20, category: "women",
     variants: [{ ml: 50, price: 7290 }, { ml: 100, price: 11690 }, { ml: 150, price: 16290 }],
     line: "BORN IN ROMA", tint: "#a86fc0", type: "Eau de Parfum",
     photo: shotDonnaPurple, photoDark: true,
@@ -302,7 +302,7 @@ export const products: Product[] = [
     notes: { top: "", heart: "", base: "" }, notesUnknown: true
   },
   {
-    id: 19, name: "Donna Yellow", brand: "VALENTINO", price: 11690, sale: 15, category: "women",
+    id: 19, name: "Donna Yellow", brand: "VALENTINO", price: 11690, sale: 25, category: "women",
     variants: [{ ml: 50, price: 7290 }, { ml: 100, price: 11690 }, { ml: 150, price: 16290 }],
     line: "BORN IN ROMA", tint: "#d8b63c", type: "Eau de Parfum",
     photo: shotDonnaYellow, photoDark: true,
@@ -312,7 +312,7 @@ export const products: Product[] = [
 
   /* ---------------- JEAN PAUL GAULTIER ---------------- */
   {
-    id: 20, name: "Le Male", brand: "JEAN PAUL GAULTIER", price: 8990, sale: 5, category: "men",
+    id: 20, name: "Le Male", brand: "JEAN PAUL GAULTIER", price: 8990, sale: 15, category: "men",
     variants: [{ ml: 75, price: 6490 }, { ml: 125, price: 8990 }, { ml: 200, price: 12490 }],
     line: "LE MALE", tint: "#5f8fd0", type: "Eau de Toilette",
     desc: "Мята с лавандой поверх ванильно-тонкового тепла — аромат, который с 1995 года слышно в любой толпе.",
@@ -323,7 +323,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 21, name: "Le Male Elixir", brand: "JEAN PAUL GAULTIER", price: 11490, sale: 15, category: "men",
+    id: 21, name: "Le Male Elixir", brand: "JEAN PAUL GAULTIER", price: 11490, sale: 25, category: "men",
     variants: [{ ml: 75, price: 8290 }, { ml: 125, price: 11490 }],
     line: "LE MALE", tint: "#8a6a3a", type: "Parfum",
     desc: "Плотная версия классики: тот же силуэт флакона, но звучание гуще и слаще.",
@@ -332,14 +332,14 @@ export const products: Product[] = [
 
   /* ---------------- LACOSTE ---------------- */
   {
-    id: 22, name: "L.12.12 Blanc", brand: "LACOSTE", price: 6990, sale: 25, category: "men",
+    id: 22, name: "L.12.12 Blanc", brand: "LACOSTE", price: 6990, sale: 35, category: "men",
     variants: [{ ml: 50, price: 4990 }, { ml: 100, price: 6990 }, { ml: 175, price: 9990 }],
     line: "L.12.12", tint: "#dfe3e7", type: "Eau de Toilette",
     desc: "Белая поло-рубашка в парфюмерии: чистый, лёгкий и подчёркнуто повседневный аромат.",
     notes: { top: "", heart: "", base: "" }, notesUnknown: true
   },
   {
-    id: 23, name: "L.12.12 Noir", brand: "LACOSTE", price: 6990, sale: 10, category: "men",
+    id: 23, name: "L.12.12 Noir", brand: "LACOSTE", price: 6990, sale: 20, category: "men",
     variants: [{ ml: 50, price: 4990 }, { ml: 100, price: 6990 }],
     line: "L.12.12", tint: "#2b2f33", type: "Eau de Toilette",
     desc: "Тёмная версия той же линии — плотнее и теплее белой, для вечера.",
@@ -348,7 +348,7 @@ export const products: Product[] = [
 
   /* ---------------- CHANEL ---------------- */
   {
-    id: 24, name: "Bleu de Chanel", brand: "CHANEL", price: 13990, sale: 5, category: "men",
+    id: 24, name: "Bleu de Chanel", brand: "CHANEL", price: 13990, sale: 15, category: "men",
     variants: [{ ml: 50, price: 9490 }, { ml: 100, price: 13990 }, { ml: 150, price: 18490 }],
     line: "BLEU", tint: "#2b4a72", type: "Eau de Parfum", nose: "Жак Польж",
     desc: "Цитрусовый старт на ладанно-древесной базе: дом называет его ароматом свободы от условностей.",
@@ -359,7 +359,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 25, name: "Coco Mademoiselle", brand: "CHANEL", price: 14490, sale: 5, category: "women",
+    id: 25, name: "Coco Mademoiselle", brand: "CHANEL", price: 14490, sale: 15, category: "women",
     variants: [{ ml: 50, price: 9990 }, { ml: 100, price: 14490 }, { ml: 200, price: 21990 }],
     line: "COCO", tint: "#c9884f", type: "Eau de Parfum", nose: "Жак Польж",
     desc: "Шипр с апельсиновой искрой и пачулевой подписью — один из самых узнаваемых женских ароматов дома.",
@@ -372,7 +372,7 @@ export const products: Product[] = [
 
   /* ---------------- TOM FORD ---------------- */
   {
-    id: 26, name: "Tobacco Vanille", brand: "TOM FORD", price: 27900, sale: 10, category: "unisex",
+    id: 26, name: "Tobacco Vanille", brand: "TOM FORD", price: 27900, sale: 20, category: "unisex",
     variants: [{ ml: 50, price: 27900 }, { ml: 100, price: 39900 }],
     line: "PRIVATE BLEND", tint: "#7a4a22", type: "Eau de Parfum", nose: "Оливье Жилотен",
     desc: "Табачный лист с ванилью и сухофруктами — плотный, тёплый и очень зимний.",
@@ -383,7 +383,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 27, name: "Lost Cherry", brand: "TOM FORD", price: 29900, sale: 15, category: "unisex",
+    id: 27, name: "Lost Cherry", brand: "TOM FORD", price: 29900, sale: 25, category: "unisex",
     variants: [{ ml: 50, price: 29900 }, { ml: 100, price: 42900 }],
     line: "PRIVATE BLEND", tint: "#a52a3c", type: "Eau de Parfum", nose: "Луиза Тёрнер",
     photo: shotLostCherry, photoDark: true,
@@ -397,7 +397,7 @@ export const products: Product[] = [
 
   /* ---------------- YVES SAINT LAURENT ---------------- */
   {
-    id: 28, name: "Libre", brand: "YVES SAINT LAURENT", price: 12990, sale: 15, category: "women",
+    id: 28, name: "Libre", brand: "YVES SAINT LAURENT", price: 12990, sale: 25, category: "women",
     variants: [{ ml: 50, price: 8990 }, { ml: 90, price: 12990 }, { ml: 150, price: 17490 }],
     line: "LIBRE", tint: "#c8a64a", type: "Eau de Parfum", nose: "Анн Флипо и Карлос Бенаим",
     desc: "Лаванда против ванили — мужской материал в женском аромате, на этом контрасте всё и держится.",
@@ -421,7 +421,7 @@ export const products: Product[] = [
 
   /* ---------------- PACO RABANNE ---------------- */
   {
-    id: 30, name: "1 Million", brand: "PACO RABANNE", price: 9490, sale: 20, category: "men",
+    id: 30, name: "1 Million", brand: "PACO RABANNE", price: 9490, sale: 30, category: "men",
     variants: [{ ml: 50, price: 6990 }, { ml: 100, price: 9490 }, { ml: 200, price: 14490 }],
     line: "1 MILLION", tint: "#c2922f", type: "Eau de Toilette",
     nose: "Кристоф Рейно, Оливье Пешё и Мишель Жирар",
@@ -433,7 +433,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 31, name: "Invictus", brand: "PACO RABANNE", price: 8990, sale: 5, category: "men",
+    id: 31, name: "Invictus", brand: "PACO RABANNE", price: 8990, sale: 15, category: "men",
     variants: [{ ml: 50, price: 6490 }, { ml: 100, price: 8990 }, { ml: 200, price: 13990 }],
     line: "INVICTUS", tint: "#3f6f86", type: "Eau de Toilette",
     desc: "Морская свежесть на древесно-амбровой базе: спортивный профиль, который держится весь день.",
@@ -446,7 +446,7 @@ export const products: Product[] = [
 
   /* ---------------- CREED ---------------- */
   {
-    id: 32, name: "Aventus", brand: "CREED", price: 38900, sale: 10, category: "niche",
+    id: 32, name: "Aventus", brand: "CREED", price: 38900, sale: 20, category: "niche",
     variants: [{ ml: 50, price: 27900 }, { ml: 100, price: 38900 }, { ml: 120, price: 45900 }],
     line: "AVENTUS", tint: "#6d4a2f", type: "Eau de Parfum", nose: "Эрвен Крид",
     photo: shotAventus, photoDark: true,
@@ -458,7 +458,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 33, name: "Silver Mountain Water", brand: "CREED", price: 35900, sale: 5, category: "unisex",
+    id: 33, name: "Silver Mountain Water", brand: "CREED", price: 35900, sale: 15, category: "unisex",
     variants: [{ ml: 50, price: 25900 }, { ml: 100, price: 35900 }],
     line: "MILLESIME", tint: "#7f98a6", type: "Eau de Parfum",
     desc: "Холодная вода и зелёный чай: прозрачный аромат, придуманный как портрет альпийского ручья.",
@@ -471,7 +471,7 @@ export const products: Product[] = [
 
   /* ---------------- ESCENTRIC MOLECULES ---------------- */
   {
-    id: 34, name: "Molecule 01", brand: "ESCENTRIC MOLECULES", price: 14900, sale: 15, category: "unisex",
+    id: 34, name: "Molecule 01", brand: "ESCENTRIC MOLECULES", price: 14900, sale: 25, category: "unisex",
     variants: [{ ml: 30, price: 9900 }, { ml: 100, price: 14900 }],
     line: "MOLECULE", tint: "#8d8b86", type: "Eau de Toilette", nose: "Гёза Шён",
     photo: shotMol01, photoDark: true,
@@ -483,7 +483,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 35, name: "Escentric 01", brand: "ESCENTRIC MOLECULES", price: 15900, sale: 15, category: "unisex",
+    id: 35, name: "Escentric 01", brand: "ESCENTRIC MOLECULES", price: 15900, sale: 25, category: "unisex",
     variants: [{ ml: 30, price: 10900 }, { ml: 100, price: 15900 }],
     line: "ESCENTRIC", tint: "#7f8a7a", type: "Eau de Toilette", nose: "Гёза Шён",
     photo: shotEsc01, photoDark: true,
@@ -509,7 +509,7 @@ export const products: Product[] = [
 
   /* ---------------- EX NIHILO ---------------- */
   {
-    id: 37, name: "Fleur Narcotique", brand: "EX NIHILO", price: 33900, sale: 5, category: "unisex",
+    id: 37, name: "Fleur Narcotique", brand: "EX NIHILO", price: 33900, sale: 15, category: "unisex",
     variants: [{ ml: 50, price: 24900 }, { ml: 100, price: 33900 }],
     line: "INITIALE", tint: "#c9a3a8", type: "Eau de Parfum",
     photo: shotFleurNarcotique, photoDark: true,
@@ -523,7 +523,7 @@ export const products: Product[] = [
 
   /* ---------------- MANCERA ---------------- */
   {
-    id: 38, name: "Cedrat Boise", brand: "MANCERA", price: 14900, sale: 10, category: "unisex",
+    id: 38, name: "Cedrat Boise", brand: "MANCERA", price: 14900, sale: 20, category: "unisex",
     variants: [{ ml: 60, price: 10900 }, { ml: 120, price: 14900 }],
     line: "LES CONFIDENTIELS", tint: "#93803f", type: "Eau de Parfum",
     photo: shotCedratBoise, photoDark: true,
@@ -535,7 +535,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 39, name: "Red Tobacco", brand: "MANCERA", price: 16900, sale: 25, category: "unisex",
+    id: 39, name: "Red Tobacco", brand: "MANCERA", price: 16900, sale: 35, category: "unisex",
     variants: [{ ml: 60, price: 12400 }, { ml: 120, price: 16900 }],
     line: "LES CONFIDENTIELS", tint: "#6e1d18", type: "Eau de Parfum",
     photo: shotRedTobacco, photoDark: true,
@@ -549,7 +549,7 @@ export const products: Product[] = [
 
   /* ---------------- ESSENTIAL PARFUMS ---------------- */
   {
-    id: 40, name: "Bois Imperial", brand: "ESSENTIAL PARFUMS", price: 12900, sale: 15, category: "unisex",
+    id: 40, name: "Bois Imperial", brand: "ESSENTIAL PARFUMS", price: 12900, sale: 25, category: "unisex",
     variants: [{ ml: 30, price: 7900 }, { ml: 100, price: 12900 }],
     line: "PARIS", tint: "#8a7b5c", type: "Eau de Parfum", nose: "Кантен Биш",
     photo: shotBoisImperial, photoDark: true,
@@ -563,7 +563,7 @@ export const products: Product[] = [
 
   /* ---------------- MONTALE ---------------- */
   {
-    id: 41, name: "Roses Musk", brand: "MONTALE", price: 13900, sale: 5, category: "women",
+    id: 41, name: "Roses Musk", brand: "MONTALE", price: 13900, sale: 15, category: "women",
     variants: [{ ml: 50, price: 9900 }, { ml: 100, price: 13900 }],
     line: "LES ROSES", tint: "#c0567f", type: "Eau de Parfum",
     photo: shotRosesMusk, photoDark: true,
@@ -575,7 +575,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: 42, name: "Soleil de Capri", brand: "MONTALE", price: 12900, sale: 15, category: "unisex",
+    id: 42, name: "Soleil de Capri", brand: "MONTALE", price: 12900, sale: 25, category: "unisex",
     variants: [{ ml: 50, price: 9400 }, { ml: 100, price: 12900 }],
     line: "LES SOLEILS", tint: "#d8b64a", type: "Eau de Parfum",
     photo: shotSoleilCapri, photoDark: true,
@@ -603,7 +603,7 @@ export const products: Product[] = [
 
   /* ---------------- AMOUAGE ---------------- */
   {
-    id: 44, name: "Guidance", brand: "AMOUAGE", price: 52900, sale: 10, category: "niche",
+    id: 44, name: "Guidance", brand: "AMOUAGE", price: 52900, sale: 20, category: "niche",
     variants: [{ ml: 50, price: 39900 }, { ml: 100, price: 52900 }],
     line: "EXCEPTIONAL EXTRAITS", tint: "#b98c7a", type: "Extrait de Parfum",
     photo: shotGuidance, photoDark: true,
@@ -617,7 +617,7 @@ export const products: Product[] = [
 
   /* ---------------- MAISON FRANCIS KURKDJIAN ---------------- */
   {
-    id: 45, name: "Baccarat Rouge 540", brand: "MAISON FRANCIS KURKDJIAN", price: 44900, sale: 20, category: "unisex",
+    id: 45, name: "Baccarat Rouge 540", brand: "MAISON FRANCIS KURKDJIAN", price: 44900, sale: 30, category: "unisex",
     variants: [{ ml: 35, price: 26900 }, { ml: 70, price: 44900 }, { ml: 200, price: 89900 }],
     line: "BACCARAT ROUGE", tint: "#8c1d2a", type: "Eau de Parfum", nose: "Франсис Куркджян",
     photo: shotBR540, photoDark: true,
@@ -631,7 +631,7 @@ export const products: Product[] = [
 
   /* ---------------- BYREDO ---------------- */
   {
-    id: 46, name: "Bal d’Afrique", brand: "BYREDO", price: 27900, sale: 20, category: "unisex",
+    id: 46, name: "Bal d’Afrique", brand: "BYREDO", price: 27900, sale: 30, category: "unisex",
     variants: [{ ml: 50, price: 20900 }, { ml: 100, price: 27900 }],
     line: "BYREDO", tint: "#9a7c4e", type: "Eau de Parfum", nose: "Жером Эпине",
     photo: shotBalAfrique, photoDark: true,
@@ -645,7 +645,7 @@ export const products: Product[] = [
 
   /* ---------------- LE LABO ---------------- */
   {
-    id: 47, name: "Santal 33", brand: "LE LABO", price: 34900, sale: 15, category: "unisex",
+    id: 47, name: "Santal 33", brand: "LE LABO", price: 34900, sale: 25, category: "unisex",
     variants: [{ ml: 50, price: 26900 }, { ml: 100, price: 34900 }],
     line: "CITY EXCLUSIVES", tint: "#8a6f52", type: "Eau de Parfum", nose: "Франк Фёлькль",
     photo: shotSantal33, photoDark: true,
@@ -659,7 +659,7 @@ export const products: Product[] = [
 
   /* ---------------- NASOMATTO ---------------- */
   {
-    id: 48, name: "Black Afgano", brand: "NASOMATTO", price: 39900, sale: 5, category: "niche",
+    id: 48, name: "Black Afgano", brand: "NASOMATTO", price: 39900, sale: 15, category: "niche",
     variants: [{ ml: 30, price: 39900 }],
     line: "NASOMATTO", tint: "#2f2a24", type: "Extrait de Parfum", nose: "Алессандро Гуальтьери",
     photo: shotBlackAfgano, photoDark: true,
@@ -673,7 +673,7 @@ export const products: Product[] = [
 
   /* ---------------- TIZIANA TERENZI ---------------- */
   {
-    id: 49, name: "Kirke", brand: "TIZIANA TERENZI", price: 46900, sale: 10, category: "women",
+    id: 49, name: "Kirke", brand: "TIZIANA TERENZI", price: 46900, sale: 20, category: "women",
     variants: [{ ml: 30, price: 24900 }, { ml: 100, price: 46900 }],
     line: "LUNA", tint: "#b4603f", type: "Extrait de Parfum",
     photo: shotKirke, photoDark: true,
@@ -699,7 +699,7 @@ export const products: Product[] = [
 
   /* ---------------- XERJOFF ---------------- */
   {
-    id: 51, name: "Erba Pura", brand: "XERJOFF", price: 41900, sale: 15, category: "unisex",
+    id: 51, name: "Erba Pura", brand: "XERJOFF", price: 41900, sale: 25, category: "unisex",
     variants: [{ ml: 50, price: 31900 }, { ml: 100, price: 41900 }],
     line: "CASAMORATI · SHOOTING STARS", tint: "#27a8a8", type: "Eau de Parfum",
     photo: shotErbaPura, photoDark: true,
