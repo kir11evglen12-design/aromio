@@ -1647,7 +1647,7 @@
         onclick: function () {
           direction = pair[0];
           UI.$$(".segbtn", toggle).forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === pair[1])); });
-          model.set(trimNumber(token.price * (direction === "above" ? 1.05 : 0.95), token.price < 10 ? 4 : 2));
+          model.set(priceString(token.price * (direction === "above" ? 1.05 : 0.95)));
           paint();
         }
       }));
@@ -1685,7 +1685,7 @@
     bindKeys(sheet, model);
     /* seeded only now: setting it earlier would repaint before the
        elements it draws into exist */
-    model.set(trimNumber(token.price * 1.05, token.price < 10 ? 4 : 2));
+    model.set(priceString(token.price * 1.05));
     paint();
   }
 
@@ -1759,6 +1759,11 @@
   /** A number as a keypad-friendly string: no trailing zeros, comma decimal. */
   function trimNumber(value, dp) {
     return value.toFixed(dp + 2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ",");
+  }
+
+  /** The same, at the precision a price is quoted in rather than held in. */
+  function priceString(price) {
+    return price.toFixed(price < 10 ? 4 : 2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ",");
   }
 
   /* ============================================================
