@@ -348,9 +348,9 @@
 </footer>
 
 <!-- CART -->
-<div class="drawer cart-drawer" id="cartDrawer">
+<div class="drawer cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartDrawerTitle">
   <div class="drawer-head">
-    <h2>Корзина</h2>
+    <h2 id="cartDrawerTitle">Корзина</h2>
     <button class="close" data-close aria-label="Закрыть">×</button>
   </div>
   <div class="drawer-scroll" id="cartItemsScroll"></div>
@@ -358,25 +358,25 @@
 </div>
 
 <!-- FAVORITES -->
-<div class="drawer" id="favoritesDrawer">
+<div class="drawer" id="favoritesDrawer" role="dialog" aria-modal="true" aria-labelledby="favoritesDrawerTitle">
   <div class="drawer-head">
-    <h2>Избранное</h2>
+    <h2 id="favoritesDrawerTitle">Избранное</h2>
     <button class="close" data-close aria-label="Закрыть">×</button>
   </div>
   <div class="drawer-scroll" id="favoritesScroll"></div>
 </div>
 
 <!-- PROFILE -->
-<div class="drawer" id="profileDrawer">
+<div class="drawer" id="profileDrawer" role="dialog" aria-modal="true" aria-labelledby="profileDrawerTitle">
   <div class="drawer-head">
-    <h2>Профиль</h2>
+    <h2 id="profileDrawerTitle">Профиль</h2>
     <button class="close" data-close aria-label="Закрыть">×</button>
   </div>
   <div class="drawer-scroll" id="profileScroll"></div>
 </div>
 
 <!-- SEARCH -->
-<div class="overlay search-overlay" id="searchDrawer">
+<div class="overlay search-overlay" id="searchDrawer" role="dialog" aria-modal="true" aria-label="Поиск">
   <div class="search-panel">
     <div class="search-box">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -389,7 +389,7 @@
 </div>
 
 <!-- QUIZ -->
-<div class="modal quiz-modal" id="quizModal">
+<div class="modal quiz-modal" id="quizModal" role="dialog" aria-modal="true" aria-label="Подбор аромата">
   <div class="modal-panel">
     <button class="close" data-close aria-label="Закрыть">×</button>
     <div class="quiz-progress" id="quizProgress"><span></span></div>
@@ -398,7 +398,7 @@
 </div>
 
 <!-- STORY -->
-<div class="modal" id="storyModal">
+<div class="modal" id="storyModal" role="dialog" aria-modal="true" aria-label="Факт о парфюмерии">
   <div class="modal-panel story-modal-panel">
     <button class="close" data-close aria-label="Закрыть">×</button>
     <div class="story-progress-row" id="storyProgressRow"></div>
