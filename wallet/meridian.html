@@ -1318,7 +1318,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   padding: 0;
   scroll-behavior: auto;
 }
-.intro__runway { height: 460%; }
+.intro__runway { height: 460%; min-height: 1800px; }
 
 .intro__end {
   position: relative;
@@ -1327,8 +1327,19 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   flex-direction: column;
   justify-content: flex-end;
   gap: 12px;
-  padding: 0 20px 26px;
-  opacity: var(--end-o, 1);
+  padding: 0 20px 150px;          /* room for the gate pinned below */
+}
+
+/* The entrance, always on screen and always tappable. */
+.intro__gate {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, #000 42%, rgb(0 0 0 / 78%) 72%, transparent);
 }
 .intro__title {
   font-size: 40px;
@@ -1342,7 +1353,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
 .intro__cue {
   position: absolute;
-  left: 0; right: 0; bottom: 22px;
+  left: 0; right: 0; bottom: 156px;      /* above the entrance, not under it */
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -1359,23 +1370,9 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 .intro__cue svg { width: 18px; height: 18px; }
 @keyframes cue { 50% { transform: translateY(6px); } }
 
-.intro__skip {
-  position: absolute;
-  top: 14px; right: 14px;
-  z-index: 3;
-  padding: 7px 13px;
-  border-radius: 999px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: rgb(255 255 255 / 70%);
-  background: rgb(255 255 255 / 8%);
-  transition: opacity .3s, background .2s;
-}
-.intro__skip:hover { background: rgb(255 255 255 / 14%); color: #fff; }
 
 /* a still frame for anyone who would rather not be flown anywhere */
-.intro--still .intro__cue,
-.intro--still .intro__skip { display: none; }
+.intro--still .intro__cue { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .intro__cue { animation: none; }
@@ -3597,17 +3594,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     /* --- the end card, and the scroller that drives everything --- */
     var end = h("div", { class: "intro__end" }, [
       h("div", { class: "intro__title", text: "Meridian" }),
-      h("div", { class: "intro__sub", text: "Кошелёк с большими кнопками «Купить» и «Продать». Симулятор: настоящих денег и настоящей сети здесь нет." }),
-      h("div", { class: "intro__actions" }, [
-        h("button", {
-          class: "btn btn--primary", html: icon("plus") + "<span>Создать кошелёк</span>",
-          onclick: actions.create
-        }),
-        h("button", {
-          class: "btn btn--ghost", html: icon("key") + "<span>У меня уже есть фраза</span>",
-          onclick: actions.restore
-        })
-      ])
+      h("div", { class: "intro__sub", text: "Кошелёк с большими кнопками «Купить» и «Продать». Симулятор: настоящих денег и настоящей сети здесь нет." })
     ]);
 
     var cue = h("div", { class: "intro__cue", html: icon("chevron-down") + "<span>листайте</span>" });
@@ -3617,12 +3604,21 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
       end
     ]);
 
-    var skip = h("button", {
-      class: "intro__skip", text: "Пропустить",
-      onclick: function () { finish(); }
-    });
+    /* The way in never depends on the title sequence: if scrolling does not
+       work here — a framed page, a stubborn touch surface — the buttons are
+       still under the thumb. */
+    var gate = h("div", { class: "intro__gate" }, [
+      h("button", {
+        class: "btn btn--primary", html: icon("plus") + "<span>Создать кошелёк</span>",
+        onclick: actions.create
+      }),
+      h("button", {
+        class: "btn btn--ghost", html: icon("key") + "<span>У меня уже есть фраза</span>",
+        onclick: actions.restore
+      })
+    ]);
 
-    var root = h("div", { class: "screen intro" }, [stage, scroller, cue, skip]);
+    var root = h("div", { class: "screen intro" }, [stage, scroller, cue, gate]);
 
     /* --- driving it --- */
     function paint() {
@@ -3635,8 +3631,6 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
       stage.style.setProperty("--flash", seg(p, BEATS.flash).toFixed(4));
       stage.style.setProperty("--end", seg(p, BEATS.end).toFixed(4));
       cue.style.opacity = p > 0.04 ? "0" : "";
-      skip.style.opacity = p > 0.9 ? "0" : "";
-      skip.style.pointerEvents = p > 0.9 ? "none" : "";
     }
 
     var ticking = false;
@@ -3646,17 +3640,25 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
       requestAnimationFrame(function () { paint(); ticking = false; });
     }, { passive: true });
 
-    function finish() {
-      scroller.scrollTo({ top: scroller.scrollHeight, behavior: reducedMotion() ? "auto" : "smooth" });
+    /* If the runway never gained height — a layout where percentages
+       collapse — there is nothing to scroll, so show the last frame. */
+    function ensureScrollable() {
+      if (scroller.scrollHeight - scroller.clientHeight < 40) {
+        root.classList.add("intro--still");
+        stage.style.setProperty("--p", "1");
+        ["mark", "type", "wall", "flash", "end"].forEach(function (name) {
+          stage.style.setProperty("--" + name, "1");
+        });
+        cue.style.opacity = "0";
+      }
     }
 
-    /* Nobody should have to scroll through a title sequence to reach a
-       wallet they have already seen — or at all, if motion is unwelcome. */
-    if (reducedMotion() || actions.instant) {
+    if (reducedMotion()) {
       root.classList.add("intro--still");
       setTimeout(function () { scroller.scrollTop = scroller.scrollHeight; paint(); }, 0);
     } else {
-      setTimeout(paint, 0);
+      setTimeout(function () { paint(); ensureScrollable(); }, 0);
+      setTimeout(ensureScrollable, 400);
     }
 
     root.__tick = null;

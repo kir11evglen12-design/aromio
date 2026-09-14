@@ -102,17 +102,7 @@
     /* --- the end card, and the scroller that drives everything --- */
     var end = h("div", { class: "intro__end" }, [
       h("div", { class: "intro__title", text: "Meridian" }),
-      h("div", { class: "intro__sub", text: "Кошелёк с большими кнопками «Купить» и «Продать». Симулятор: настоящих денег и настоящей сети здесь нет." }),
-      h("div", { class: "intro__actions" }, [
-        h("button", {
-          class: "btn btn--primary", html: icon("plus") + "<span>Создать кошелёк</span>",
-          onclick: actions.create
-        }),
-        h("button", {
-          class: "btn btn--ghost", html: icon("key") + "<span>У меня уже есть фраза</span>",
-          onclick: actions.restore
-        })
-      ])
+      h("div", { class: "intro__sub", text: "Кошелёк с большими кнопками «Купить» и «Продать». Симулятор: настоящих денег и настоящей сети здесь нет." })
     ]);
 
     var cue = h("div", { class: "intro__cue", html: icon("chevron-down") + "<span>листайте</span>" });
@@ -122,12 +112,21 @@
       end
     ]);
 
-    var skip = h("button", {
-      class: "intro__skip", text: "Пропустить",
-      onclick: function () { finish(); }
-    });
+    /* The way in never depends on the title sequence: if scrolling does not
+       work here — a framed page, a stubborn touch surface — the buttons are
+       still under the thumb. */
+    var gate = h("div", { class: "intro__gate" }, [
+      h("button", {
+        class: "btn btn--primary", html: icon("plus") + "<span>Создать кошелёк</span>",
+        onclick: actions.create
+      }),
+      h("button", {
+        class: "btn btn--ghost", html: icon("key") + "<span>У меня уже есть фраза</span>",
+        onclick: actions.restore
+      })
+    ]);
 
-    var root = h("div", { class: "screen intro" }, [stage, scroller, cue, skip]);
+    var root = h("div", { class: "screen intro" }, [stage, scroller, cue, gate]);
 
     /* --- driving it --- */
     function paint() {
@@ -140,8 +139,6 @@
       stage.style.setProperty("--flash", seg(p, BEATS.flash).toFixed(4));
       stage.style.setProperty("--end", seg(p, BEATS.end).toFixed(4));
       cue.style.opacity = p > 0.04 ? "0" : "";
-      skip.style.opacity = p > 0.9 ? "0" : "";
-      skip.style.pointerEvents = p > 0.9 ? "none" : "";
     }
 
     var ticking = false;
@@ -151,17 +148,25 @@
       requestAnimationFrame(function () { paint(); ticking = false; });
     }, { passive: true });
 
-    function finish() {
-      scroller.scrollTo({ top: scroller.scrollHeight, behavior: reducedMotion() ? "auto" : "smooth" });
+    /* If the runway never gained height — a layout where percentages
+       collapse — there is nothing to scroll, so show the last frame. */
+    function ensureScrollable() {
+      if (scroller.scrollHeight - scroller.clientHeight < 40) {
+        root.classList.add("intro--still");
+        stage.style.setProperty("--p", "1");
+        ["mark", "type", "wall", "flash", "end"].forEach(function (name) {
+          stage.style.setProperty("--" + name, "1");
+        });
+        cue.style.opacity = "0";
+      }
     }
 
-    /* Nobody should have to scroll through a title sequence to reach a
-       wallet they have already seen — or at all, if motion is unwelcome. */
-    if (reducedMotion() || actions.instant) {
+    if (reducedMotion()) {
       root.classList.add("intro--still");
       setTimeout(function () { scroller.scrollTop = scroller.scrollHeight; paint(); }, 0);
     } else {
-      setTimeout(paint, 0);
+      setTimeout(function () { paint(); ensureScrollable(); }, 0);
+      setTimeout(ensureScrollable, 400);
     }
 
     root.__tick = null;
