@@ -166,9 +166,14 @@
     return words.every(function (w) { return list.indexOf(w) !== -1; });
   }
 
-  /** A stable address for account `index` of this phrase. */
-  function addressFor(phrase, index) {
-    return base58(digest("cobalt/account/" + index + "/" + normalizePhrase(phrase)));
+  /**
+   * A stable address for account `index` of this phrase. The namespace is a
+   * parameter because the wallet shipped once under another name: those
+   * wallets keep deriving with their original prefix, so a second account
+   * added today lands next to the ones already stored.
+   */
+  function addressFor(phrase, index, namespace) {
+    return base58(digest((namespace || "meridian") + "/account/" + index + "/" + normalizePhrase(phrase)));
   }
 
   var ROUNDS = 20000;

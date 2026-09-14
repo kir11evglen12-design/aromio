@@ -78,7 +78,10 @@
     "qr":              "M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z",
     "zap":             "M13 2 4.1 12.6a1 1 0 0 0 .8 1.6H11l-1 7.8 8.9-10.6a1 1 0 0 0-.8-1.6H13z",
     "logout":          "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9",
-    "refresh":         "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6"
+    "refresh":         "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6",
+    "bell":            "M10.3 21a1.9 1.9 0 0 0 3.4 0M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9",
+    "stake":           "M12 2 3 7l9 5 9-5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5",
+    "search":          "m21 21-4.3-4.3"
   };
 
   /* icons that need a circle or rect alongside the path */
@@ -93,7 +96,8 @@
     "copy":     '<rect x="9" y="9" width="13" height="13" rx="2"/>',
     "settings": '<circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
     "key":      '<circle cx="7.5" cy="15.5" r="5.5"/>',
-    "users":    '<circle cx="9" cy="7" r="4"/>'
+    "users":    '<circle cx="9" cy="7" r="4"/>',
+    "search":   '<circle cx="11" cy="11" r="8"/>'
   };
 
   function icon(name, size) {
@@ -119,7 +123,7 @@
   /** Account avatar: two deterministic hues from the address. */
   function avatarStyle(seed) {
     var rnd = Vault.seedRandom("avatar/" + seed);
-    /* Every avatar runs cobalt -> cyan. Letting the second hue drift upward
+    /* Every avatar runs cobalt blue -> cyan. Letting the second hue drift upward
        lands in violet, which reads as a different product. */
     var hue = 200 + Math.floor(rnd() * 38);
     var hue2 = hue - 34 + Math.floor(rnd() * 14);

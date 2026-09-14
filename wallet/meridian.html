@@ -1,0 +1,4874 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#04060d">
+<meta name="description" content="Meridian — демонстрационный криптокошелёк с большими кнопками «Купить» и «Продать». Сине-чёрная тема, симуляция рынка, без сети и реальных средств.">
+<title>Meridian — криптокошелёк</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%232e6bff'/><ellipse cx='32' cy='32' rx='10' ry='28' fill='none' stroke='%2304070f' stroke-opacity='.4' stroke-width='3'/><path d='M32 4v56' stroke='%23fff' stroke-width='4'/></svg>">
+<style>
+/* ============================================================
+   MERIDIAN — a blue-black wallet skin.
+
+   One accent family (cobalt blue -> cyan) carries every action, so the two
+   buttons that matter — buy and sell — are never competing with a
+   rainbow of other colours. Green and rose appear only on numbers that
+   went up or down, where a hue actually means something.
+   ============================================================ */
+
+:root {
+  --void:      #04060d;
+  --app:       #070b14;
+  --card:      #0d1322;
+  --card-hi:   #121a2d;
+  --card-lo:   #0a0f1c;
+
+  --line:      rgb(122 158 255 / 10%);
+  --line-hi:   rgb(122 158 255 / 20%);
+
+  --txt:       #e9eefb;
+  --dim:       #8593b4;
+  --dim-lo:    #5b6786;
+
+  --blue:      #2e6bff;
+  --blue-lo:   #1b47c8;
+  --cyan:      #17c1ff;
+  --soft:      #9dbbff;
+
+  --up:        #24d6a0;
+  --down:      #ff5c7c;
+
+  --r-lg: 26px;
+  --r-md: 18px;
+  --r-sm: 12px;
+
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --pop: cubic-bezier(.34, 1.56, .64, 1);
+
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--void);
+  color: var(--txt);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, textarea { font: inherit; color: inherit; }
+button { border: 0; background: none; cursor: pointer; }
+input { border: 0; outline: 0; background: none; }
+
+/* numbers line up in columns and stop jittering as prices tick */
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* ---------- stage: the page behind the device ---------- */
+
+.stage {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+  background:
+    radial-gradient(900px 620px at 22% -8%,  rgb(46 107 255 / 22%), transparent 62%),
+    radial-gradient(760px 540px at 88% 108%, rgb(23 193 255 / 14%), transparent 60%),
+    var(--void);
+}
+
+.device {
+  position: relative;
+  width: min(414px, 100%);
+  height: min(880px, calc(100dvh - 56px));
+  min-height: 620px;
+  border-radius: 42px;
+  background: var(--app);
+  border: 1px solid var(--line-hi);
+  box-shadow:
+    0 0 0 1px rgb(4 6 13 / 90%),
+    0 60px 140px -30px rgb(4 8 24 / 90%),
+    0 0 120px -40px rgb(46 107 255 / 55%);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* faint aurora inside the shell, so flat cards sit on something */
+.device::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(520px 300px at 50% -12%, rgb(46 107 255 / 20%), transparent 70%),
+    radial-gradient(420px 260px at 110% 12%, rgb(23 193 255 / 10%), transparent 70%);
+  z-index: 0;
+}
+
+@media (max-width: 480px) {
+  .stage { padding: 0; }
+  .device {
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+  }
+}
+
+/* ---------- screens ---------- */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 16px 28px;
+  scrollbar-width: none;
+}
+
+.screen[hidden] { display: none; }
+
+.screen--enter { animation: screen-in .34s var(--ease) both; }
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(10px) scale(.99); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 10px;
+}
+
+.acct {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 4%);
+  border: 1px solid var(--line);
+  transition: background .18s, border-color .18s;
+}
+.acct:hover { background: rgb(255 255 255 / 8%); border-color: var(--line-hi); }
+
+.acct__name { font-weight: 620; font-size: 14px; letter-spacing: -.01em; }
+.acct__addr { font-size: 11.5px; color: var(--dim); letter-spacing: .01em; }
+
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: #04060d;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 22%);
+}
+
+.iconbtn {
+  width: 38px; height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--dim);
+  border: 1px solid transparent;
+  transition: background .18s, color .18s, border-color .18s;
+}
+.iconbtn:hover { background: rgb(255 255 255 / 6%); color: var(--txt); border-color: var(--line); }
+.iconbtn--on { color: var(--soft); background: rgb(46 107 255 / 14%); border-color: var(--line-hi); }
+
+.spacer { flex: 1; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--soft);
+  background: rgb(46 107 255 / 14%);
+  border: 1px solid var(--line-hi);
+}
+.pill__dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 0 3px rgb(23 193 255 / 18%);
+}
+
+/* ---------- balance block ---------- */
+
+.balance { padding: 14px 4px 6px; text-align: center; }
+
+.balance__label {
+  font-size: 12.5px;
+  color: var(--dim);
+  letter-spacing: .02em;
+}
+
+.balance__value {
+  margin-top: 4px;
+  font-size: clamp(38px, 11vw, 46px);
+  font-weight: 760;
+  letter-spacing: -.035em;
+  line-height: 1.05;
+}
+.balance__value--hidden { letter-spacing: .06em; }
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 640;
+  background: rgb(36 214 160 / 12%);
+  color: var(--up);
+}
+.delta--down { background: rgb(255 92 124 / 12%); color: var(--down); }
+.delta svg { width: 14px; height: 14px; }
+
+.flash { animation: flash .5s var(--ease); }
+@keyframes flash { 0% { color: var(--cyan); } 100% { color: inherit; } }
+
+/* ---------- the two big buttons ---------- */
+
+.bigrow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 18px 0 12px;
+}
+
+.bigbtn {
+  position: relative;
+  height: 104px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -.01em;
+  overflow: hidden;
+  transition: transform .18s var(--pop), box-shadow .22s;
+}
+.bigbtn:active { transform: scale(.965); }
+.bigbtn svg { width: 26px; height: 26px; }
+
+.bigbtn--buy {
+  color: #fff;
+  background: linear-gradient(150deg, #3d7bff 0%, #2e6bff 44%, #17a8ff 100%);
+  box-shadow:
+    0 16px 34px -14px rgb(46 107 255 / 90%),
+    inset 0 1px 0 rgb(255 255 255 / 28%);
+}
+.bigbtn--buy::after {
+  content: "";
+  position: absolute;
+  inset: -60% -20% auto;
+  height: 140%;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 26%), transparent);
+  opacity: .8;
+  pointer-events: none;
+}
+.bigbtn--buy:hover { box-shadow: 0 20px 44px -14px rgb(46 107 255 / 100%), inset 0 1px 0 rgb(255 255 255 / 32%); }
+
+.bigbtn--sell {
+  color: var(--soft);
+  background: linear-gradient(180deg, var(--card-hi), var(--card-lo));
+  border: 1px solid var(--line-hi);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+}
+.bigbtn--sell:hover { background: linear-gradient(180deg, #16203a, #0d1425); border-color: rgb(122 158 255 / 32%); }
+
+.bigbtn__hint {
+  font-size: 11.5px;
+  font-weight: 560;
+  letter-spacing: .01em;
+  opacity: .78;
+}
+
+/* ---------- secondary actions ---------- */
+
+.quickrow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding-bottom: 18px;
+}
+
+.quick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 4px 10px;
+  border-radius: var(--r-md);
+  background: rgb(255 255 255 / 3.5%);
+  border: 1px solid var(--line);
+  font-size: 11.5px;
+  font-weight: 560;
+  color: var(--dim);
+  transition: background .18s, color .18s, transform .18s var(--pop);
+}
+.quick svg { width: 19px; height: 19px; color: var(--soft); }
+.quick:hover { background: rgb(46 107 255 / 12%); color: var(--txt); }
+.quick:active { transform: scale(.94); }
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 3.5%);
+  border: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.tab {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  transition: color .18s, background .18s;
+}
+.tab[aria-selected="true"] {
+  color: var(--txt);
+  background: linear-gradient(180deg, rgb(46 107 255 / 30%), rgb(46 107 255 / 16%));
+  box-shadow: inset 0 0 0 1px var(--line-hi);
+}
+
+/* ---------- asset rows ---------- */
+
+.list { display: flex; flex-direction: column; gap: 4px; }
+
+.row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 54px auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: var(--r-md);
+  text-align: left;
+  border: 1px solid transparent;
+  transition: background .16s, border-color .16s;
+}
+/* rows without a trend line — accounts, pickers — keep three columns */
+.row--wide { grid-template-columns: 42px minmax(0, 1fr) auto; }
+
+.row:hover { background: rgb(255 255 255 / 4%); border-color: var(--line); }
+.row:active { background: rgb(255 255 255 / 7%); }
+
+.coin {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 780;
+  font-size: 13px;
+  letter-spacing: -.02em;
+  color: #04060d;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 20%);
+}
+
+.row__name { font-weight: 620; font-size: 15px; letter-spacing: -.01em; }
+.row__sub { font-size: 12.5px; color: var(--dim); display: flex; align-items: center; gap: 6px; }
+.row__right { text-align: right; }
+.row__val { font-weight: 620; font-size: 15px; }
+.row__delta { font-size: 12.5px; font-weight: 560; color: var(--up); }
+.row__delta--down { color: var(--down); }
+
+.spark { width: 54px; height: 22px; flex: none; }
+
+/* the trend line is the first thing to go when the row gets tight */
+@media (max-width: 379px) {
+  .row { grid-template-columns: 42px minmax(0, 1fr) auto; }
+  .spark { display: none; }
+}
+
+/* a small count riding on the bell */
+.badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 16px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--app);
+}
+.iconbtn { position: relative; }
+
+/* a note under the balance: what part of it is locked up */
+.balance__note { margin-top: 7px; font-size: 12.5px; color: var(--dim); }
+button.balance { display: block; width: 100%; border-radius: var(--r-md); }
+button.balance:hover { background: rgb(255 255 255 / 3%); }
+
+/* an inline qualifier on a row's second line */
+.row__tag {
+  margin-left: 7px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--soft);
+  background: rgb(46 107 255 / 16%);
+  white-space: nowrap;
+}
+.row__sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row--on { background: rgb(46 107 255 / 14%); border-color: rgb(46 107 255 / 45%); }
+
+/* ---------- staking ---------- */
+
+.stat { padding: 2px 0 10px; }
+.stat__label { font-size: 12.5px; color: var(--dim); }
+.stat__value { font-size: 28px; font-weight: 740; letter-spacing: -.03em; margin-top: 2px; }
+
+.apy {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--up);
+  background: rgb(36 214 160 / 12%);
+}
+.stakecard + .stakecard { margin-top: 10px; }
+.reward { color: var(--up); }
+
+/* allocation bars in the portfolio sheet */
+.alloc { padding: 8px 2px; }
+.bar {
+  height: 6px;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 7%);
+  overflow: hidden;
+}
+.bar__fill { height: 100%; border-radius: 999px; }
+
+/* a contact row: the body picks, the trailing button deletes */
+.contact__pick {
+  min-width: 0;
+  text-align: left;
+  display: block;
+}
+.contact__pick .row__sub { display: block; }
+
+.tx--unread { background: rgb(46 107 255 / 8%); }
+
+/* ---------- section headings & empty states ---------- */
+
+.h {
+  font-size: 12px;
+  font-weight: 640;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--dim-lo);
+  padding: 16px 4px 8px;
+}
+
+.empty {
+  padding: 46px 20px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 13.5px;
+}
+.empty svg { width: 34px; height: 34px; color: var(--dim-lo); margin-bottom: 10px; }
+
+/* ---------- cards ---------- */
+
+.card {
+  border-radius: var(--r-md);
+  background: linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 2%));
+  border: 1px solid var(--line);
+  padding: 14px;
+}
+
+.kv { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13.5px; }
+.kv__k { color: var(--dim); }
+.kv__v { font-weight: 600; text-align: right; }
+.kv + .kv { border-top: 1px solid var(--line); }
+
+/* ---------- chart ---------- */
+
+.chartwrap { position: relative; margin: 6px -4px 0; }
+.chart { width: 100%; height: 168px; display: block; overflow: visible; }
+
+.seg {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 3px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 3.5%);
+  border: 1px solid var(--line);
+}
+.segbtn {
+  flex: 1;
+  padding: 7px 2px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 620;
+  color: var(--dim);
+  transition: color .16s, background .16s;
+}
+.segbtn[aria-pressed="true"] { color: var(--txt); background: rgb(46 107 255 / 26%); }
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  height: 54px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 680;
+  letter-spacing: -.01em;
+  transition: transform .16s var(--pop), opacity .16s, background .18s;
+}
+.btn:active { transform: scale(.975); }
+.btn svg { width: 19px; height: 19px; }
+.btn[disabled] { opacity: .38; pointer-events: none; }
+
+.btn--primary {
+  color: #fff;
+  background: linear-gradient(150deg, #3d7bff, #2e6bff 50%, #17a8ff);
+  box-shadow: 0 14px 30px -14px rgb(46 107 255 / 95%), inset 0 1px 0 rgb(255 255 255 / 26%);
+}
+.btn--ghost {
+  color: var(--soft);
+  background: rgb(255 255 255 / 5%);
+  border: 1px solid var(--line-hi);
+}
+.btn--danger { color: var(--down); background: rgb(255 92 124 / 10%); border: 1px solid rgb(255 92 124 / 26%); }
+.btn--sm { height: 44px; font-size: 14.5px; border-radius: 13px; }
+
+/* press-and-hold confirmation: a deliberate gesture for a money move */
+.hold { position: relative; overflow: hidden; }
+.hold__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: rgb(255 255 255 / 22%);
+  pointer-events: none;
+}
+.hold__label { position: relative; display: flex; align-items: center; gap: 9px; }
+
+/* ---------- inputs ---------- */
+
+.field { display: block; padding: 14px 0 4px; }
+.field__label {
+  display: block;
+  font-size: 12px;
+  font-weight: 620;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--dim-lo);
+  margin-bottom: 8px;
+}
+.input {
+  width: 100%;
+  padding: 14px 14px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 4%);
+  border: 1px solid var(--line);
+  font-size: 15px;
+  transition: border-color .18s, background .18s;
+}
+.input:focus { border-color: rgb(46 107 255 / 60%); background: rgb(46 107 255 / 8%); }
+.input::placeholder { color: var(--dim-lo); }
+.input--mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px; letter-spacing: -.01em; }
+.input--bad { border-color: rgb(255 92 124 / 60%); }
+
+.hint { font-size: 12.5px; color: var(--dim); padding: 8px 2px 0; }
+.hint--bad { color: var(--down); }
+
+/* ---------- amount display + keypad ---------- */
+
+.amount {
+  text-align: center;
+  padding: 12px 8px 4px;
+}
+.amount__value {
+  font-size: clamp(36px, 12vw, 48px);
+  font-weight: 740;
+  letter-spacing: -.04em;
+  line-height: 1.05;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.amount__cur { color: var(--dim); font-size: .62em; font-weight: 640; }
+.amount__zero { color: var(--dim-lo); }
+.amount__sub { margin-top: 8px; font-size: 14px; color: var(--dim); font-weight: 560; }
+.amount__caret {
+  display: inline-block;
+  width: 2px;
+  height: .82em;
+  background: var(--cyan);
+  border-radius: 2px;
+  animation: caret 1.05s steps(1, end) infinite;
+  transform: translateY(.04em);
+}
+@keyframes caret { 50% { opacity: 0; } }
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  padding: 6px 0 4px;
+}
+.key {
+  height: 46px;
+  border-radius: 14px;
+  font-size: 20px;
+  font-weight: 620;
+  color: var(--txt);
+  transition: background .14s, transform .14s var(--pop);
+}
+.key:hover { background: rgb(255 255 255 / 6%); }
+.key:active { background: rgb(46 107 255 / 26%); transform: scale(.93); }
+.key svg { width: 22px; height: 22px; }
+
+.chips { display: flex; gap: 7px; padding: 2px 0 4px; }
+.chip {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 620;
+  color: var(--soft);
+  background: rgb(46 107 255 / 12%);
+  border: 1px solid var(--line-hi);
+  transition: background .16s, transform .16s var(--pop);
+}
+.chip:hover { background: rgb(46 107 255 / 22%); }
+.chip:active { transform: scale(.94); }
+
+/* horizontal token picker */
+.picker { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 10px; scrollbar-width: none; }
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 7px 13px 7px 7px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 4%);
+  border: 1px solid var(--line);
+  font-weight: 620;
+  font-size: 13.5px;
+  transition: background .16s, border-color .16s;
+}
+.pick[aria-pressed="true"] { background: rgb(46 107 255 / 22%); border-color: rgb(46 107 255 / 55%); }
+.pick .coin { width: 26px; height: 26px; font-size: 10px; }
+
+/* ---------- sheets ---------- */
+
+.sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.sheet[hidden] { display: none; }
+
+.sheet__veil {
+  position: absolute;
+  inset: 0;
+  background: rgb(2 4 10 / 68%);
+  backdrop-filter: blur(6px);
+  animation: fade .22s ease both;
+}
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+.sheet__panel {
+  position: relative;
+  max-height: 92%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 28px 28px 0 0;
+  background: linear-gradient(180deg, #101830, #080d1a 42%);
+  border: 1px solid var(--line-hi);
+  border-bottom: 0;
+  box-shadow: 0 -30px 70px -30px rgb(0 0 0 / 90%);
+  animation: sheet-up .34s var(--ease) both;
+}
+@keyframes sheet-up { from { transform: translateY(102%); } to { transform: none; } }
+.sheet--out .sheet__panel { animation: sheet-down .24s ease-in both; }
+.sheet--out .sheet__veil { animation: fade .24s ease-in reverse both; }
+@keyframes sheet-down { to { transform: translateY(102%); } }
+
+.grabber {
+  width: 38px; height: 4px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 18%);
+  margin: 10px auto 0;
+  flex: none;
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 4px;
+}
+.sheet__title { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+.sheet__body { padding: 4px 16px 6px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.sheet__foot { padding: 10px 16px 18px; }
+
+/* ---------- seed phrase ---------- */
+
+.seedgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 4px 0;
+}
+.seedword {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 4%);
+  border: 1px solid var(--line);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.seedword__i { font-size: 11px; color: var(--dim-lo); min-width: 13px; }
+
+.blurred { position: relative; }
+.blurred > .seedgrid { filter: blur(9px); opacity: .5; user-select: none; }
+.blurred__cta {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 620;
+  color: var(--soft);
+}
+.blurred__cta svg { width: 22px; height: 22px; }
+
+/* ---------- warning banner ---------- */
+
+.warn {
+  display: flex;
+  gap: 10px;
+  padding: 12px 13px;
+  border-radius: 14px;
+  font-size: 12.8px;
+  line-height: 1.42;
+  color: #ffd7de;
+  background: rgb(255 92 124 / 9%);
+  border: 1px solid rgb(255 92 124 / 26%);
+}
+.warn svg { width: 17px; height: 17px; flex: none; margin-top: 1px; color: var(--down); }
+.warn--info { color: var(--soft); background: rgb(46 107 255 / 10%); border-color: var(--line-hi); }
+.warn--info svg { color: var(--cyan); }
+
+/* ---------- activity ---------- */
+
+.tx { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border-radius: var(--r-md); text-align: left; border: 1px solid transparent; }
+.tx:hover { background: rgb(255 255 255 / 4%); border-color: var(--line); }
+.tx__ico {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgb(46 107 255 / 14%);
+  color: var(--soft);
+}
+.tx__ico svg { width: 17px; height: 17px; }
+.tx__ico--in { background: rgb(36 214 160 / 13%); color: var(--up); }
+.tx__ico--out { background: rgb(255 92 124 / 12%); color: var(--down); }
+.tx__t { font-weight: 620; font-size: 14.5px; }
+.tx__s { font-size: 12.5px; color: var(--dim); }
+.tx__a { font-weight: 620; font-size: 14.5px; text-align: right; }
+.tx__a--in { color: var(--up); }
+
+/* ---------- collectibles ---------- */
+
+.nftgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.nft { border-radius: var(--r-md); overflow: hidden; background: var(--card); border: 1px solid var(--line); text-align: left; transition: transform .2s var(--ease), border-color .2s; }
+.nft:hover { transform: translateY(-3px); border-color: var(--line-hi); }
+.nft svg { display: block; width: 100%; height: auto; }
+.nft__meta { padding: 9px 11px 11px; }
+.nft__t { font-size: 13.5px; font-weight: 640; }
+.nft__s { font-size: 11.5px; color: var(--dim); }
+
+/* ---------- settings ---------- */
+
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 12px;
+  border-radius: var(--r-md);
+  text-align: left;
+  border: 1px solid transparent;
+  transition: background .16s;
+}
+.opt:hover { background: rgb(255 255 255 / 4%); }
+.opt__ico { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: rgb(46 107 255 / 13%); color: var(--soft); flex: none; }
+.opt__ico svg { width: 16px; height: 16px; }
+.opt__t { font-weight: 600; font-size: 14.5px; }
+.opt__s { font-size: 12px; color: var(--dim); }
+
+.switch {
+  width: 44px; height: 26px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 10%);
+  position: relative;
+  flex: none;
+  transition: background .2s;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform .22s var(--pop);
+}
+.switch[aria-checked="true"] { background: var(--blue); }
+.switch[aria-checked="true"]::after { transform: translateX(18px); }
+
+/* ---------- onboarding ---------- */
+
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px 26px;
+  text-align: center;
+}
+.hero__mark { width: 92px; height: 92px; animation: bob 5.5s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-9px); } }
+.hero__title { font-size: 32px; font-weight: 780; letter-spacing: -.035em; }
+.hero__sub { font-size: 14.5px; color: var(--dim); max-width: 30ch; line-height: 1.5; }
+
+.foot { padding: 0 16px 22px; display: flex; flex-direction: column; gap: 10px; }
+
+.steps { display: flex; gap: 6px; justify-content: center; padding: 6px 0 2px; }
+.step { width: 22px; height: 3px; border-radius: 999px; background: rgb(255 255 255 / 12%); }
+.step--on { background: var(--blue); }
+
+/* ---------- toast ---------- */
+
+.toasts {
+  position: absolute;
+  left: 0; right: 0; bottom: 18px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  padding: 0 16px;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 100%;
+  padding: 11px 15px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  font-weight: 580;
+  color: var(--txt);
+  background: rgb(16 24 46 / 96%);
+  border: 1px solid var(--line-hi);
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 90%);
+  animation: toast-in .28s var(--pop) both;
+}
+.toast svg { width: 16px; height: 16px; color: var(--cyan); flex: none; }
+.toast--out { animation: toast-out .22s ease-in both; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+@keyframes toast-out { to { opacity: 0; transform: translateY(8px); } }
+
+/* ---------- success overlay ---------- */
+
+.done {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 28px;
+  text-align: center;
+  background: linear-gradient(180deg, rgb(10 18 38 / 98%), rgb(5 8 15 / 99%));
+  animation: fade .2s ease both;
+}
+.done__ring {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle, rgb(46 107 255 / 30%), transparent 70%);
+  animation: ring 2.6s ease-out infinite;
+}
+@keyframes ring { 0% { box-shadow: 0 0 0 0 rgb(46 107 255 / 45%); } 70%, 100% { box-shadow: 0 0 0 34px rgb(46 107 255 / 0%); } }
+.done__ring svg { width: 54px; height: 54px; color: var(--cyan); }
+.done__t { font-size: 24px; font-weight: 740; letter-spacing: -.03em; }
+.done__s { font-size: 14px; color: var(--dim); }
+
+.tick { stroke-dasharray: 60; stroke-dashoffset: 60; animation: tick .5s var(--ease) .12s forwards; }
+@keyframes tick { to { stroke-dashoffset: 0; } }
+
+/* ---------- misc ---------- */
+
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.center { text-align: center; }
+.muted { color: var(--dim); }
+.rowsplit { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.gap { display: flex; flex-direction: column; gap: 10px; }
+
+.swapline {
+  display: flex;
+  justify-content: center;
+  margin: -13px 0;
+  position: relative;
+  z-index: 2;
+}
+.swapbtn {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #131c33;
+  border: 1px solid var(--line-hi);
+  color: var(--soft);
+  transition: transform .3s var(--ease), background .18s;
+}
+.swapbtn:hover { background: #1a2543; }
+.swapbtn--spin { transform: rotate(180deg); }
+.swapbtn svg { width: 17px; height: 17px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="device" id="device">
+    <div id="app"></div>
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+  </div>
+</div>
+
+<!-- plain scripts, loaded in dependency order, so the page also works from file:// -->
+<!-- wordlist.js -->
+<script>
+/**
+ * The 256-word list a demo recovery phrase is drawn from.
+ *
+ * Deliberately not the BIP-39 list: a phrase minted here must never be
+ * mistaken for one that controls real funds. Twelve words out of 256 give
+ * 96 bits of entropy, which is plenty to keep two demo wallets apart.
+ */
+(function (global) {
+  "use strict";
+
+  var WORDS = [
+    "abbey", "adobe", "agent", "alien", "amber", "angle", "arbor", "arrow",
+    "atlas", "autumn", "badge", "baker", "banjo", "basin", "beacon", "bear",
+    "belt", "berry", "bison", "bloom", "boat", "boot", "bridge", "bubble",
+    "buffalo", "bunny", "cabin", "cactus", "camel", "canoe", "canyon", "cargo",
+    "cave", "chain", "charm", "cherry", "chief", "cider", "clay", "clock",
+    "coal", "cocoa", "coin", "copper", "corn", "cotton", "crate", "crest",
+    "crystal", "curve", "dance", "deck", "denim", "diesel", "dinner", "dome",
+    "dove", "dream", "dune", "eagle", "east", "edge", "ember", "engine",
+    "error", "exit", "farm", "fence", "fiber", "filter", "fire", "flask",
+    "float", "flower", "forest", "fountain", "frost", "fusion", "garlic", "gauge",
+    "glacier", "glove", "gold", "gorge", "grape", "grass", "guitar", "harbor",
+    "harvest", "heart", "helmet", "heron", "hollow", "horizon", "horse", "hunter",
+    "igloo", "ingot", "iron", "jacket", "jaguar", "jelly", "jockey", "judge",
+    "jungle", "kelp", "kilo", "kite", "knight", "ladder", "lake", "lark",
+    "lava", "layer", "legend", "leopard", "lever", "lilac", "linen", "liquid",
+    "lobby", "lodge", "lumber", "magnet", "maple", "market", "meadow", "mercury",
+    "metal", "mint", "mitten", "mocha", "monkey", "moose", "mosaic", "mound",
+    "muffin", "mushroom", "nectar", "nest", "night", "node", "nova", "nutmeg",
+    "octagon", "onion", "opal", "orbit", "organ", "oven", "oxide", "palm",
+    "panther", "parade", "pasta", "pearl", "pecan", "penguin", "phoenix", "pigeon",
+    "pine", "plasma", "plum", "polar", "pony", "portal", "powder", "puddle",
+    "pumpkin", "quail", "queen", "quill", "rabbit", "radio", "rail", "ranch",
+    "reef", "resin", "ridge", "robin", "rocket", "rook", "rover", "rudder",
+    "rust", "sage", "salmon", "sapphire", "scarf", "scout", "shale", "shelf",
+    "shore", "shuttle", "silver", "slate", "slope", "snake", "soil", "sonar",
+    "south", "spice", "spiral", "spruce", "stable", "stamp", "steam", "storm",
+    "straw", "studio", "sunset", "swan", "syrup", "taiga", "tavern", "temple",
+    "thistle", "thread", "tide", "tissue", "token", "torch", "totem", "trace",
+    "train", "treasure", "trench", "trout", "tulip", "tunnel", "twig", "unicorn",
+    "urban", "valley", "vapor", "verse", "vine", "viper", "vortex", "wagon",
+    "warden", "wave", "weather", "whale", "wheel", "whistle", "winter", "wombat",
+    "wool", "wrench", "yard", "yeast", "yogurt", "zenith", "zinc", "zone"
+  ];
+
+  if (WORDS.length !== 256) throw new Error("wordlist must hold exactly 256 words");
+
+  var api = { WORDS: WORDS };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  global.Wordlist = api;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<!-- qr.js -->
+<script>
+/**
+ * A small QR encoder: byte mode, error-correction level M, versions 1-10.
+ *
+ * The receive screen needs a code that a real phone camera can read, so this
+ * is the actual ISO/IEC 18004 algorithm (Reed-Solomon, function patterns,
+ * mask scoring) rather than a decorative grid of squares. Ten versions cover
+ * anything up to 216 bytes, which is far more than an address needs.
+ */
+(function (global) {
+  "use strict";
+
+  /* Per version: total codewords, EC codewords per block, block layout
+     as [count, data codewords per block] pairs. Level M throughout. */
+  var VERSIONS = {
+    1:  [26,  10, [[1, 16]]],
+    2:  [44,  16, [[1, 28]]],
+    3:  [70,  26, [[1, 44]]],
+    4:  [100, 18, [[2, 32]]],
+    5:  [134, 24, [[2, 43]]],
+    6:  [172, 16, [[4, 27]]],
+    7:  [196, 18, [[4, 31]]],
+    8:  [242, 22, [[2, 38], [2, 39]]],
+    9:  [292, 22, [[3, 36], [2, 37]]],
+    10: [346, 26, [[4, 43], [1, 44]]]
+  };
+
+  /* Row/column centres of the alignment patterns, per version. */
+  var ALIGN = {
+    1: [], 2: [6, 18], 3: [6, 22], 4: [6, 26], 5: [6, 30],
+    6: [6, 34], 7: [6, 22, 38], 8: [6, 24, 42], 9: [6, 26, 46], 10: [6, 28, 50]
+  };
+
+  /* GF(256) with the QR primitive polynomial 0x11d. */
+  var EXP = new Uint8Array(512);
+  var LOG = new Uint8Array(256);
+  (function buildTables() {
+    for (var i = 0, x = 1; i < 255; i++) {
+      EXP[i] = x;
+      LOG[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11d;
+    }
+    for (var j = 255; j < 512; j++) EXP[j] = EXP[j - 255];
+  })();
+
+  function mul(a, b) {
+    return a === 0 || b === 0 ? 0 : EXP[LOG[a] + LOG[b]];
+  }
+
+  /** Generator polynomial of the given degree, high-order coefficient first. */
+  function generator(degree) {
+    var poly = [1];
+    for (var i = 0; i < degree; i++) {
+      var next = new Array(poly.length + 1).fill(0);
+      for (var j = 0; j < poly.length; j++) {
+        next[j] ^= poly[j];                     // shift up one degree
+        next[j + 1] ^= mul(poly[j], EXP[i]);    // multiply by a^i
+      }
+      poly = next;
+    }
+    return poly;
+  }
+
+  /** Reed-Solomon remainder: the EC codewords appended to one block. */
+  function ecCodewords(data, ecLen) {
+    var gen = generator(ecLen);
+    var rem = new Array(ecLen).fill(0);
+    for (var i = 0; i < data.length; i++) {
+      var factor = data[i] ^ rem[0];
+      rem.shift();
+      rem.push(0);
+      for (var j = 0; j < ecLen; j++) rem[j] ^= mul(gen[j + 1], factor);
+    }
+    return rem;
+  }
+
+  function utf8Bytes(text) {
+    var out = [];
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charCodeAt(i);
+      if (c < 0x80) out.push(c);
+      else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
+      else if (c >= 0xd800 && c <= 0xdbff && i + 1 < text.length) {
+        var pair = 0x10000 + ((c & 0x3ff) << 10) + (text.charCodeAt(++i) & 0x3ff);
+        out.push(0xf0 | (pair >> 18), 0x80 | ((pair >> 12) & 63),
+                 0x80 | ((pair >> 6) & 63), 0x80 | (pair & 63));
+      } else out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+    }
+    return out;
+  }
+
+  /** Smallest version that fits the payload, or 0 when nothing does. */
+  function pickVersion(byteLen) {
+    for (var v = 1; v <= 10; v++) {
+      var spec = VERSIONS[v];
+      var dataCw = spec[2].reduce(function (sum, b) { return sum + b[0] * b[1]; }, 0);
+      var countBits = v < 10 ? 8 : 16;
+      if (4 + countBits + byteLen * 8 <= dataCw * 8) return v;
+    }
+    return 0;
+  }
+
+  /** Payload -> final interleaved codeword stream. */
+  function codewords(bytes, version) {
+    var spec = VERSIONS[version];
+    var ecLen = spec[1];
+    var layout = spec[2];
+    var dataCw = layout.reduce(function (sum, b) { return sum + b[0] * b[1]; }, 0);
+
+    var bits = [];
+    var push = function (value, len) {
+      for (var i = len - 1; i >= 0; i--) bits.push((value >>> i) & 1);
+    };
+    push(0b0100, 4);                              // byte mode
+    push(bytes.length, version < 10 ? 8 : 16);
+    for (var i = 0; i < bytes.length; i++) push(bytes[i], 8);
+
+    var capacity = dataCw * 8;
+    push(0, Math.min(4, capacity - bits.length));  // terminator
+    while (bits.length % 8) bits.push(0);
+
+    var stream = [];
+    for (var b = 0; b < bits.length; b += 8) {
+      var byte = 0;
+      for (var k = 0; k < 8; k++) byte = (byte << 1) | bits[b + k];
+      stream.push(byte);
+    }
+    for (var pad = 0; stream.length < dataCw; pad++) stream.push(pad % 2 ? 0x11 : 0xec);
+
+    /* Split into blocks, compute EC, then interleave both halves. */
+    var blocks = [], ecBlocks = [], offset = 0;
+    layout.forEach(function (group) {
+      for (var n = 0; n < group[0]; n++) {
+        var chunk = stream.slice(offset, offset + group[1]);
+        offset += group[1];
+        blocks.push(chunk);
+        ecBlocks.push(ecCodewords(chunk, ecLen));
+      }
+    });
+
+    var result = [];
+    var longest = Math.max.apply(null, blocks.map(function (x) { return x.length; }));
+    for (var col = 0; col < longest; col++)
+      for (var r = 0; r < blocks.length; r++)
+        if (col < blocks[r].length) result.push(blocks[r][col]);
+    for (var e = 0; e < ecLen; e++)
+      for (var r2 = 0; r2 < ecBlocks.length; r2++) result.push(ecBlocks[r2][e]);
+    return result;
+  }
+
+  var MASKS = [
+    function (x, y) { return (x + y) % 2 === 0; },
+    function (x, y) { return y % 2 === 0; },
+    function (x) { return x % 3 === 0; },
+    function (x, y) { return (x + y) % 3 === 0; },
+    function (x, y) { return (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0; },
+    function (x, y) { return (x * y) % 2 + (x * y) % 3 === 0; },
+    function (x, y) { return ((x * y) % 2 + (x * y) % 3) % 2 === 0; },
+    function (x, y) { return ((x + y) % 2 + (x * y) % 3) % 2 === 0; }
+  ];
+
+  /** Finder patterns, separators, timing, alignment and the dark module. */
+  function drawFunctionPatterns(m, fn, size, version) {
+    var set = function (x, y, dark) {
+      if (x < 0 || y < 0 || x >= size || y >= size) return;
+      m[y][x] = dark ? 1 : 0;
+      fn[y][x] = 1;
+    };
+
+    for (var i = 0; i < size; i++) {
+      set(6, i, i % 2 === 0);
+      set(i, 6, i % 2 === 0);
+    }
+
+    [[0, 0], [size - 7, 0], [0, size - 7]].forEach(function (p) {
+      for (var dy = -1; dy <= 7; dy++)
+        for (var dx = -1; dx <= 7; dx++) {
+          var x = p[0] + dx, y = p[1] + dy;
+          var ring = Math.max(Math.abs(dx - 3), Math.abs(dy - 3));
+          set(x, y, ring !== 2 && ring <= 3);
+        }
+    });
+
+    var centres = ALIGN[version];
+    for (var a = 0; a < centres.length; a++)
+      for (var b = 0; b < centres.length; b++) {
+        var cx = centres[a], cy = centres[b];
+        var corner = (a === 0 && b === 0) ||
+                     (a === 0 && b === centres.length - 1) ||
+                     (a === centres.length - 1 && b === 0);
+        if (corner) continue;                       // overlaps a finder
+        for (var oy = -2; oy <= 2; oy++)
+          for (var ox = -2; ox <= 2; ox++)
+            set(cx + ox, cy + oy, Math.max(Math.abs(ox), Math.abs(oy)) !== 1);
+      }
+
+    /* Reserve the format areas; the bits themselves land later. The two
+       cells at index 6 belong to the timing patterns and keep their value. */
+    for (var f = 0; f < 9; f++) {
+      if (f === 6) continue;
+      set(8, f, false); set(f, 8, false);
+    }
+    for (var g = 0; g < 8; g++) { set(size - 1 - g, 8, false); set(8, size - 1 - g, false); }
+    set(8, size - 8, true);                         // dark module
+
+    if (version >= 7) {
+      var rem = version;
+      for (var v = 0; v < 12; v++) rem = ((rem << 1) ^ (((rem >>> 11) & 1) * 0x1f25)) & 0x1fff;
+      var vbits = (version << 12) | rem;
+      for (var k = 0; k < 18; k++) {
+        var bit = (vbits >>> k) & 1;
+        var p1 = size - 11 + (k % 3), p2 = Math.floor(k / 3);
+        set(p1, p2, bit); set(p2, p1, bit);
+      }
+    }
+  }
+
+  function drawFormatBits(m, size, mask) {
+    var value = (0b00 << 3) | mask;                 // 00 = level M
+    var rem = value;
+    for (var i = 0; i < 10; i++) rem = ((rem << 1) ^ (((rem >>> 9) & 1) * 0x537)) & 0x3ff;
+    var bits = ((value << 10) | rem) ^ 0x5412;
+    var at = function (n) { return (bits >>> n) & 1; };
+
+    for (var j = 0; j <= 5; j++) m[j][8] = at(j);
+    m[7][8] = at(6);
+    m[8][8] = at(7);
+    m[8][7] = at(8);
+    for (var k = 9; k <= 14; k++) m[8][14 - k] = at(k);
+
+    for (var p = 0; p <= 7; p++) m[8][size - 1 - p] = at(p);
+    for (var q = 8; q <= 14; q++) m[size - 15 + q][8] = at(q);
+    m[size - 8][8] = 1;
+  }
+
+  function placeData(m, fn, size, stream) {
+    var bit = 0, total = stream.length * 8;
+    for (var right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;                   // skip the timing column
+      for (var vert = 0; vert < size; vert++) {
+        for (var j = 0; j < 2; j++) {
+          var x = right - j;
+          var upward = ((right + 1) & 2) === 0;
+          var y = upward ? size - 1 - vert : vert;
+          if (!fn[y][x] && bit < total) {
+            m[y][x] = (stream[bit >>> 3] >>> (7 - (bit & 7))) & 1;
+            bit++;
+          }
+        }
+      }
+    }
+  }
+
+  /** ISO penalty score: the lower, the more readable the mask. */
+  function penalty(m, size) {
+    var score = 0, x, y, run, colour;
+
+    var line = function (get) {
+      run = 1; colour = get(0);
+      var same = 0;
+      for (var i = 1; i < size; i++) {
+        var cell = get(i);
+        if (cell === colour) {
+          run++;
+          if (run === 5) same += 3;
+          else if (run > 5) same += 1;
+        } else { colour = cell; run = 1; }
+      }
+      return same;
+    };
+    for (y = 0; y < size; y++) score += line(function (i) { return m[y][i]; });
+    for (x = 0; x < size; x++) score += line(function (i) { return m[i][x]; });
+
+    for (y = 0; y < size - 1; y++)
+      for (x = 0; x < size - 1; x++) {
+        var v = m[y][x];
+        if (v === m[y][x + 1] && v === m[y + 1][x] && v === m[y + 1][x + 1]) score += 3;
+      }
+
+    /* A 1:1:3:1:1 run with a four-module light area on either side looks
+       like a finder pattern to a scanner. Matches are consumed, not counted
+       twice, so an overlapping run scores once. */
+    var finder = [1, 0, 1, 1, 1, 0, 1];
+    var scan = function (get) {
+      var found = 0, i = 0;
+      while (i <= size - 7) {
+        var hit = true;
+        for (var k = 0; k < 7; k++) if (get(i + k) !== finder[k]) { hit = false; break; }
+        if (!hit) { i++; continue; }
+        var before = true, after = true;
+        for (var b = Math.max(i - 4, 0); b < i; b++) if (get(b)) { before = false; break; }
+        for (var a = i + 7; a < Math.min(i + 11, size); a++) if (get(a)) { after = false; break; }
+        if (before || after) { found += 40; i += 7; } else i += 4;
+      }
+      return found;
+    };
+    for (y = 0; y < size; y++) score += scan(function (i) { return i < 0 || i >= size ? 0 : m[y][i]; });
+    for (x = 0; x < size; x++) score += scan(function (i) { return i < 0 || i >= size ? 0 : m[i][x]; });
+
+    var dark = 0;
+    for (y = 0; y < size; y++) for (x = 0; x < size; x++) dark += m[y][x];
+    var percent = (dark * 100) / (size * size);
+    score += Math.floor(Math.abs(percent - 50) / 5) * 10;
+    return score;
+  }
+
+  /**
+   * Encode `text` and return the module matrix (1 = dark), without the
+   * quiet zone. `forceMask` exists so the encoder can be diffed against a
+   * reference implementation mask by mask.
+   */
+  function encode(text, forceMask) {
+    var bytes = utf8Bytes(text);
+    var version = pickVersion(bytes.length);
+    if (!version) throw new Error("QR: payload is too long");
+
+    var size = version * 4 + 17;
+    var stream = codewords(bytes, version);
+    var best = null;
+
+    for (var mask = 0; mask < 8; mask++) {
+      if (forceMask != null && mask !== forceMask) continue;
+      var m = [], fn = [];
+      for (var y = 0; y < size; y++) {
+        m.push(new Array(size).fill(0));
+        fn.push(new Array(size).fill(0));
+      }
+      drawFunctionPatterns(m, fn, size, version);
+      placeData(m, fn, size, stream);
+      for (var my = 0; my < size; my++)
+        for (var mx = 0; mx < size; mx++)
+          if (!fn[my][mx] && MASKS[mask](mx, my)) m[my][mx] ^= 1;
+
+      /* Scored before the format bits go in, as 7.8.3 requires. */
+      var cost = penalty(m, size);
+      if (!best || cost < best.cost) best = { cost: cost, matrix: m, mask: mask };
+    }
+    drawFormatBits(best.matrix, size, best.mask);
+    return { matrix: best.matrix, size: size, version: version, mask: best.mask };
+  }
+
+  /** The same code as an <svg> string, sized to `px` and quiet zone included. */
+  function svg(text, px, opts) {
+    opts = opts || {};
+    var code = encode(text);
+    var quiet = opts.quiet == null ? 2 : opts.quiet;
+    var span = code.size + quiet * 2;
+    var dark = opts.dark || "#05070e";
+    var light = opts.light || "#ffffff";
+    var path = "";
+    for (var y = 0; y < code.size; y++)
+      for (var x = 0; x < code.size; x++)
+        if (code.matrix[y][x]) path += "M" + (x + quiet) + " " + (y + quiet) + "h1v1h-1z";
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + px + '" height="' + px +
+      '" viewBox="0 0 ' + span + " " + span + '" shape-rendering="crispEdges" role="img" aria-label="QR-код адреса">' +
+      '<rect width="' + span + '" height="' + span + '" rx="' + (opts.radius || 0) + '" fill="' + light + '"/>' +
+      '<path d="' + path + '" fill="' + dark + '"/></svg>';
+  }
+
+  var api = { encode: encode, svg: svg };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  global.QR = api;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<!-- vault.js -->
+<script>
+/**
+ * Keys, addresses and the recovery phrase.
+ *
+ * Everything here is deliberately self-contained: no WebCrypto, no network,
+ * so the wallet behaves the same opened from a server or straight off disk.
+ * What that buys and what it does not:
+ *
+ *   - the password is never stored, only a salted, stretched SHA-256 digest;
+ *   - the recovery phrase is stored XOR-ed against a keystream derived from
+ *     that digest, so it is not sitting in localStorage in the clear;
+ *   - 20 000 rounds of SHA-256 in JavaScript is not scrypt or Argon2, and a
+ *     stream cipher hand-rolled from a hash is not AES-GCM.
+ *
+ * That is honest for a wallet holding simulated balances. It is not a
+ * keystore for real funds, and nothing here should be reused as one.
+ */
+(function (global) {
+  "use strict";
+
+  var K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
+    0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+    0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786,
+    0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147,
+    0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+    0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b,
+    0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a,
+    0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+    0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+
+  var H0 = [
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+  ];
+
+  /** SHA-256 over a byte array. */
+  function sha256(bytes) {
+    var len = bytes.length;
+    /* message + the 0x80 byte + a 64-bit length, rounded up to whole blocks.
+       Note the +63: at len = 55 the tail fits exactly and no second block
+       is needed, which a plain "+1 block" would get wrong. */
+    var withPad = ((len + 9 + 63) >> 6) << 6;
+    var block = new Uint8Array(withPad);
+    block.set(bytes);
+    block[len] = 0x80;
+    var bits = len * 8;
+    for (var b = 0; b < 8; b++)
+      block[withPad - 1 - b] = Math.floor(bits / Math.pow(2, 8 * b)) & 0xff;
+
+    var h = H0.slice();
+    var w = new Uint32Array(64);
+
+    for (var off = 0; off < withPad; off += 64) {
+      for (var i = 0; i < 16; i++)
+        w[i] = (block[off + i * 4] << 24) | (block[off + i * 4 + 1] << 16) |
+               (block[off + i * 4 + 2] << 8) | block[off + i * 4 + 3];
+      for (var t = 16; t < 64; t++) {
+        var w15 = w[t - 15], w2 = w[t - 2];
+        var s0 = ((w15 >>> 7) | (w15 << 25)) ^ ((w15 >>> 18) | (w15 << 14)) ^ (w15 >>> 3);
+        var s1 = ((w2 >>> 17) | (w2 << 15)) ^ ((w2 >>> 19) | (w2 << 13)) ^ (w2 >>> 10);
+        w[t] = (w[t - 16] + s0 + w[t - 7] + s1) >>> 0;
+      }
+
+      var a = h[0], bb = h[1], c = h[2], d = h[3], e = h[4], f = h[5], g = h[6], hh = h[7];
+      for (var r = 0; r < 64; r++) {
+        var S1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        var ch = (e & f) ^ (~e & g);
+        var t1 = (hh + S1 + ch + K[r] + w[r]) >>> 0;
+        var S0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        var maj = (a & bb) ^ (a & c) ^ (bb & c);
+        var t2 = (S0 + maj) >>> 0;
+        hh = g; g = f; f = e;
+        e = (d + t1) >>> 0;
+        d = c; c = bb; bb = a;
+        a = (t1 + t2) >>> 0;
+      }
+      h[0] = (h[0] + a) >>> 0;  h[1] = (h[1] + bb) >>> 0;
+      h[2] = (h[2] + c) >>> 0;  h[3] = (h[3] + d) >>> 0;
+      h[4] = (h[4] + e) >>> 0;  h[5] = (h[5] + f) >>> 0;
+      h[6] = (h[6] + g) >>> 0;  h[7] = (h[7] + hh) >>> 0;
+    }
+
+    var out = new Uint8Array(32);
+    for (var k = 0; k < 8; k++) {
+      out[k * 4] = h[k] >>> 24; out[k * 4 + 1] = (h[k] >>> 16) & 0xff;
+      out[k * 4 + 2] = (h[k] >>> 8) & 0xff; out[k * 4 + 3] = h[k] & 0xff;
+    }
+    return out;
+  }
+
+  function utf8(text) {
+    if (typeof TextEncoder !== "undefined") return new TextEncoder().encode(text);
+    var out = [];
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charCodeAt(i);
+      if (c < 0x80) out.push(c);
+      else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
+      else out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+    }
+    return new Uint8Array(out);
+  }
+
+  function hex(bytes) {
+    var s = "";
+    for (var i = 0; i < bytes.length; i++) s += (bytes[i] < 16 ? "0" : "") + bytes[i].toString(16);
+    return s;
+  }
+
+  function unhex(text) {
+    var out = new Uint8Array(text.length / 2);
+    for (var i = 0; i < out.length; i++) out[i] = parseInt(text.substr(i * 2, 2), 16);
+    return out;
+  }
+
+  function digest(text) { return sha256(utf8(text)); }
+
+  var B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+  /** Base58 (Bitcoin alphabet) — no 0, O, I or l to misread aloud. */
+  function base58(bytes) {
+    var digits = [0];
+    for (var i = 0; i < bytes.length; i++) {
+      var carry = bytes[i];
+      for (var j = 0; j < digits.length; j++) {
+        carry += digits[j] << 8;
+        digits[j] = carry % 58;
+        carry = (carry / 58) | 0;
+      }
+      while (carry) { digits.push(carry % 58); carry = (carry / 58) | 0; }
+    }
+    var out = "";
+    for (var z = 0; z < bytes.length && bytes[z] === 0; z++) out += B58[0];
+    for (var d = digits.length - 1; d >= 0; d--) out += B58[digits[d]];
+    return out;
+  }
+
+  /** Cryptographic randomness where the browser offers it. */
+  function randomBytes(n) {
+    var out = new Uint8Array(n);
+    if (global.crypto && global.crypto.getRandomValues) global.crypto.getRandomValues(out);
+    else for (var i = 0; i < n; i++) out[i] = Math.floor(Math.random() * 256);
+    return out;
+  }
+
+  /** Twelve words out of 256 — 96 bits, one byte of entropy per word. */
+  function newPhrase() {
+    var words = global.Wordlist.WORDS;
+    var bytes = randomBytes(12);
+    var picked = [];
+    for (var i = 0; i < 12; i++) picked.push(words[bytes[i]]);
+    return picked.join(" ");
+  }
+
+  function normalizePhrase(text) {
+    return String(text).toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/).filter(Boolean).join(" ");
+  }
+
+  /** True when every word is on the list and there are twelve of them. */
+  function phraseIsValid(text) {
+    var words = normalizePhrase(text).split(" ");
+    if (words.length !== 12) return false;
+    var list = global.Wordlist.WORDS;
+    return words.every(function (w) { return list.indexOf(w) !== -1; });
+  }
+
+  /**
+   * A stable address for account `index` of this phrase. The namespace is a
+   * parameter because the wallet shipped once under another name: those
+   * wallets keep deriving with their original prefix, so a second account
+   * added today lands next to the ones already stored.
+   */
+  function addressFor(phrase, index, namespace) {
+    return base58(digest((namespace || "meridian") + "/account/" + index + "/" + normalizePhrase(phrase)));
+  }
+
+  var ROUNDS = 20000;
+
+  /** Salted, iterated SHA-256. Slow on purpose, though only mildly so. */
+  function stretch(password, salt) {
+    var acc = digest(salt + "|" + password);
+    var buf = new Uint8Array(36);
+    for (var i = 1; i < ROUNDS; i++) {
+      buf.set(acc);
+      buf[32] = i & 0xff; buf[33] = (i >>> 8) & 0xff;
+      buf[34] = (i >>> 16) & 0xff; buf[35] = (i >>> 24) & 0xff;
+      acc = sha256(buf);
+    }
+    return acc;
+  }
+
+  function newSalt() { return hex(randomBytes(16)); }
+
+  function passwordHash(password, salt) { return hex(stretch(password, salt)); }
+
+  function passwordMatches(password, salt, expected) {
+    var got = passwordHash(password, salt);
+    if (got.length !== expected.length) return false;
+    var diff = 0;                                   // constant time over the digest
+    for (var i = 0; i < got.length; i++) diff |= got.charCodeAt(i) ^ expected.charCodeAt(i);
+    return diff === 0;
+  }
+
+  /** Keystream: SHA-256 in counter mode over the stretched password. */
+  function keystream(key, length) {
+    var out = new Uint8Array(length);
+    var buf = new Uint8Array(36);
+    for (var block = 0; block * 32 < length; block++) {
+      buf.set(key);
+      buf[32] = block & 0xff; buf[33] = (block >>> 8) & 0xff; buf[34] = 0; buf[35] = 0;
+      var chunk = sha256(buf);
+      for (var i = 0; i < 32 && block * 32 + i < length; i++) out[block * 32 + i] = chunk[i];
+    }
+    return out;
+  }
+
+  function sealPhrase(phrase, password, salt) {
+    var plain = utf8(phrase);
+    var pad = keystream(stretch(password, salt), plain.length);
+    var out = new Uint8Array(plain.length);
+    for (var i = 0; i < plain.length; i++) out[i] = plain[i] ^ pad[i];
+    return hex(out);
+  }
+
+  function openPhrase(sealed, password, salt) {
+    var cipher = unhex(sealed);
+    var pad = keystream(stretch(password, salt), cipher.length);
+    var out = new Uint8Array(cipher.length);
+    for (var i = 0; i < cipher.length; i++) out[i] = cipher[i] ^ pad[i];
+    return typeof TextDecoder !== "undefined"
+      ? new TextDecoder().decode(out)
+      : String.fromCharCode.apply(null, out);
+  }
+
+  /** Deterministic 0..1 stream from any string — drives avatars and art. */
+  function seedRandom(text) {
+    var d = digest(text);
+    var s = ((d[0] << 24) | (d[1] << 16) | (d[2] << 8) | d[3]) >>> 0;
+    return function () {
+      s = (s + 0x6d2b79f5) >>> 0;
+      var t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var api = {
+    sha256: sha256, digest: digest, hex: hex, utf8: utf8, base58: base58,
+    randomBytes: randomBytes, newPhrase: newPhrase, normalizePhrase: normalizePhrase,
+    phraseIsValid: phraseIsValid, addressFor: addressFor, newSalt: newSalt,
+    passwordHash: passwordHash, passwordMatches: passwordMatches,
+    sealPhrase: sealPhrase, openPhrase: openPhrase, seedRandom: seedRandom
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  global.Vault = api;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<!-- market.js -->
+<script>
+/**
+ * The simulated market.
+ *
+ * Prices here are generated, not fetched — the wallet makes no network
+ * requests at all. Each token gets a seeded random walk per timeframe, so
+ * the chart you see for "1Д" is the same chart after a reload, and the
+ * percentage on a row is read off the series it is drawn from rather than
+ * being a second, unrelated number.
+ */
+(function (global) {
+  "use strict";
+
+  /* `cap` is a simulated market capitalisation in billions — it exists so the
+     market list can be sorted by something other than the alphabet. `apy`
+     marks the tokens the staking screen accepts. */
+  var TOKENS = [
+    { id: "mrd",  sym: "MRD",  name: "Meridian", hue: 218, price: 2.184,   vol: 0.055, dp: 2, cap: 4.1,   apy: 8.4, chain: "Meridian", note: "Токен сети Meridian" },
+    { id: "btc",  sym: "BTC",  name: "Bitcoin",  hue: 34,  price: 71240,   vol: 0.022, dp: 5, cap: 1410,  apy: 0,   chain: "Bitcoin",  note: "Первая криптовалюта" },
+    { id: "eth",  sym: "ETH",  name: "Ethereum", hue: 232, price: 3824.50, vol: 0.026, dp: 4, cap: 460,   apy: 3.2, chain: "Ethereum", note: "Смарт-контракты" },
+    { id: "sol",  sym: "SOL",  name: "Solana",   hue: 158, price: 184.20,  vol: 0.038, dp: 3, cap: 86,    apy: 6.9, chain: "Solana",   note: "Быстрые расчёты" },
+    { id: "ton",  sym: "TON",  name: "Toncoin",  hue: 202, price: 6.42,    vol: 0.033, dp: 2, cap: 16,    apy: 4.1, chain: "TON",      note: "Сеть TON" },
+    { id: "usdc", sym: "USDC", name: "USD Coin", hue: 214, price: 1.0,     vol: 0.001, dp: 2, cap: 34,    apy: 0,   chain: "Solana",   note: "Стейблкоин, привязан к доллару" },
+    { id: "doge", sym: "DOGE", name: "Dogecoin", hue: 46,  price: 0.1642,  vol: 0.048, dp: 0, cap: 24,    apy: 0,   chain: "Dogecoin", note: "Мем-монета" },
+
+    /* not in the starting portfolio — these are what the market tab is for */
+    { id: "xrp",  sym: "XRP",  name: "XRP",       hue: 196, price: 0.6284,  vol: 0.041, dp: 2, cap: 35,   apy: 0,   chain: "XRP Ledger", note: "Расчёты между банками" },
+    { id: "ada",  sym: "ADA",  name: "Cardano",   hue: 210, price: 0.4712,  vol: 0.044, dp: 2, cap: 17,   apy: 3.8, chain: "Cardano",    note: "Научный подход к протоколу" },
+    { id: "avax", sym: "AVAX", name: "Avalanche", hue: 356, price: 34.18,   vol: 0.046, dp: 3, cap: 13,   apy: 7.4, chain: "Avalanche",  note: "Подсети под свои задачи" },
+    { id: "link", sym: "LINK", name: "Chainlink", hue: 224, price: 17.62,   vol: 0.043, dp: 3, cap: 11,   apy: 4.6, chain: "Ethereum",   note: "Оракулы: данные извне сети" },
+    { id: "dot",  sym: "DOT",  name: "Polkadot",  hue: 322, price: 6.84,    vol: 0.045, dp: 2, cap: 9.8,  apy: 11.2, chain: "Polkadot",  note: "Парачейны и общая безопасность" },
+    { id: "ltc",  sym: "LTC",  name: "Litecoin",  hue: 206, price: 82.40,   vol: 0.031, dp: 4, cap: 6.2,  apy: 0,   chain: "Litecoin",   note: "Быстрее и дешевле биткоина" },
+    { id: "atom", sym: "ATOM", name: "Cosmos",    hue: 240, price: 8.16,    vol: 0.047, dp: 2, cap: 3.4,  apy: 14.6, chain: "Cosmos",    note: "Связь между независимыми сетями" },
+    { id: "near", sym: "NEAR", name: "NEAR",      hue: 172, price: 5.28,    vol: 0.049, dp: 2, cap: 5.9,  apy: 9.1, chain: "NEAR",       note: "Шардинг и простые адреса" }
+  ];
+
+  var BY_ID = {};
+  TOKENS.forEach(function (t) { BY_ID[t.id] = t; t.base = t.price; });
+
+  /* label, number of points, step in minutes, volatility per step */
+  var FRAMES = [
+    { id: "1h", label: "1Ч",  points: 60,  step: 1,      vol: 0.0016 },
+    { id: "1d", label: "1Д",  points: 96,  step: 15,     vol: 0.0042 },
+    { id: "1w", label: "1Н",  points: 84,  step: 120,    vol: 0.0100 },
+    { id: "1m", label: "1М",  points: 90,  step: 480,    vol: 0.0165 },
+    { id: "1y", label: "1Г",  points: 120, step: 4380,   vol: 0.0330 },
+    { id: "all", label: "ВСЁ", points: 140, step: 13140, vol: 0.0480 }
+  ];
+
+  /* Named validators, so a stake is placed somewhere rather than nowhere.
+     `bonus` shifts the token's base APY; `fee` is the operator's cut. */
+  var VALIDATORS = [
+    { id: "polaris", name: "Полярная станция", fee: 5,  bonus: 0.0,  slots: "надёжный, работает с 2021" },
+    { id: "signal9", name: "Сигнал-9",         fee: 2,  bonus: 0.6,  slots: "молодой, комиссия ниже рынка" },
+    { id: "quiet",   name: "Тихий узел",       fee: 8,  bonus: -0.4, slots: "минимум пропусков блоков" },
+    { id: "meridian", name: "Узел Meridian",    fee: 0,  bonus: 0.9,  slots: "собственный узел кошелька" }
+  ];
+
+  /** Effective yearly rate of a token staked with a given validator. */
+  function apyFor(tokenId, validatorId) {
+    var token = BY_ID[tokenId];
+    var validator = VALIDATORS.filter(function (v) { return v.id === validatorId; })[0] || VALIDATORS[0];
+    if (!token || !token.apy) return 0;
+    return Math.max(0, (token.apy + validator.bonus) * (1 - validator.fee / 100));
+  }
+
+  function mulberry(seed) {
+    var s = seed >>> 0;
+    return function () {
+      s = (s + 0x6d2b79f5) >>> 0;
+      var t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function hashSeed(text) {
+    var h = 2166136261;
+    for (var i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  var cache = {};
+
+  /**
+   * A price series ending at the token's live price. The walk is generated
+   * once per token and frame, then rescaled on every read so the right-hand
+   * edge always sits on the current price.
+   */
+  function series(tokenId, frameId) {
+    var token = BY_ID[tokenId];
+    var frame = FRAMES.filter(function (f) { return f.id === frameId; })[0] || FRAMES[1];
+    var key = tokenId + ":" + frameId;
+
+    if (!cache[key]) {
+      var rnd = mulberry(hashSeed(key));
+      var n = frame.points;
+      var vol = frame.vol * (token.vol / 0.03);
+      var trend = (rnd() - 0.45) * frame.vol * n * 0.55;
+      var walk = new Array(n);
+      var v = 1;
+      for (var i = 0; i < n; i++) {
+        /* two uniforms make a rough bell, which looks less spiky than one */
+        var shock = ((rnd() + rnd() + rnd()) / 1.5 - 1) * vol;
+        v *= 1 + shock + trend / n;
+        walk[i] = Math.max(v, 0.05);
+      }
+      cache[key] = { walk: walk, step: frame.step };
+    }
+
+    var entry = cache[key];
+    var scale = token.price / entry.walk[entry.walk.length - 1];
+    return entry.walk.map(function (x) { return x * scale; });
+  }
+
+  /** Percentage move across a frame, straight from the series it draws. */
+  function change(tokenId, frameId) {
+    var s = series(tokenId, frameId || "1d");
+    return ((s[s.length - 1] - s[0]) / s[0]) * 100;
+  }
+
+  /** One market tick: a small nudge, with stablecoins staying put. */
+  function tick() {
+    var moved = [];
+    TOKENS.forEach(function (t) {
+      var pull = t.id === "usdc" ? 0.4 : 0.012;              // drift back toward base
+      var jitter = (Math.random() + Math.random() - 1) * t.vol * 0.09;
+      var next = t.price * (1 + jitter) + (t.base - t.price) * pull * 0.02;
+      if (t.id === "usdc") next = Math.min(1.002, Math.max(0.998, next));
+      var before = t.price;
+      t.price = Math.max(next, t.base * 0.2);
+      /* the newest point of every cached walk follows the live price */
+      Object.keys(cache).forEach(function (key) {
+        if (key.indexOf(t.id + ":") === 0) {
+          var w = cache[key].walk;
+          w[w.length - 1] *= t.price / before;
+        }
+      });
+      if (t.price !== before) moved.push(t.id);
+    });
+    return moved;
+  }
+
+  /* ---------- money ---------- */
+
+  var CURRENCIES = {
+    USD: { code: "USD", sign: "$", rate: 1 },
+    RUB: { code: "RUB", sign: "₽", rate: 92.4 },
+    EUR: { code: "EUR", sign: "€", rate: 0.92 }
+  };
+
+  function rate(code) { return (CURRENCIES[code] || CURRENCIES.USD).rate; }
+
+  /** Fiat, in the currency the wallet is set to. */
+  function money(usd, code, opts) {
+    opts = opts || {};
+    var cur = CURRENCIES[code] || CURRENCIES.USD;
+    var value = usd * cur.rate;
+    var dp = opts.dp;
+    if (dp == null) dp = Math.abs(value) >= 1000 ? 0 : Math.abs(value) >= 1 ? 2 : 4;
+    return new Intl.NumberFormat("ru-RU", {
+      style: "currency", currency: cur.code,
+      minimumFractionDigits: dp, maximumFractionDigits: dp
+    }).format(value);
+  }
+
+  /**
+   * A token amount with the precision that token deserves. `extra` adds
+   * digits — staking rewards need them, or the figure would sit still.
+   */
+  function amount(value, tokenId, extra) {
+    var t = BY_ID[tokenId];
+    var dp = (t ? t.dp : 4) + (extra || 0);
+    if (value !== 0 && Math.abs(value) < Math.pow(10, -dp)) dp = Math.min(dp + 4, 10);
+    return new Intl.NumberFormat("ru-RU", {
+      minimumFractionDigits: 0, maximumFractionDigits: Math.min(dp, 20)
+    }).format(value);
+  }
+
+  function percent(value) {
+    return (value >= 0 ? "+" : "−") + Math.abs(value).toFixed(2).replace(".", ",") + " %";
+  }
+
+  var api = {
+    TOKENS: TOKENS, FRAMES: FRAMES, CURRENCIES: CURRENCIES, VALIDATORS: VALIDATORS,
+    apyFor: apyFor,
+    byId: function (id) { return BY_ID[id]; },
+    series: series, change: change, tick: tick,
+    money: money, amount: amount, percent: percent, rate: rate,
+    mulberry: mulberry, hashSeed: hashSeed
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  global.Market = api;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<!-- wallet.js -->
+<script>
+/**
+ * Wallet state: accounts, balances, history, and the operations that move
+ * money between them. Everything lives in localStorage under one key, and
+ * nothing leaves the browser.
+ *
+ * The linked card is what makes "купить" and "продать" symmetrical: buying
+ * draws from the card, selling pays back into it, so neither button mints
+ * value out of nowhere.
+ *
+ * Staking rewards are computed from elapsed time rather than incremented on
+ * a timer, so they keep accruing across a reload and cannot drift. Demo time
+ * runs fast — a second of watching is an hour of staking — otherwise nothing
+ * visible would ever happen at 7 % a year.
+ */
+(function (global) {
+  "use strict";
+
+  var KEY = "meridian.wallet.v1";
+  var LEGACY_KEY = "cobalt.wallet.v1";   // the wallet shipped under its old name
+  var Market = global.Market;
+  var Vault = global.Vault;
+
+  var FEES = { buy: 0.012, sell: 0.012, swap: 0.0025 };
+  var NETWORK_FEE_USD = 0.12;
+  var HOURS_PER_SECOND = 1;        // demo clock: 1 s watched = 1 h staked
+  var MAX_NOTES = 50;
+
+  var state = null;      // persisted
+  var phrase = null;     // in memory only, while unlocked
+
+  function read() {
+    try {
+      if (!global.localStorage) return null;
+      var raw = global.localStorage.getItem(KEY) || global.localStorage.getItem(LEGACY_KEY);
+      return raw ? migrate(JSON.parse(raw)) : null;
+    } catch (e) { return null; }
+  }
+
+  function save() {
+    try {
+      if (global.localStorage) global.localStorage.setItem(KEY, JSON.stringify(state));
+    } catch (e) { /* private mode: the session still works, it just won't survive */ }
+  }
+
+  /**
+   * Fills in whatever a stored wallet predates. Wallets written before the
+   * rename keep deriving addresses from their original namespace, and their
+   * house-token balances are moved onto the new ticker.
+   */
+  function migrate(stored) {
+    if (!stored || !stored.accounts) return stored;
+    stored.settings = stored.settings || { currency: "USD", hidden: false, network: "mainnet" };
+    stored.card = stored.card || { last4: "4417", available: 5000 };
+    stored.contacts = stored.contacts || [];
+    stored.alerts = stored.alerts || [];
+    stored.notes = stored.notes || [];
+    stored.derive = stored.derive || "cobalt";
+    stored.accounts.forEach(function (acc) {
+      acc.balances = acc.balances || {};
+      acc.stakes = acc.stakes || [];
+      if (acc.balances.cob != null) {                 // COB became MRD
+        acc.balances.mrd = (acc.balances.mrd || 0) + acc.balances.cob;
+        delete acc.balances.cob;
+      }
+    });
+    (stored.txs || []).forEach(function (tx) {
+      if (tx.tokenId === "cob") tx.tokenId = "mrd";
+      if (tx.toTokenId === "cob") tx.toTokenId = "mrd";
+    });
+    return stored;
+  }
+
+  function exists() { return !!read(); }
+  function isUnlocked() { return !!state; }
+
+  function signature() { return Vault.base58(Vault.randomBytes(32)); }
+
+  function account() { return state.accounts[state.active]; }
+
+  function balanceOf(tokenId) {
+    var b = account().balances[tokenId];
+    return b ? b : 0;
+  }
+
+  function setBalance(tokenId, value) {
+    account().balances[tokenId] = Math.max(0, value);
+  }
+
+  /** Locked in stakes — owned, but not spendable until unstaked. */
+  function stakedOf(tokenId) {
+    return (account().stakes || []).reduce(function (sum, st) {
+      return st.tokenId === tokenId ? sum + st.amount : sum;
+    }, 0);
+  }
+
+  /** Everything owned of a token: what can be spent plus what is staked. */
+  function holdingOf(tokenId) { return balanceOf(tokenId) + stakedOf(tokenId); }
+
+  /** Portfolio value in USD at current prices, staked positions included. */
+  function total() {
+    return Market.TOKENS.reduce(function (sum, t) {
+      return sum + holdingOf(t.id) * t.price;
+    }, 0);
+  }
+
+  function stakedTotal() {
+    return Market.TOKENS.reduce(function (sum, t) { return sum + stakedOf(t.id) * t.price; }, 0);
+  }
+
+  /** Weighted 24h move of the portfolio, so the header figure means something. */
+  function totalChange() {
+    var now = total();
+    if (now <= 0) return 0;
+    var before = Market.TOKENS.reduce(function (sum, t) {
+      var s = Market.series(t.id, "1d");
+      return sum + holdingOf(t.id) * s[0];
+    }, 0);
+    return before > 0 ? ((now - before) / before) * 100 : 0;
+  }
+
+  /**
+   * Portfolio value across a timeframe: today's holdings valued at each
+   * historical price. It answers "what would this basket have been worth",
+   * which is the only honest reading without a ledger of past balances.
+   */
+  function totalSeries(frameId) {
+    var out = null;
+    Market.TOKENS.forEach(function (t) {
+      var units = holdingOf(t.id);
+      if (!units) return;
+      var s = Market.series(t.id, frameId);
+      if (!out) out = s.map(function (v) { return v * units; });
+      else out = out.map(function (v, i) { return v + s[i] * units; });
+    });
+    return out || Market.series("usdc", frameId).map(function () { return 0; });
+  }
+
+  /* ---------- creation, locking ---------- */
+
+  function starterPortfolio() {
+    return { mrd: 1180, btc: 0.0412, eth: 1.24, sol: 12.482, ton: 320, usdc: 1840.5, doge: 12500 };
+  }
+
+  /** A little history so the activity tab has something true to show. */
+  /** One position already running, so the staking screen opens with content. */
+  function starterStakes() {
+    return [{
+      id: signature(), tokenId: "sol", amount: 6, validator: "polaris",
+      apy: Market.apyFor("sol", "polaris"),
+      since: Date.now() - 1080 * 1000,    // 1080 demo hours ≈ 45 days of rewards
+      carried: 0
+    }];
+  }
+
+  function starterContacts() {
+    return [
+      { id: signature(), name: "Аня", address: Vault.base58(Vault.digest("meridian/demo/anya")), note: "обмен на карту" },
+      { id: signature(), name: "Холодный кошелёк", address: Vault.base58(Vault.digest("meridian/demo/cold")), note: "долгое хранение" }
+    ];
+  }
+
+  function starterHistory() {
+    var day = 86400000;
+    var now = Date.now();
+    return [
+      { id: signature(), kind: "buy",  tokenId: "sol",  amount: 4.2,   usd: 774.2,  fee: 9.29, at: now - day * 2 - 3600e3 * 5, status: "ok" },
+      { id: signature(), kind: "swap", tokenId: "usdc", amount: 620,   usd: 620,    fee: 1.55, at: now - day * 4, status: "ok",
+        toTokenId: "mrd", toAmount: 284.3 },
+      { id: signature(), kind: "in",   tokenId: "eth",  amount: 0.35,  usd: 1338.6, fee: 0,    at: now - day * 9, status: "ok",
+        address: Vault.base58(Vault.digest("meridian/demo/sender")) },
+      { id: signature(), kind: "buy",  tokenId: "btc",  amount: 0.0412, usd: 2935.1, fee: 35.2, at: now - day * 21, status: "ok" }
+    ];
+  }
+
+  function create(password, recovery) {
+    var salt = Vault.newSalt();
+    state = {
+      v: 1,
+      auth: { salt: salt, hash: Vault.passwordHash(password, salt) },
+      sealed: Vault.sealPhrase(recovery, password, salt),
+      derive: "meridian",
+      accounts: [{
+        name: "Основной",
+        index: 0,
+        address: Vault.addressFor(recovery, 0, "meridian"),
+        balances: starterPortfolio(),
+        stakes: starterStakes()
+      }],
+      active: 0,
+      settings: { currency: "USD", hidden: false, network: "mainnet" },
+      txs: starterHistory(),
+      card: { last4: "4417", available: 5000 },
+      contacts: starterContacts(),
+      alerts: [],
+      notes: []
+    };
+    phrase = recovery;
+    save();
+    return state;
+  }
+
+  function unlock(password) {
+    var stored = read();
+    if (!stored) return false;
+    if (!Vault.passwordMatches(password, stored.auth.salt, stored.auth.hash)) return false;
+    state = stored;
+    phrase = Vault.openPhrase(stored.sealed, password, stored.auth.salt);
+    return true;
+  }
+
+  function lock() { state = null; phrase = null; }
+
+  function reset() {
+    lock();
+    try { if (global.localStorage) global.localStorage.removeItem(KEY); } catch (e) {}
+  }
+
+  /** Only available while unlocked — the phrase is never read from storage. */
+  function recoveryPhrase() { return phrase; }
+
+  function addAccount(name) {
+    var index = state.accounts.length;
+    state.accounts.push({
+      name: name || "Счёт " + (index + 1),
+      index: index,
+      address: Vault.addressFor(phrase, index, state.derive),
+      balances: {},
+      stakes: []
+    });
+    state.active = index;
+    save();
+  }
+
+  function selectAccount(i) {
+    state.active = Math.max(0, Math.min(i, state.accounts.length - 1));
+    save();
+  }
+
+  /* ---------- operations ---------- */
+
+  function record(tx) {
+    tx.id = signature();
+    tx.at = Date.now();
+    tx.status = "ok";
+    state.txs.unshift(tx);
+    if (state.txs.length > 120) state.txs.length = 120;
+    return tx;
+  }
+
+  /** Fiat -> token. `usd` is what leaves the card, fee included. */
+  function buy(tokenId, usd) {
+    var token = Market.byId(tokenId);
+    if (!token) throw new Error("нет такого токена");
+    if (!(usd > 0)) throw new Error("сумма должна быть больше нуля");
+    if (usd > state.card.available + 1e-9) throw new Error("на карте недостаточно средств");
+
+    var fee = usd * FEES.buy;
+    var units = (usd - fee) / token.price;
+    state.card.available -= usd;
+    setBalance(tokenId, balanceOf(tokenId) + units);
+    var tx = record({ kind: "buy", tokenId: tokenId, amount: units, usd: usd, fee: fee });
+    notify("buy", "Куплено " + Market.amount(units, tokenId) + " " + token.sym,
+           "Списано с карты •• " + state.card.last4);
+    save();
+    return tx;
+  }
+
+  /** Token -> fiat, paid back to the card. */
+  function sell(tokenId, units) {
+    var token = Market.byId(tokenId);
+    if (!token) throw new Error("нет такого токена");
+    if (!(units > 0)) throw new Error("количество должно быть больше нуля");
+    if (units > balanceOf(tokenId) + 1e-12) throw new Error("недостаточно " + token.sym);
+
+    var gross = units * token.price;
+    var fee = gross * FEES.sell;
+    setBalance(tokenId, balanceOf(tokenId) - units);
+    state.card.available += gross - fee;
+    var tx = record({ kind: "sell", tokenId: tokenId, amount: units, usd: gross, fee: fee });
+    notify("sell", "Продано " + Market.amount(units, tokenId) + " " + token.sym,
+           "На карту •• " + state.card.last4);
+    save();
+    return tx;
+  }
+
+  function networkFee(tokenId) {
+    var token = Market.byId(tokenId);
+    return NETWORK_FEE_USD / token.price;
+  }
+
+  function send(tokenId, units, address) {
+    var token = Market.byId(tokenId);
+    if (!token) throw new Error("нет такого токена");
+    if (!addressLooksValid(address)) throw new Error("адрес выглядит неверно");
+    if (address === account().address) throw new Error("это адрес этого же счёта");
+    if (!(units > 0)) throw new Error("количество должно быть больше нуля");
+
+    var fee = networkFee(tokenId);
+    if (units + fee > balanceOf(tokenId) + 1e-12) throw new Error("не хватает на комиссию сети");
+
+    setBalance(tokenId, balanceOf(tokenId) - units - fee);
+    var tx = record({
+      kind: "out", tokenId: tokenId, amount: units,
+      usd: units * token.price, fee: fee * token.price, address: address
+    });
+    var known = contactFor(address);
+    notify("out", "Отправлено " + Market.amount(units, tokenId) + " " + token.sym,
+           known ? "Получатель: " + known.name : "На адрес " + address.slice(0, 6) + "…");
+    save();
+    return tx;
+  }
+
+  function swapQuote(fromId, toId, units) {
+    var from = Market.byId(fromId), to = Market.byId(toId);
+    if (!from || !to || fromId === toId) return null;
+    var gross = units * from.price;
+    var fee = gross * FEES.swap;
+    return {
+      from: from, to: to, units: units,
+      out: (gross - fee) / to.price,
+      fee: fee,
+      rate: from.price / to.price,
+      impact: Math.min(0.9, (gross / 250000) * 100)
+    };
+  }
+
+  function swap(fromId, toId, units) {
+    var quote = swapQuote(fromId, toId, units);
+    if (!quote) throw new Error("нельзя обменять токен сам на себя");
+    if (!(units > 0)) throw new Error("количество должно быть больше нуля");
+    if (units > balanceOf(fromId) + 1e-12) throw new Error("недостаточно " + quote.from.sym);
+
+    setBalance(fromId, balanceOf(fromId) - units);
+    setBalance(toId, balanceOf(toId) + quote.out);
+    var tx = record({
+      kind: "swap", tokenId: fromId, amount: units, usd: units * quote.from.price,
+      fee: quote.fee, toTokenId: toId, toAmount: quote.out
+    });
+    notify("swap", "Обмен выполнен",
+           Market.amount(units, fromId) + " " + quote.from.sym + " → " +
+           Market.amount(quote.out, toId) + " " + quote.to.sym);
+    save();
+    return tx;
+  }
+
+  /* ---------- staking ---------- */
+
+  /** Rewards owed on a position right now, from elapsed demo time. */
+  function rewardsOf(stake) {
+    var hours = ((Date.now() - stake.since) / 1000) * HOURS_PER_SECOND;
+    return (stake.carried || 0) + stake.amount * (stake.apy / 100) * (hours / (24 * 365));
+  }
+
+  function stakes() { return account().stakes || []; }
+
+  function rewardsTotal() {
+    return stakes().reduce(function (sum, st) {
+      return sum + rewardsOf(st) * Market.byId(st.tokenId).price;
+    }, 0);
+  }
+
+  function stake(tokenId, units, validatorId) {
+    var token = Market.byId(tokenId);
+    if (!token) throw new Error("нет такого токена");
+    if (!token.apy) throw new Error(token.sym + " не поддерживает стейкинг");
+    if (!(units > 0)) throw new Error("количество должно быть больше нуля");
+    if (units > balanceOf(tokenId) + 1e-12) throw new Error("недостаточно " + token.sym);
+
+    setBalance(tokenId, balanceOf(tokenId) - units);
+    var position = {
+      id: signature(), tokenId: tokenId, amount: units, validator: validatorId,
+      apy: Market.apyFor(tokenId, validatorId), since: Date.now(), carried: 0
+    };
+    account().stakes.push(position);
+    var tx = record({ kind: "stake", tokenId: tokenId, amount: units, usd: units * token.price, fee: 0 });
+    notify("stake", "Застейкано " + Market.amount(units, tokenId) + " " + token.sym,
+           "Ставка " + position.apy.toFixed(1).replace(".", ",") + " % годовых");
+    save();
+    return tx;
+  }
+
+  /** Pays out rewards without touching the principal. */
+  function claim(stakeId) {
+    var position = stakes().filter(function (st) { return st.id === stakeId; })[0];
+    if (!position) throw new Error("позиция не найдена");
+    var reward = rewardsOf(position);
+    /* Demo time runs fast enough that a reward is never exactly zero, so the
+       bar is the token's own precision: don't spend a transaction on dust. */
+    var dust = Math.pow(10, -(Market.byId(position.tokenId).dp + 2));
+    if (reward < dust) throw new Error("награда пока слишком мала");
+
+    position.carried = 0;
+    position.since = Date.now();
+    setBalance(position.tokenId, balanceOf(position.tokenId) + reward);
+    var token = Market.byId(position.tokenId);
+    var tx = record({ kind: "reward", tokenId: position.tokenId, amount: reward, usd: reward * token.price, fee: 0 });
+    notify("reward", "Награда зачислена", Market.amount(reward, position.tokenId) + " " + token.sym);
+    save();
+    return tx;
+  }
+
+  /** Returns principal and rewards together, and closes the position. */
+  function unstake(stakeId) {
+    var position = stakes().filter(function (st) { return st.id === stakeId; })[0];
+    if (!position) throw new Error("позиция не найдена");
+    var reward = rewardsOf(position);
+    var returned = position.amount + reward;
+
+    account().stakes = stakes().filter(function (st) { return st.id !== stakeId; });
+    setBalance(position.tokenId, balanceOf(position.tokenId) + returned);
+    var token = Market.byId(position.tokenId);
+    var tx = record({ kind: "unstake", tokenId: position.tokenId, amount: returned, usd: returned * token.price, fee: 0 });
+    notify("unstake", "Выведено из стейкинга",
+           Market.amount(returned, position.tokenId) + " " + token.sym + ", включая награду");
+    save();
+    return tx;
+  }
+
+  /* ---------- address book ---------- */
+
+  function contacts() { return state.contacts; }
+
+  function contactFor(address) {
+    return state.contacts.filter(function (c) { return c.address === address; })[0] || null;
+  }
+
+  function addContact(name, address, note) {
+    if (!String(name || "").trim()) throw new Error("нужно имя");
+    if (!addressLooksValid(address)) throw new Error("адрес выглядит неверно");
+    if (contactFor(address.trim())) throw new Error("такой адрес уже сохранён");
+    var contact = { id: signature(), name: String(name).trim(), address: String(address).trim(), note: String(note || "").trim() };
+    state.contacts.unshift(contact);
+    save();
+    return contact;
+  }
+
+  function removeContact(id) {
+    state.contacts = state.contacts.filter(function (c) { return c.id !== id; });
+    save();
+  }
+
+  /* ---------- price alerts ---------- */
+
+  function alerts() { return state.alerts; }
+
+  function addAlert(tokenId, direction, price) {
+    var token = Market.byId(tokenId);
+    if (!token) throw new Error("нет такого токена");
+    if (!(price > 0)) throw new Error("укажите цену больше нуля");
+    if (direction === "above" && price <= token.price) throw new Error("цена уже выше указанной");
+    if (direction === "below" && price >= token.price) throw new Error("цена уже ниже указанной");
+    var alert = { id: signature(), tokenId: tokenId, direction: direction, price: price, at: Date.now() };
+    state.alerts.unshift(alert);
+    save();
+    return alert;
+  }
+
+  function removeAlert(id) {
+    state.alerts = state.alerts.filter(function (a) { return a.id !== id; });
+    save();
+  }
+
+  /** Called on every market tick; returns the alerts that just tripped. */
+  function checkAlerts() {
+    if (!state) return [];
+    var fired = state.alerts.filter(function (a) {
+      var price = Market.byId(a.tokenId).price;
+      return a.direction === "above" ? price >= a.price : price <= a.price;
+    });
+    if (!fired.length) return [];
+    fired.forEach(function (a) {
+      var token = Market.byId(a.tokenId);
+      notify("alert", token.sym + (a.direction === "above" ? " выше " : " ниже ") +
+        Market.money(a.price, state.settings.currency),
+        "Сейчас " + Market.money(token.price, state.settings.currency));
+      removeAlert(a.id);
+    });
+    save();
+    return fired;
+  }
+
+  /* ---------- notifications ---------- */
+
+  function notes() { return state.notes; }
+  function unreadCount() { return state.notes.filter(function (n) { return !n.read; }).length; }
+
+  function notify(kind, title, body) {
+    state.notes.unshift({ id: signature(), kind: kind, title: title, body: body, at: Date.now(), read: false });
+    if (state.notes.length > MAX_NOTES) state.notes.length = MAX_NOTES;
+  }
+
+  function markNotesRead() {
+    state.notes.forEach(function (n) { n.read = true; });
+    save();
+  }
+
+  /** Base58, and the length a 32-byte key encodes to. */
+  function addressLooksValid(address) {
+    return /^[1-9A-HJ-NP-Za-km-z]{32,46}$/.test(String(address || "").trim());
+  }
+
+  function settings() { return state.settings; }
+
+  function setSetting(key, value) {
+    state.settings[key] = value;
+    save();
+  }
+
+  var api = {
+    exists: exists, isUnlocked: isUnlocked, create: create, unlock: unlock,
+    lock: lock, reset: reset, recoveryPhrase: recoveryPhrase,
+    state: function () { return state; },
+    account: account, accounts: function () { return state.accounts; },
+    addAccount: addAccount, selectAccount: selectAccount,
+    balanceOf: balanceOf, stakedOf: stakedOf, holdingOf: holdingOf,
+    total: total, stakedTotal: stakedTotal, totalChange: totalChange, totalSeries: totalSeries,
+    card: function () { return state.card; },
+    txs: function () { return state.txs; },
+    buy: buy, sell: sell, send: send, swap: swap, swapQuote: swapQuote,
+    networkFee: networkFee, addressLooksValid: addressLooksValid,
+    settings: settings, setSetting: setSetting, save: save,
+    stakes: stakes, stake: stake, unstake: unstake, claim: claim,
+    rewardsOf: rewardsOf, rewardsTotal: rewardsTotal,
+    contacts: contacts, contactFor: contactFor, addContact: addContact, removeContact: removeContact,
+    alerts: alerts, addAlert: addAlert, removeAlert: removeAlert, checkAlerts: checkAlerts,
+    notes: notes, unreadCount: unreadCount, markNotesRead: markNotesRead,
+    FEES: FEES, NETWORK_FEE_USD: NETWORK_FEE_USD, HOURS_PER_SECOND: HOURS_PER_SECOND
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  global.WalletStore = api;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<!-- ui.js -->
+<script>
+/**
+ * The small toolkit the screens are built from: DOM helpers, the icon set,
+ * charts, sheets and toasts. No framework — the app is a handful of screens
+ * that re-render from state, and that stays legible at this size.
+ */
+(function (global) {
+  "use strict";
+
+  var Vault = global.Vault;
+
+  /* ---------- DOM ---------- */
+
+  function h(tag, props, children) {
+    var node = document.createElement(tag);
+    if (props) Object.keys(props).forEach(function (key) {
+      var value = props[key];
+      if (value == null || value === false) return;
+      if (key === "class") node.className = value;
+      else if (key === "html") node.innerHTML = value;
+      else if (key === "text") node.textContent = value;
+      else if (key.slice(0, 2) === "on") node.addEventListener(key.slice(2).toLowerCase(), value);
+      else if (key === "dataset") Object.assign(node.dataset, value);
+      else node.setAttribute(key, value === true ? "" : value);
+    });
+    [].concat(children == null ? [] : children).forEach(function (child) {
+      if (child == null || child === false) return;
+      node.appendChild(typeof child === "string" ? document.createTextNode(child) : child);
+    });
+    return node;
+  }
+
+  function frag(html) {
+    var t = document.createElement("template");
+    t.innerHTML = html.trim();
+    return t.content.firstElementChild;
+  }
+
+  function esc(text) {
+    return String(text).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  /* ---------- icons (lucide-shaped, 24px grid, stroked) ---------- */
+
+  var PATHS = {
+    "arrow-down":      "M12 5v14M19 12l-7 7-7-7",
+    "arrow-up":        "M12 19V5M5 12l7-7 7 7",
+    "arrow-up-right":  "M7 17 17 7M7 7h10v10",
+    "arrow-down-left": "M17 7 7 17M17 17H7V7",
+    "arrow-left":      "M19 12H5M12 19l-7-7 7-7",
+    "plus":            "M5 12h14M12 5v14",
+    "x":               "M18 6 6 18M6 6l12 12",
+    "check":           "M20 6 9 17l-5-5",
+    "chevron-right":   "M9 18l6-6-6-6",
+    "chevron-down":    "M6 9l6 6 6-6",
+    "swap":            "M17 2l4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3",
+    "settings":        "M20 7h-9M14 17H5",
+    "eye":             "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z",
+    "eye-off":         "M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 8 10 8a18 18 0 0 1-2.16 3.19M6.6 6.6A18 18 0 0 0 2 12s3.5 7 10 7a9 9 0 0 0 5.4-1.6M2 2l20 20",
+    "copy":            "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",
+    "alert":           "M21.73 18 13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3zM12 9v4M12 17h.01",
+    "info":            "M12 16v-4M12 8h.01",
+    "lock":            "M7 11V7a5 5 0 0 1 10 0v4",
+    "key":             "M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3",
+    "shield":          "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
+    "card":            "M2 10h20",
+    "image":           "M21 15l-3.09-3.09a2 2 0 0 0-2.82 0L6 21",
+    "clock":           "M12 6v6l4 2",
+    "trash":           "M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
+    "globe":           "M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+    "backspace":       "M20 5H9l-7 7 7 7h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zM12 9l6 6M18 9l-6 6",
+    "users":           "M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M22 21v-2a4 4 0 0 0-3-3.87",
+    "wallet":          "M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h15a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5M18 12h.01",
+    "qr":              "M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z",
+    "zap":             "M13 2 4.1 12.6a1 1 0 0 0 .8 1.6H11l-1 7.8 8.9-10.6a1 1 0 0 0-.8-1.6H13z",
+    "logout":          "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9",
+    "refresh":         "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6",
+    "bell":            "M10.3 21a1.9 1.9 0 0 0 3.4 0M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9",
+    "stake":           "M12 2 3 7l9 5 9-5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5",
+    "search":          "m21 21-4.3-4.3"
+  };
+
+  /* icons that need a circle or rect alongside the path */
+  var EXTRA = {
+    "eye":      '<circle cx="12" cy="12" r="3"/>',
+    "info":     '<circle cx="12" cy="12" r="10"/>',
+    "clock":    '<circle cx="12" cy="12" r="10"/>',
+    "globe":    '<circle cx="12" cy="12" r="10"/>',
+    "lock":     '<rect x="3" y="11" width="18" height="11" rx="2"/>',
+    "card":     '<rect x="2" y="5" width="20" height="14" rx="2"/>',
+    "image":    '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.6"/>',
+    "copy":     '<rect x="9" y="9" width="13" height="13" rx="2"/>',
+    "settings": '<circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+    "key":      '<circle cx="7.5" cy="15.5" r="5.5"/>',
+    "users":    '<circle cx="9" cy="7" r="4"/>',
+    "search":   '<circle cx="11" cy="11" r="8"/>'
+  };
+
+  function icon(name, size) {
+    var d = PATHS[name];
+    if (!d) return "";
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' +
+      (size ? ' width="' + size + '" height="' + size + '"' : "") + ">" +
+      (EXTRA[name] || "") + '<path d="' + d + '"/></svg>';
+  }
+
+  /* ---------- identity colours ---------- */
+
+  /** A coin badge in the token's own hue, pulled toward the app's blue. */
+  function coinBadge(token, size) {
+    var a = "hsl(" + token.hue + " 82% 63%)";
+    var b = "hsl(" + (token.hue + 16) + " 68% 44%)";
+    var style = "background:linear-gradient(140deg," + a + "," + b + ")" +
+      (size ? ";width:" + size + "px;height:" + size + "px;font-size:" + Math.round(size * 0.31) + "px" : "");
+    return '<span class="coin" style="' + style + '">' + esc(token.sym.slice(0, 3)) + "</span>";
+  }
+
+  /** Account avatar: two deterministic hues from the address. */
+  function avatarStyle(seed) {
+    var rnd = Vault.seedRandom("avatar/" + seed);
+    /* Every avatar runs cobalt blue -> cyan. Letting the second hue drift upward
+       lands in violet, which reads as a different product. */
+    var hue = 200 + Math.floor(rnd() * 38);
+    var hue2 = hue - 34 + Math.floor(rnd() * 14);
+    return "background:linear-gradient(135deg,hsl(" + hue + " 85% 64%),hsl(" + hue2 + " 72% 48%))";
+  }
+
+  function shortAddress(address, head, tail) {
+    if (!address) return "";
+    return address.slice(0, head || 4) + "…" + address.slice(-(tail || 4));
+  }
+
+  /* ---------- charts ---------- */
+
+  function extent(values) {
+    var lo = Infinity, hi = -Infinity;
+    values.forEach(function (v) { if (v < lo) lo = v; if (v > hi) hi = v; });
+    if (lo === hi) { lo -= 1; hi += 1; }
+    return [lo, hi];
+  }
+
+  /** A tiny inline trend line for list rows. */
+  function sparkline(values, up) {
+    var w = 54, hgt = 22, pad = 2;
+    var range = extent(values);
+    var stepX = w / (values.length - 1);
+    var pts = values.map(function (v, i) {
+      var y = pad + (hgt - pad * 2) * (1 - (v - range[0]) / (range[1] - range[0]));
+      return (i * stepX).toFixed(1) + " " + y.toFixed(1);
+    });
+    return '<svg class="spark" viewBox="0 0 ' + w + " " + hgt + '" fill="none" aria-hidden="true">' +
+      '<polyline points="' + pts.join(" ") + '" stroke="' + (up ? "#24d6a0" : "#ff5c7c") +
+      '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+
+  var chartSeq = 0;
+
+  /**
+   * The detail chart: filled area, live end point, and a crosshair that
+   * reports the value under the pointer through `onHover`.
+   */
+  function areaChart(container, values, opts) {
+    opts = opts || {};
+    var up = values[values.length - 1] >= values[0];
+    var stroke = up ? "#24d6a0" : "#ff5c7c";
+    var w = 320, hgt = 168, pad = 14;
+    var range = extent(values);
+    var id = "cg" + (++chartSeq);
+
+    var x = function (i) { return (i / (values.length - 1)) * w; };
+    var y = function (v) { return pad + (hgt - pad * 2) * (1 - (v - range[0]) / (range[1] - range[0])); };
+
+    var line = values.map(function (v, i) { return (i ? "L" : "M") + x(i).toFixed(2) + " " + y(v).toFixed(2); }).join("");
+    var area = line + "L" + w + " " + hgt + "L0 " + hgt + "Z";
+
+    container.innerHTML =
+      '<svg class="chart" viewBox="0 0 ' + w + " " + hgt + '" preserveAspectRatio="none" fill="none">' +
+        '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0" stop-color="' + stroke + '" stop-opacity=".26"/>' +
+          '<stop offset="1" stop-color="' + stroke + '" stop-opacity="0"/>' +
+        "</linearGradient></defs>" +
+        '<path d="' + area + '" fill="url(#' + id + ')"/>' +
+        '<path d="' + line + '" stroke="' + stroke + '" stroke-width="2" ' +
+          'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
+        '<line class="cross" x1="0" y1="0" x2="0" y2="' + hgt + '" stroke="' + stroke +
+          '" stroke-opacity=".45" stroke-width="1" vector-effect="non-scaling-stroke" style="display:none"/>' +
+        '<circle class="dot" r="4" fill="' + stroke + '" stroke="#070b14" stroke-width="2" ' +
+          'cx="' + x(values.length - 1) + '" cy="' + y(values[values.length - 1]) + '"/>' +
+      "</svg>";
+
+    if (!opts.onHover) return;
+    var svg = container.firstChild;
+    var cross = svg.querySelector(".cross");
+    var dot = svg.querySelector(".dot");
+
+    var move = function (event) {
+      var box = svg.getBoundingClientRect();
+      var px = (event.touches ? event.touches[0].clientX : event.clientX) - box.left;
+      var i = Math.round((px / box.width) * (values.length - 1));
+      i = Math.max(0, Math.min(values.length - 1, i));
+      cross.style.display = "";
+      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
+      dot.setAttribute("cx", x(i)); dot.setAttribute("cy", y(values[i]));
+      opts.onHover(values[i], i);
+    };
+    var leave = function () {
+      cross.style.display = "none";
+      dot.setAttribute("cx", x(values.length - 1));
+      dot.setAttribute("cy", y(values[values.length - 1]));
+      opts.onHover(null, null);
+    };
+    svg.addEventListener("pointermove", move);
+    svg.addEventListener("pointerleave", leave);
+    svg.addEventListener("touchmove", move, { passive: true });
+    svg.addEventListener("touchend", leave);
+  }
+
+  /** Deterministic collectible art, so a token id always looks the same. */
+  function nftArt(seed) {
+    var rnd = Vault.seedRandom("art/" + seed);
+    var hue = 200 + Math.floor(rnd() * 60);
+    var hue2 = (hue + 30 + Math.floor(rnd() * 90)) % 360;
+    var id = "a" + Math.floor(rnd() * 1e6);
+    var shapes = "";
+    var count = 3 + Math.floor(rnd() * 4);
+    for (var i = 0; i < count; i++) {
+      var cx = 20 + rnd() * 120, cy = 20 + rnd() * 120, r = 12 + rnd() * 52;
+      shapes += rnd() > 0.45
+        ? '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) +
+          '" fill="none" stroke="hsl(' + hue2 + ' 90% 70%)" stroke-opacity="' + (0.25 + rnd() * 0.5).toFixed(2) + '" stroke-width="' + (1 + rnd() * 3).toFixed(1) + '"/>'
+        : '<rect x="' + (cx - r / 2).toFixed(1) + '" y="' + (cy - r / 2).toFixed(1) + '" width="' + r.toFixed(1) +
+          '" height="' + r.toFixed(1) + '" rx="' + (r / 6).toFixed(1) + '" fill="hsl(' + hue + ' 90% 62% / ' +
+          (0.12 + rnd() * 0.3).toFixed(2) + ')" transform="rotate(' + (rnd() * 90).toFixed(0) + " " + cx.toFixed(1) + " " + cy.toFixed(1) + ')"/>';
+    }
+    return '<svg viewBox="0 0 160 160" role="img" aria-label="Изображение коллекции">' +
+      '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1">' +
+      '<stop offset="0" stop-color="hsl(' + hue + ' 70% 22%)"/>' +
+      '<stop offset="1" stop-color="hsl(' + hue2 + ' 60% 10%)"/></linearGradient></defs>' +
+      '<rect width="160" height="160" fill="url(#' + id + ')"/>' + shapes + "</svg>";
+  }
+
+  /* ---------- toast ---------- */
+
+  function toast(text, iconName) {
+    var host = $("#toasts");
+    if (!host) return;
+    var node = h("div", { class: "toast", html: icon(iconName || "check") + "<span></span>" });
+    node.lastChild.textContent = text;
+    host.appendChild(node);
+    setTimeout(function () {
+      node.classList.add("toast--out");
+      setTimeout(function () { node.remove(); }, 240);
+    }, 2300);
+  }
+
+  function copy(text, message) {
+    var done = function () { toast(message || "Скопировано", "copy"); };
+    if (global.navigator && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+    } else fallbackCopy(text, done);
+  }
+
+  function fallbackCopy(text, done) {
+    var area = h("textarea", { style: "position:fixed;opacity:0" });
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+    try { document.execCommand("copy"); done(); } catch (e) { toast("Не удалось скопировать", "alert"); }
+    area.remove();
+  }
+
+  /* ---------- bottom sheet ---------- */
+
+  var sheetHost = null;
+  var onSheetClose = null;
+
+  function openSheet(title, body, foot, opts) {
+    opts = opts || {};
+    closeSheet(true);
+    sheetHost = h("div", { class: "sheet" }, [
+      h("div", { class: "sheet__veil", onclick: function () { if (!opts.sticky) closeSheet(); } }),
+      h("div", { class: "sheet__panel" }, [
+        h("div", { class: "grabber" }),
+        h("div", { class: "sheet__head" }, [
+          h("div", { class: "sheet__title", text: title }),
+          h("div", { class: "spacer" }),
+          h("button", {
+            class: "iconbtn", "aria-label": "Закрыть", html: icon("x"),
+            onclick: function () { closeSheet(); }
+          })
+        ]),
+        h("div", { class: "sheet__body" }, body),
+        foot ? h("div", { class: "sheet__foot" }, foot) : null
+      ])
+    ]);
+    $("#device").appendChild(sheetHost);
+    onSheetClose = opts.onClose || null;
+    return sheetHost;
+  }
+
+  function closeSheet(immediate) {
+    if (!sheetHost) return;
+    var node = sheetHost;
+    var cb = onSheetClose;
+    sheetHost = null;
+    onSheetClose = null;
+    node.dispatchEvent(new CustomEvent("sheet-teardown"));
+    if (immediate) node.remove();
+    else {
+      node.classList.add("sheet--out");
+      setTimeout(function () { node.remove(); }, 240);
+    }
+    if (cb) cb();
+  }
+
+  function sheetIsOpen() { return !!sheetHost; }
+
+  /* ---------- press and hold ---------- */
+
+  /** Money moves on a deliberate gesture, not a stray tap. */
+  function holdToConfirm(button, ms, done) {
+    var fill = button.querySelector(".hold__fill");
+    var start = 0, raf = 0, running = false;
+
+    var frame = function (now) {
+      if (!running) return;
+      var p = Math.min(1, (now - start) / ms);
+      fill.style.width = (p * 100) + "%";
+      if (p >= 1) { stop(); done(); return; }
+      raf = requestAnimationFrame(frame);
+    };
+    var begin = function (event) {
+      if (event.button != null && event.button !== 0) return;
+      if (button.disabled) return;
+      running = true;
+      start = performance.now();
+      raf = requestAnimationFrame(frame);
+    };
+    var stop = function () {
+      running = false;
+      cancelAnimationFrame(raf);
+      fill.style.width = "0%";
+    };
+    button.addEventListener("pointerdown", begin);
+    button.addEventListener("pointerup", stop);
+    button.addEventListener("pointerleave", stop);
+    button.addEventListener("pointercancel", stop);
+    /* keyboard: Enter or Space commits without the hold */
+    button.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (!button.disabled) done(); }
+    });
+  }
+
+  /* ---------- dates ---------- */
+
+  var MONTHS = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+
+  function dayLabel(ts) {
+    var d = new Date(ts), now = new Date();
+    var sameDay = function (a, b) {
+      return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+    };
+    if (sameDay(d, now)) return "Сегодня";
+    var yesterday = new Date(now.getTime() - 86400000);
+    if (sameDay(d, yesterday)) return "Вчера";
+    return d.getDate() + " " + MONTHS[d.getMonth()] + (d.getFullYear() !== now.getFullYear() ? " " + d.getFullYear() : "");
+  }
+
+  function timeLabel(ts) {
+    var d = new Date(ts);
+    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+  }
+
+  var api = {
+    h: h, frag: frag, esc: esc, $: $, $: $, icon: icon,
+    coinBadge: coinBadge, avatarStyle: avatarStyle, shortAddress: shortAddress,
+    sparkline: sparkline, areaChart: areaChart, nftArt: nftArt,
+    toast: toast, copy: copy,
+    openSheet: openSheet, closeSheet: closeSheet, sheetIsOpen: sheetIsOpen,
+    holdToConfirm: holdToConfirm, dayLabel: dayLabel, timeLabel: timeLabel
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  global.UI = api;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<!-- screens.js -->
+<script>
+/**
+ * Every screen and sheet in the wallet.
+ *
+ * Each function returns a detached DOM node; the router in app.js decides
+ * what is on screen. Rendering is plain re-creation — at this size it is
+ * cheaper to read than any diffing scheme would be.
+ */
+(function (global) {
+  "use strict";
+
+  var UI = global.UI, Market = global.Market, Store = global.WalletStore, Vault = global.Vault;
+  var h = UI.h, icon = UI.icon, esc = UI.esc;
+
+  var BRAND = "Meridian";
+
+  /* A globe with its prime meridian picked out — the name drawn literally. */
+  var MARK =
+    '<svg class="hero__mark" viewBox="0 0 64 64" aria-hidden="true">' +
+    '<defs><linearGradient id="mk" x1="0" y1="0" x2="1" y2="1">' +
+    '<stop offset="0" stop-color="#5b93ff"/><stop offset="1" stop-color="#12b6ff"/></linearGradient></defs>' +
+    '<circle cx="32" cy="32" r="27" fill="url(#mk)"/>' +
+    '<g fill="none" stroke="#04070f" stroke-opacity=".34" stroke-width="2.4">' +
+    '<ellipse cx="32" cy="32" rx="20" ry="27"/><ellipse cx="32" cy="32" rx="9" ry="27"/>' +
+    '<path d="M7 32h50M11.5 19h41M11.5 45h41"/></g>' +
+    '<path d="M32 5v54" stroke="#fff" stroke-opacity=".85" stroke-width="3" stroke-linecap="round"/>' +
+    "</svg>";
+
+  function app() { return global.App; }
+  function currency() { return Store.settings().currency; }
+  function money(usd, opts) { return Market.money(usd, currency(), opts); }
+
+  /* ============================================================
+     onboarding
+     ============================================================ */
+
+  function welcome() {
+    return h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("div", { class: "spacer" }),
+        h("span", { class: "pill", html: '<span class="pill__dot"></span>демо' })
+      ]),
+      h("div", { class: "hero", html: MARK }),
+      h("div", { class: "hero", style: "flex:0" }, [
+        h("div", { class: "hero__title", text: BRAND }),
+        h("div", { class: "hero__sub", text: "Кошелёк с большими кнопками «Купить» и «Продать». Симулятор: настоящих денег и настоящей сети здесь нет." })
+      ]),
+      h("div", { class: "foot" }, [
+        h("button", {
+          class: "btn btn--primary", html: icon("plus") + "<span>Создать кошелёк</span>",
+          onclick: function () { app().go("create"); }
+        }),
+        h("button", {
+          class: "btn btn--ghost", html: icon("key") + "<span>У меня уже есть фраза</span>",
+          onclick: function () { app().go("import"); }
+        })
+      ])
+    ]);
+  }
+
+  /** Password + confirmation, shared by the create and import flows. */
+  function passwordFields(onValid) {
+    var pass = h("input", { class: "input", type: "password", placeholder: "Не короче 8 символов", autocomplete: "new-password" });
+    var again = h("input", { class: "input", type: "password", placeholder: "Ещё раз", autocomplete: "new-password" });
+    var hint = h("div", { class: "hint" });
+
+    var check = function () {
+      var a = pass.value, b = again.value;
+      var problem = a.length < 8 ? "Пароль короче восьми символов"
+        : (b && a !== b) ? "Пароли не совпадают" : "";
+      hint.textContent = problem || "Пароль хранится только у вас — восстановить его нельзя.";
+      hint.className = "hint" + (problem && b ? " hint--bad" : "");
+      onValid(!problem && a === b && b.length > 0, a);
+    };
+    pass.addEventListener("input", check);
+    again.addEventListener("input", check);
+    check();
+
+    return {
+      node: h("div", {}, [
+        h("label", { class: "field" }, [h("span", { class: "field__label", text: "Пароль" }), pass]),
+        h("label", { class: "field" }, [h("span", { class: "field__label", text: "Повторите" }), again]),
+        hint
+      ]),
+      focus: function () { pass.focus(); }
+    };
+  }
+
+  function createFlow() {
+    var step = 0;
+    var password = "";
+    var recovery = Vault.newPhrase();
+    var revealed = false;
+
+    var body = h("div", { class: "scroll" });
+    var foot = h("div", { class: "foot" });
+    var dots = h("div", { class: "steps" });
+
+    var screen = h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", {
+          class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"),
+          onclick: function () { step ? (step--, render()) : app().go("welcome"); }
+        }),
+        h("div", { class: "spacer" }),
+        h("span", { class: "pill", html: '<span class="pill__dot"></span>демо' })
+      ]),
+      dots, body, foot
+    ]);
+
+    function render() {
+      dots.innerHTML = "";
+      [0, 1, 2].forEach(function (i) { dots.appendChild(h("div", { class: "step" + (i <= step ? " step--on" : "") })); });
+      body.innerHTML = "";
+      foot.innerHTML = "";
+      if (step === 0) stepPassword();
+      else if (step === 1) stepPhrase();
+      else stepVerify();
+    }
+
+    function heading(title, sub) {
+      body.appendChild(h("div", { style: "padding:14px 4px 6px" }, [
+        h("div", { style: "font-size:24px;font-weight:740;letter-spacing:-.03em", text: title }),
+        h("div", { class: "muted", style: "font-size:13.5px;margin-top:6px;line-height:1.5", text: sub })
+      ]));
+    }
+
+    function stepPassword() {
+      heading("Придумайте пароль", "Им шифруется секретная фраза в этом браузере. Пароль не уходит никуда.");
+      var next = h("button", { class: "btn btn--primary", text: "Дальше", disabled: true, onclick: function () { step = 1; render(); } });
+      var fields = passwordFields(function (ok, value) {
+        password = value;
+        next.disabled = !ok;
+      });
+      body.appendChild(fields.node);
+      foot.appendChild(next);
+      fields.focus();
+    }
+
+    function stepPhrase() {
+      heading("Секретная фраза", "Двенадцать слов восстанавливают доступ. Запишите их по порядку и держите офлайн.");
+      var grid = h("div", { class: "seedgrid" });
+      recovery.split(" ").forEach(function (word, i) {
+        grid.appendChild(h("div", { class: "seedword" }, [
+          h("span", { class: "seedword__i", text: String(i + 1) }),
+          h("span", { text: word })
+        ]));
+      });
+
+      var wrap = h("div", { class: revealed ? "" : "blurred" }, [grid]);
+      if (!revealed) {
+        wrap.appendChild(h("button", {
+          class: "blurred__cta", html: icon("eye") + "<span>Показать фразу</span>",
+          onclick: function () { revealed = true; render(); }
+        }));
+      }
+      body.appendChild(wrap);
+      body.appendChild(h("div", { style: "height:10px" }));
+      body.appendChild(h("div", { class: "warn" }, [
+        h("span", { html: icon("alert") }),
+        h("span", { text: "Кто знает фразу — распоряжается счётом. Настоящий кошелёк никогда не попросит её у вас в переписке." })
+      ]));
+      foot.appendChild(h("button", {
+        class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать</span>",
+        onclick: function () { UI.copy(recovery, "Фраза скопирована"); }
+      }));
+      foot.appendChild(h("button", {
+        class: "btn btn--primary", text: "Я записал", disabled: !revealed,
+        onclick: function () { step = 2; render(); }
+      }));
+    }
+
+    function stepVerify() {
+      var words = recovery.split(" ");
+      var asked = [];
+      var rnd = Market.mulberry(Market.hashSeed(recovery));
+      while (asked.length < 3) {
+        var i = Math.floor(rnd() * 12);
+        if (asked.indexOf(i) === -1) asked.push(i);
+      }
+      asked.sort(function (a, b) { return a - b; });
+      var answers = {};
+
+      heading("Проверим фразу", "Выберите слова, которые стоят на этих местах.");
+
+      asked.forEach(function (index) {
+        var options = [words[index]];
+        while (options.length < 4) {
+          var w = global.Wordlist.WORDS[Math.floor(Math.random() * 256)];
+          if (options.indexOf(w) === -1) options.push(w);
+        }
+        options.sort(function () { return Math.random() - 0.5; });
+
+        var row = h("div", { class: "chips", style: "flex-wrap:wrap" });
+        options.forEach(function (word) {
+          row.appendChild(h("button", {
+            class: "chip", text: word, style: "flex:1 1 40%",
+            onclick: function () {
+              answers[index] = word;
+              UI.$(".chip", row).forEach(function (c) { c.style.background = ""; c.style.color = ""; });
+              this.style.background = word === words[index] ? "rgb(36 214 160 / .22)" : "rgb(255 92 124 / .2)";
+              this.style.color = word === words[index] ? "#24d6a0" : "#ff5c7c";
+              check();
+            }
+          }));
+        });
+        body.appendChild(h("div", { class: "h", text: "Слово № " + (index + 1) }));
+        body.appendChild(row);
+      });
+
+      var done = h("button", {
+        class: "btn btn--primary", text: "Готово", disabled: true,
+        onclick: function () {
+          Store.create(password, recovery);
+          app().go("home");
+          UI.toast("Кошелёк создан. Демо-портфель начислен.", "check");
+        }
+      });
+      function check() {
+        done.disabled = !asked.every(function (i) { return answers[i] === words[i]; });
+      }
+      foot.appendChild(h("button", { class: "btn btn--ghost", text: "Показать фразу ещё раз", onclick: function () { step = 1; render(); } }));
+      foot.appendChild(done);
+    }
+
+    render();
+    return screen;
+  }
+
+  function importFlow() {
+    var password = "";
+    var passOk = false;
+    var area = h("textarea", {
+      class: "input input--mono", rows: 3, placeholder: "двенадцать слов через пробел",
+      style: "resize:none", spellcheck: "false", autocapitalize: "off"
+    });
+    var hint = h("div", { class: "hint" });
+    var submit = h("button", { class: "btn btn--primary", text: "Восстановить", disabled: true });
+
+    function check() {
+      var text = area.value.trim();
+      var count = text ? Vault.normalizePhrase(text).split(" ").length : 0;
+      var valid = Vault.phraseIsValid(text);
+      area.className = "input input--mono" + (count >= 12 && !valid ? " input--bad" : "");
+      hint.className = "hint" + (count >= 12 && !valid ? " hint--bad" : "");
+      hint.textContent = !text ? "Слов: 0 из 12"
+        : valid ? "Фраза распознана"
+        : count < 12 ? "Слов: " + count + " из 12"
+        : "Такие слова не из демо-словаря. Настоящую seed-фразу сюда вводить нельзя.";
+      submit.disabled = !(valid && passOk);
+    }
+    area.addEventListener("input", check);
+
+    var fields = passwordFields(function (ok, value) { passOk = ok; password = value; check(); });
+
+    submit.addEventListener("click", function () {
+      var recovery = Vault.normalizePhrase(area.value);
+      Store.create(password, recovery);
+      app().go("home");
+      UI.toast("Кошелёк восстановлен", "check");
+    });
+
+    return h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("welcome"); } }),
+        h("div", { class: "spacer" }),
+        h("span", { class: "pill", html: '<span class="pill__dot"></span>демо' })
+      ]),
+      h("div", { class: "scroll" }, [
+        h("div", { style: "padding:14px 4px 10px" }, [
+          h("div", { style: "font-size:24px;font-weight:740;letter-spacing:-.03em", text: "Восстановить кошелёк" })
+        ]),
+        h("div", { class: "warn" }, [
+          h("span", { html: icon("alert") }),
+          h("span", { text: "Это симулятор. Он принимает только фразы из своего словаря — настоящую seed-фразу от реального кошелька не вводите ни здесь, ни на любом сайте." })
+        ]),
+        h("label", { class: "field" }, [h("span", { class: "field__label", text: "Секретная фраза" }), area]),
+        hint,
+        h("button", {
+          class: "btn btn--ghost btn--sm", style: "margin-top:10px",
+          html: icon("zap") + "<span>Подставить демо-фразу</span>",
+          onclick: function () { area.value = Vault.newPhrase(); check(); }
+        }),
+        fields.node
+      ]),
+      h("div", { class: "foot" }, [submit])
+    ]);
+  }
+
+  function lockScreen() {
+    var pass = h("input", { class: "input", type: "password", placeholder: "Пароль", autocomplete: "current-password" });
+    var hint = h("div", { class: "hint" });
+    var open = function () {
+      if (Store.unlock(pass.value)) { app().go("home"); return; }
+      hint.className = "hint hint--bad";
+      hint.textContent = "Неверный пароль";
+      pass.value = "";
+      pass.focus();
+    };
+    pass.addEventListener("keydown", function (e) { if (e.key === "Enter") open(); });
+
+    var screen = h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "hero" }, [
+        UI.frag(MARK),
+        h("div", { class: "hero__title", text: BRAND }),
+        h("div", { class: "hero__sub", text: "Кошелёк заблокирован" }),
+        h("div", { style: "width:100%;max-width:300px;margin-top:6px" }, [pass, hint])
+      ]),
+      h("div", { class: "foot" }, [
+        h("button", { class: "btn btn--primary", html: icon("lock") + "<span>Разблокировать</span>", onclick: open }),
+        h("button", {
+          class: "btn btn--ghost btn--sm", text: "Сбросить кошелёк",
+          onclick: function () { confirmReset(); }
+        })
+      ])
+    ]);
+    setTimeout(function () { pass.focus(); }, 60);
+    return screen;
+  }
+
+  function confirmReset() {
+    UI.openSheet("Сбросить кошелёк?", [
+      h("div", { class: "warn" }, [
+        h("span", { html: icon("alert") }),
+        h("span", { text: "Счета, история и секретная фраза будут удалены из этого браузера. Восстановить можно только по записанной фразе." })
+      ])
+    ], [
+      h("button", { class: "btn btn--ghost", text: "Отмена", onclick: function () { UI.closeSheet(); } }),
+      h("button", {
+        class: "btn btn--danger", html: icon("trash") + "<span>Удалить всё</span>",
+        onclick: function () { Store.reset(); UI.closeSheet(); app().go("welcome"); UI.toast("Кошелёк сброшен", "trash"); }
+      })
+    ]);
+  }
+
+  /* ============================================================
+     home
+     ============================================================ */
+
+  var homeTab = "tokens";
+
+  function topBar() {
+    var acc = Store.account();
+    return h("div", { class: "topbar" }, [
+      h("button", {
+        class: "acct", onclick: accountsSheet,
+        html: '<span class="avatar" style="' + UI.avatarStyle(acc.address) + '">' + esc(acc.name.slice(0, 1).toUpperCase()) + "</span>" +
+              '<span style="text-align:left"><span class="acct__name">' + esc(acc.name) + "</span><br>" +
+              '<span class="acct__addr mono">' + esc(UI.shortAddress(acc.address, 4, 4)) + "</span></span>" +
+              '<span style="color:var(--dim);display:flex">' + icon("chevron-down") + "</span>"
+      }),
+      h("div", { class: "spacer" }),
+      bellButton(),
+      h("button", {
+        class: "iconbtn", "aria-label": Store.settings().hidden ? "Показать суммы" : "Скрыть суммы",
+        html: icon(Store.settings().hidden ? "eye-off" : "eye"),
+        onclick: function () { Store.setSetting("hidden", !Store.settings().hidden); app().refresh(); }
+      }),
+      h("button", { class: "iconbtn", "aria-label": "Настройки", html: icon("settings"), onclick: function () { app().go("settings"); } })
+    ]);
+  }
+
+  function bellButton() {
+    var unread = Store.unreadCount();
+    return h("button", {
+      class: "iconbtn" + (unread ? " iconbtn--on" : ""),
+      "aria-label": unread ? "Уведомления, непрочитанных: " + unread : "Уведомления",
+      html: icon("bell") + (unread ? '<span class="badge">' + (unread > 9 ? "9+" : unread) + "</span>" : ""),
+      onclick: notificationsSheet
+    });
+  }
+
+  function hidden() { return Store.settings().hidden; }
+  function maybe(text) { return hidden() ? "••••••" : text; }
+
+  function deltaPill(value) {
+    var down = value < 0;
+    return h("span", {
+      class: "delta" + (down ? " delta--down" : ""),
+      html: icon(down ? "arrow-down" : "arrow-up") +
+        "<span>" + esc(Market.percent(value)) + "</span>" +
+        '<span style="opacity:.7">за сутки</span>'
+    });
+  }
+
+  function home() {
+    var scroll = h("div", { class: "scroll" });
+    var screen = h("div", { class: "screen screen--enter" }, [topBar(), scroll]);
+
+    var change = Store.totalChange();
+    var staked = Store.stakedTotal();
+    scroll.appendChild(h("button", {
+      class: "balance", onclick: portfolioSheet, "aria-label": "Открыть график портфеля"
+    }, [
+      h("div", { class: "balance__label", text: "Общий баланс" }),
+      h("div", { class: "balance__value num" + (hidden() ? " balance__value--hidden" : ""), id: "total", text: maybe(money(Store.total(), { dp: 2 })) }),
+      deltaPill(change),
+      staked > 0 ? h("div", { class: "balance__note num", id: "staked-note",
+        text: "в стейкинге " + maybe(money(staked, { dp: 2 })) }) : null
+    ]));
+
+    scroll.appendChild(h("div", { class: "bigrow" }, [
+      h("button", {
+        class: "bigbtn bigbtn--buy",
+        html: icon("arrow-down") + "<span>КУПИТЬ</span><span class='bigbtn__hint'>с карты •• " + esc(Store.card().last4) + "</span>",
+        onclick: function () { buySheet(); }
+      }),
+      h("button", {
+        class: "bigbtn bigbtn--sell",
+        html: icon("arrow-up") + "<span>ПРОДАТЬ</span><span class='bigbtn__hint'>вывод на карту</span>",
+        onclick: function () { sellSheet(); }
+      })
+    ]));
+
+    scroll.appendChild(h("div", { class: "quickrow" }, [
+      quick("arrow-up-right", "Отправить", function () { sendSheet(); }),
+      quick("qr", "Получить", receiveSheet),
+      quick("swap", "Обмен", function () { swapSheet(); }),
+      quick("stake", "Стейкинг", function () { app().go("staking"); })
+    ]));
+
+    var tabs = h("div", { class: "tabs", role: "tablist" });
+    [["tokens", "Токены"], ["market", "Рынок"], ["nfts", "Коллекции"], ["history", "История"]].forEach(function (pair) {
+      tabs.appendChild(h("button", {
+        class: "tab", role: "tab", "aria-selected": String(homeTab === pair[0]), text: pair[1],
+        onclick: function () { homeTab = pair[0]; app().refresh(); }
+      }));
+    });
+    scroll.appendChild(tabs);
+
+    var tabHost = h("div");
+    function renderTab() {
+      tabHost.innerHTML = "";
+      tabHost.appendChild(homeTab === "tokens" ? tokenList()
+        : homeTab === "market" ? marketList()
+        : homeTab === "nfts" ? collectibles() : activityList());
+    }
+    renderTab();
+    scroll.appendChild(tabHost);
+
+    /* A market tick repaints the numbers only — replacing the whole screen
+       here would throw away the scroll position every couple of seconds. */
+    screen.__tick = function () {
+      var totalEl = UI.$("#total", scroll);
+      if (totalEl) totalEl.textContent = maybe(money(Store.total(), { dp: 2 }));
+      var stakedEl = UI.$("#staked-note", scroll);
+      if (stakedEl) stakedEl.textContent = "в стейкинге " + maybe(money(Store.stakedTotal(), { dp: 2 }));
+      if (homeTab === "tokens" || homeTab === "market") renderTab();
+    };
+
+    return screen;
+  }
+
+  function quick(name, label, onclick) {
+    return h("button", { class: "quick", html: icon(name) + "<span>" + esc(label) + "</span>", onclick: onclick });
+  }
+
+  function tokenList() {
+    var list = h("div", { class: "list" });
+    var owned = Market.TOKENS.filter(function (t) { return Store.holdingOf(t.id) > 0; })
+      .sort(function (a, b) {
+        return Store.holdingOf(b.id) * b.price - Store.holdingOf(a.id) * a.price;
+      });
+    if (!owned.length) {
+      list.appendChild(h("div", { class: "empty", html: icon("wallet") + "<div>Пока ничего нет</div>" }));
+      list.appendChild(h("button", {
+        class: "btn btn--ghost btn--sm", html: icon("search") + "<span>Найти токены на рынке</span>",
+        onclick: function () { homeTab = "market"; app().refresh(); }
+      }));
+      return list;
+    }
+    owned.forEach(function (token) {
+      var change = Market.change(token.id, "1d");
+      var value = Store.holdingOf(token.id) * token.price;
+      list.appendChild(h("button", {
+        class: "row", dataset: { token: token.id },
+        onclick: function () { app().go("token", token.id); },
+        html:
+          UI.coinBadge(token) +
+          '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
+          '<span class="row__sub num">' + esc(maybe(Market.amount(Store.holdingOf(token.id), token.id) + " " + token.sym)) +
+          (Store.stakedOf(token.id) > 0
+            ? '<span class="row__tag">' + esc(Market.amount(Store.stakedOf(token.id), token.id)) + " в стейкинге</span>"
+            : "") +
+          "</span></span>" +
+          UI.sparkline(Market.series(token.id, "1d"), change >= 0) +
+          '<span class="row__right"><span class="row__val num">' + esc(maybe(Market.money(value, currency(), { dp: 2 }))) + "</span><br>" +
+          '<span class="row__delta' + (change < 0 ? " row__delta--down" : "") + ' num">' +
+          esc(Market.percent(change)) + "</span></span>"
+      }));
+    });
+    return list;
+  }
+
+  /* ============================================================
+     token detail
+     ============================================================ */
+
+  var frame = "1d";
+
+  function tokenScreen(tokenId) {
+    var token = Market.byId(tokenId);
+    var scroll = h("div", { class: "scroll" });
+    var priceEl = h("div", { class: "balance__value num", text: Market.money(token.price, currency(), { dp: token.price < 10 ? 4 : 2 }) });
+    var subEl = h("div", { class: "balance__label", text: "Курс " + token.sym });
+    var deltaHost = h("div");
+    var chartHost = h("div", { class: "chartwrap" });
+
+    function paint() {
+      var values = Market.series(tokenId, frame);
+      var change = Market.change(tokenId, frame);
+      deltaHost.innerHTML = "";
+      var down = change < 0;
+      deltaHost.appendChild(h("span", {
+        class: "delta" + (down ? " delta--down" : ""),
+        html: icon(down ? "arrow-down" : "arrow-up") + "<span>" + esc(Market.percent(change)) + "</span>"
+      }));
+      UI.areaChart(chartHost, values, {
+        onHover: function (value) {
+          priceEl.textContent = Market.money(value == null ? token.price : value, currency(), { dp: token.price < 10 ? 4 : 2 });
+          subEl.textContent = value == null ? "Курс " + token.sym : "На выбранной точке";
+        }
+      });
+    }
+
+    var seg = h("div", { class: "seg" });
+    Market.FRAMES.forEach(function (f) {
+      seg.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(frame === f.id), text: f.label,
+        onclick: function () {
+          frame = f.id;
+          UI.$(".segbtn", seg).forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === f.label)); });
+          paint();
+        }
+      }));
+    });
+
+    var hovering = false;
+    chartHost.addEventListener("pointerenter", function () { hovering = true; });
+    chartHost.addEventListener("pointerleave", function () { hovering = false; });
+
+    scroll.appendChild(h("div", { class: "balance" }, [subEl, priceEl, deltaHost]));
+    scroll.appendChild(chartHost);
+    scroll.appendChild(seg);
+
+    scroll.appendChild(h("div", { class: "bigrow" }, [
+      h("button", {
+        class: "bigbtn bigbtn--buy", html: icon("arrow-down") + "<span>КУПИТЬ</span><span class='bigbtn__hint'>" + esc(token.sym) + "</span>",
+        onclick: function () { buySheet(tokenId); }
+      }),
+      h("button", {
+        class: "bigbtn bigbtn--sell", html: icon("arrow-up") + "<span>ПРОДАТЬ</span><span class='bigbtn__hint'>" + esc(token.sym) + "</span>",
+        onclick: function () { sellSheet(tokenId); }
+      })
+    ]));
+
+    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:repeat(3,1fr)" }, [
+      quick("arrow-up-right", "Отправить", function () { sendSheet(tokenId); }),
+      quick("qr", "Получить", receiveSheet),
+      quick("swap", "Обмен", function () { swapSheet(tokenId); })
+    ]));
+
+    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:1fr 1fr;padding-bottom:6px" }, [
+      quick("bell", "Оповестить о цене", function () { alertSheet(tokenId); }),
+      token.apy > 0
+        ? quick("stake", "Застейкать · " + token.apy.toFixed(1).replace(".", ",") + " %", function () { stakeSheet(tokenId); })
+        : quick("info", "Стейкинг недоступен", function () { UI.toast(token.sym + " не поддерживает стейкинг", "info"); })
+    ]));
+
+    var balance = Store.balanceOf(tokenId);
+    var staked = Store.stakedOf(tokenId);
+    var holding = balance + staked;
+    var share = Store.total() > 0 ? (holding * token.price) / Store.total() * 100 : 0;
+    scroll.appendChild(h("div", { class: "h", text: "Ваш баланс" }));
+    scroll.appendChild(h("div", { class: "card" }, [
+      kv("Свободно", maybe(Market.amount(balance, tokenId) + " " + token.sym)),
+      staked > 0 ? kv("В стейкинге", maybe(Market.amount(staked, tokenId) + " " + token.sym)) : null,
+      kv("Стоимость", maybe(money(holding * token.price, { dp: 2 }))),
+      kv("Доля портфеля", share.toFixed(1).replace(".", ",") + " %"),
+      kv("Сеть", token.chain),
+      kv("Комиссия сети", Market.amount(Store.networkFee(tokenId), tokenId) + " " + token.sym)
+    ].filter(Boolean)));
+
+    scroll.appendChild(h("div", { class: "h", text: "О токене" }));
+    scroll.appendChild(h("div", { class: "card muted", style: "font-size:13.5px;line-height:1.5", text: token.note + ". Котировки в этом приложении сгенерированы и не связаны с биржами." }));
+
+    var screen = h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("div", { style: "display:flex;align-items:center;gap:9px" , html: UI.coinBadge(token, 26) + '<b style="font-size:16px;letter-spacing:-.02em">' + esc(token.name) + "</b>" }),
+        h("div", { class: "spacer" }),
+        bellButton(),
+        h("button", { class: "iconbtn", "aria-label": "Настройки", html: icon("settings"), onclick: function () { app().go("settings"); } })
+      ]),
+      scroll
+    ]);
+    paint();
+    screen.__tick = function () { if (!hovering) paint(); };
+    return screen;
+  }
+
+  function kv(key, value) {
+    return h("div", { class: "kv" }, [
+      h("span", { class: "kv__k", text: key }),
+      h("span", { class: "kv__v num", text: value })
+    ]);
+  }
+
+  /* ============================================================
+     amount entry
+     ============================================================ */
+
+  /** Digits-and-one-dot model shared by the buy, sell and send sheets. */
+  function amountModel(onChange) {
+    var text = "0";
+    var api = {
+      get: function () { return text; },
+      value: function () { return parseFloat(text.replace(",", ".")) || 0; },
+      set: function (v) {
+        text = typeof v === "string" ? v : String(v);
+        if (!text) text = "0";
+        onChange();
+      },
+      push: function (ch) {
+        if (ch === ",") {
+          if (text.indexOf(",") === -1) text += ",";
+        } else if (text === "0") text = ch;
+        else if (text.replace(/[^0-9]/g, "").length < 12) text += ch;
+        onChange();
+      },
+      back: function () {
+        text = text.length > 1 ? text.slice(0, -1) : "0";
+        onChange();
+      },
+      clear: function () { text = "0"; onChange(); }
+    };
+    return api;
+  }
+
+  function keypad(model) {
+    var pad = h("div", { class: "keypad" });
+    ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0"].forEach(function (key) {
+      pad.appendChild(h("button", { class: "key", text: key, onclick: function () { model.push(key); } }));
+    });
+    pad.appendChild(h("button", { class: "key", "aria-label": "Стереть", html: icon("backspace"), onclick: function () { model.back(); } }));
+    return pad;
+  }
+
+  /** Physical keyboards should work too. */
+  function bindKeys(node, model) {
+    var handler = function (e) {
+      var tag = e.target && e.target.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;   // the address field wins
+      if (e.key >= "0" && e.key <= "9") model.push(e.key);
+      else if (e.key === "." || e.key === ",") model.push(",");
+      else if (e.key === "Backspace") model.back();
+      else return;
+      e.preventDefault();
+    };
+    document.addEventListener("keydown", handler);
+    node.addEventListener("sheet-teardown", function () { document.removeEventListener("keydown", handler); });
+  }
+
+  function bigAmount(text, prefix, suffix) {
+    return '<span class="amount__value num">' +
+      (prefix ? '<span class="amount__cur">' + esc(prefix) + "</span>" : "") +
+      "<span>" + esc(text) + "</span>" +
+      (suffix ? '<span class="amount__cur">' + esc(suffix) + "</span>" : "") +
+      "</span>";
+  }
+
+  function holdButton(label, onDone) {
+    var button = h("button", {
+      class: "btn btn--primary hold",
+      html: '<span class="hold__fill"></span><span class="hold__label">' + icon("check") + "<span>" + esc(label) + "</span></span>"
+    });
+    UI.holdToConfirm(button, 620, function () { onDone(button); });
+    return button;
+  }
+
+  /* ============================================================
+     buy / sell
+     ============================================================ */
+
+  function tokenPicker(current, onPick, filter) {
+    var row = h("div", { class: "picker" });
+    Market.TOKENS.filter(filter || function () { return true; }).forEach(function (token) {
+      row.appendChild(h("button", {
+        class: "pick", "aria-pressed": String(token.id === current),
+        html: UI.coinBadge(token, 26) + "<span>" + esc(token.sym) + "</span>",
+        onclick: function () {
+          onPick(token.id);
+          UI.$(".pick", row).forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+          this.setAttribute("aria-pressed", "true");
+        }
+      }));
+    });
+    return row;
+  }
+
+  function buySheet(tokenId) {
+    var current = tokenId || "sol";
+    var cur = currency();
+    var rate = Market.rate(cur);
+    var sign = Market.CURRENCIES[cur].sign;
+
+    var display = h("div", { class: "amount" });
+    var summary = h("div", { class: "card" });
+    var error = h("div", { class: "hint hint--bad", style: "display:none" });
+
+    var model = amountModel(function () { paint(); });
+
+    function usdValue() { return model.value() / rate; }
+
+    function paint() {
+      var token = Market.byId(current);
+      var usd = usdValue();
+      var fee = usd * Store.FEES.buy;
+      var units = usd > 0 ? (usd - fee) / token.price : 0;
+      var card = Store.card();
+
+      display.innerHTML = bigAmount(model.get(), null, sign) +
+        '<div class="amount__sub">≈ ' + esc(Market.amount(units, current)) + " " + esc(token.sym) + "</div>";
+
+      summary.innerHTML = "";
+      summary.appendChild(kv("Курс", "1 " + token.sym + " = " + Market.money(token.price, cur)));
+      summary.appendChild(kv("Комиссия сервиса", Market.money(fee, cur, { dp: 2 })));
+      summary.appendChild(kv("Зачислится", Market.amount(units, current) + " " + token.sym));
+
+      var over = usd > card.available;
+      error.style.display = over ? "" : "none";
+      error.textContent = "На карте доступно " + Market.money(card.available, cur, { dp: 2 });
+      confirm.disabled = !(usd > 0) || over;
+    }
+
+    var confirm = holdButton("Удерживайте, чтобы купить", function () {
+      try {
+        var tx = Store.buy(current, usdValue());
+        UI.closeSheet();
+        showSuccess("Куплено", Market.amount(tx.amount, current) + " " + Market.byId(current).sym +
+          " за " + Market.money(tx.usd, cur, { dp: 2 }));
+      } catch (e) { UI.toast(e.message, "alert"); }
+    });
+
+    var chips = h("div", { class: "chips" });
+    [25, 100, 500].forEach(function (usd) {
+      chips.appendChild(h("button", {
+        class: "chip", text: Market.money(usd, cur, { dp: 0 }),
+        onclick: function () { model.set(String(Math.round(usd * rate)).replace(".", ",")); }
+      }));
+    });
+    chips.appendChild(h("button", {
+      class: "chip", text: "Макс",
+      onclick: function () { model.set(String(Math.floor(Store.card().available * rate)).replace(".", ",")); }
+    }));
+
+    var body = [
+      h("div", { class: "card", style: "display:flex;align-items:center;gap:11px;padding:11px 13px" }, [
+        h("span", { class: "opt__ico", html: icon("card") }),
+        h("span", {}, [
+          h("div", { style: "font-weight:620;font-size:14px", text: "Карта •• " + Store.card().last4 }),
+          h("div", { class: "muted", style: "font-size:12.5px", text: "Доступно " + Market.money(Store.card().available, cur, { dp: 2 }) })
+        ])
+      ]),
+      tokenPicker(current, function (id) { current = id; paint(); }),
+      display, chips, keypad(model), error, summary
+    ];
+
+    var sheet = UI.openSheet("Купить", body, [confirm]);
+    bindKeys(sheet, model);
+    paint();
+  }
+
+  function sellSheet(tokenId) {
+    var owned = Market.TOKENS.filter(function (t) { return Store.balanceOf(t.id) > 0; });
+    if (!owned.length) { UI.toast("Продавать пока нечего", "info"); return; }
+    var current = tokenId && Store.balanceOf(tokenId) > 0 ? tokenId : owned[0].id;
+    var cur = currency();
+
+    var display = h("div", { class: "amount" });
+    var summary = h("div", { class: "card" });
+    var error = h("div", { class: "hint hint--bad", style: "display:none" });
+    var model = amountModel(function () { paint(); });
+
+    function paint() {
+      var token = Market.byId(current);
+      var units = model.value();
+      var gross = units * token.price;
+      var fee = gross * Store.FEES.sell;
+      var balance = Store.balanceOf(current);
+
+      display.innerHTML = bigAmount(model.get(), null, token.sym) +
+        '<div class="amount__sub">≈ ' + esc(Market.money(gross, cur, { dp: 2 })) + "</div>";
+
+      summary.innerHTML = "";
+      summary.appendChild(kv("В кошельке", Market.amount(balance, current) + " " + token.sym));
+      summary.appendChild(kv("Курс", "1 " + token.sym + " = " + Market.money(token.price, cur)));
+      summary.appendChild(kv("Комиссия сервиса", Market.money(fee, cur, { dp: 2 })));
+      summary.appendChild(kv("Придёт на карту", Market.money(gross - fee, cur, { dp: 2 })));
+
+      var over = units > balance;
+      error.style.display = over ? "" : "none";
+      error.textContent = "Больше, чем есть: " + Market.amount(balance, current) + " " + token.sym;
+      confirm.disabled = !(units > 0) || over;
+    }
+
+    var confirm = holdButton("Удерживайте, чтобы продать", function () {
+      try {
+        var tx = Store.sell(current, model.value());
+        UI.closeSheet();
+        showSuccess("Продано", Market.money(tx.usd - tx.fee, cur, { dp: 2 }) + " на карту •• " + Store.card().last4);
+      } catch (e) { UI.toast(e.message, "alert"); }
+    });
+
+    var chips = h("div", { class: "chips" });
+    [[25, "25 %"], [50, "50 %"], [75, "75 %"], [100, "Всё"]].forEach(function (pair) {
+      chips.appendChild(h("button", {
+        class: "chip", text: pair[1],
+        onclick: function () {
+          var part = Store.balanceOf(current) * pair[0] / 100;
+          model.set(part.toFixed(Market.byId(current).dp + 2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ","));
+        }
+      }));
+    });
+
+    var body = [
+      tokenPicker(current, function (id) { current = id; model.clear(); paint(); },
+        function (t) { return Store.balanceOf(t.id) > 0; }),
+      display, chips, keypad(model), error, summary
+    ];
+    var sheet = UI.openSheet("Продать", body, [confirm]);
+    bindKeys(sheet, model);
+    paint();
+  }
+
+  /* ============================================================
+     send / receive / swap
+     ============================================================ */
+
+  function sendSheet(tokenId) {
+    var current = tokenId || "sol";
+    var cur = currency();
+    var address = h("input", { class: "input input--mono", placeholder: "Адрес получателя", spellcheck: "false" });
+    var display = h("div", { class: "amount" });
+    var summary = h("div", { class: "card" });
+    var error = h("div", { class: "hint hint--bad", style: "display:none" });
+    var model = amountModel(function () { paint(); });
+    var recipientHint = h("div", { class: "hint" });
+    address.addEventListener("input", paint);
+
+    /* Saved recipients sit right in the form — sending to a known address
+       should not mean opening a second sheet and losing the amount. */
+    var contactChips = h("div", { class: "picker" });
+    Store.contacts().forEach(function (contact) {
+      contactChips.appendChild(h("button", {
+        class: "pick", title: contact.address,
+        html: '<span class="avatar" style="width:24px;height:24px;font-size:11px;' + UI.avatarStyle(contact.address) + '">' +
+          esc(contact.name.slice(0, 1).toUpperCase()) + "</span><span>" + esc(contact.name) + "</span>",
+        onclick: function () {
+          address.value = contact.address;
+          UI.$(".pick", contactChips).forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+          this.setAttribute("aria-pressed", "true");
+          paint();
+        }
+      }));
+    });
+    contactChips.appendChild(h("button", {
+      class: "pick", html: icon("users") + "<span>Все контакты</span>",
+      onclick: function () { contactsSheet(); }
+    }));
+
+    function paint() {
+      var token = Market.byId(current);
+      var units = model.value();
+      var fee = Store.networkFee(current);
+      var balance = Store.balanceOf(current);
+      var known = Store.contactFor(address.value.trim());
+      recipientHint.textContent = known ? "Из книги: " + known.name
+        : Store.addressLooksValid(address.value) ? "Адрес не сохранён в книге" : "";
+
+      display.innerHTML = bigAmount(model.get(), null, token.sym) +
+        '<div class="amount__sub">≈ ' + esc(Market.money(units * token.price, cur, { dp: 2 })) + "</div>";
+
+      summary.innerHTML = "";
+      summary.appendChild(kv("Сеть", token.chain));
+      summary.appendChild(kv("Комиссия сети", Market.amount(fee, current) + " " + token.sym));
+      summary.appendChild(kv("Итого спишется", Market.amount(units + fee, current) + " " + token.sym));
+      summary.appendChild(kv("Остаток", Market.amount(Math.max(0, balance - units - fee), current) + " " + token.sym));
+
+      var badAddress = address.value && !Store.addressLooksValid(address.value);
+      address.className = "input input--mono" + (badAddress ? " input--bad" : "");
+      var over = units + fee > balance;
+      error.style.display = (over || badAddress) ? "" : "none";
+      error.textContent = badAddress ? "Адрес не похож на base58-адрес" : "Не хватает на сумму с комиссией";
+      confirm.disabled = !(units > 0) || over || !Store.addressLooksValid(address.value);
+    }
+
+    var confirm = holdButton("Удерживайте, чтобы отправить", function () {
+      try {
+        var tx = Store.send(current, model.value(), address.value.trim());
+        UI.closeSheet();
+        showSuccess("Отправлено", Market.amount(tx.amount, current) + " " + Market.byId(current).sym +
+          " → " + UI.shortAddress(tx.address, 4, 4));
+      } catch (e) { UI.toast(e.message, "alert"); }
+    });
+
+    var chips = h("div", { class: "chips" });
+    [[25, "25 %"], [50, "50 %"], [100, "Макс"]].forEach(function (pair) {
+      chips.appendChild(h("button", {
+        class: "chip", text: pair[1],
+        onclick: function () {
+          var room = Math.max(0, Store.balanceOf(current) - (pair[0] === 100 ? Store.networkFee(current) : 0));
+          var part = room * pair[0] / 100;
+          model.set(part.toFixed(Market.byId(current).dp + 2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ","));
+        }
+      }));
+    });
+
+    var body = [
+      tokenPicker(current, function (id) { current = id; model.clear(); paint(); },
+        function (t) { return Store.balanceOf(t.id) > 0; }),
+      h("label", { class: "field" }, [h("span", { class: "field__label", text: "Кому" }), address]),
+      recipientHint,
+      contactChips,
+      h("button", {
+        class: "btn btn--ghost btn--sm", html: icon("copy") + "<span>Вставить из буфера</span>",
+        onclick: function () {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            navigator.clipboard.readText().then(function (t) { address.value = t.trim(); paint(); },
+              function () { UI.toast("Буфер недоступен", "alert"); });
+          } else UI.toast("Буфер недоступен", "alert");
+        }
+      }),
+      display, chips, keypad(model), error, summary
+    ];
+    var sheet = UI.openSheet("Отправить", body, [confirm]);
+    bindKeys(sheet, model);
+    paint();
+  }
+
+  function receiveSheet() {
+    var acc = Store.account();
+    var qr = global.QR.svg(acc.address, 208, { dark: "#05070e", light: "#ffffff", quiet: 2, radius: 1 });
+    UI.openSheet("Получить", [
+      h("div", { class: "center", style: "padding:6px 0 12px" }, [
+        h("div", { style: "display:inline-block;padding:12px;border-radius:20px;background:#fff", html: qr })
+      ]),
+      h("div", { class: "card center" }, [
+        h("div", { class: "muted", style: "font-size:12.5px;margin-bottom:6px", text: "Адрес счёта «" + acc.name + "»" }),
+        h("div", { class: "mono", style: "font-size:13px;word-break:break-all;line-height:1.5", text: acc.address })
+      ]),
+      h("div", { style: "height:10px" }),
+      h("div", { class: "warn warn--info" }, [
+        h("span", { html: icon("info") }),
+        h("span", { text: "Адрес демонстрационный: за ним нет реальной сети, и отправленные на него настоящие средства пропадут." })
+      ])
+    ], [
+      h("button", {
+        class: "btn btn--primary", html: icon("copy") + "<span>Скопировать адрес</span>",
+        onclick: function () { UI.copy(acc.address, "Адрес скопирован"); }
+      })
+    ]);
+  }
+
+  function swapSheet(fromId) {
+    var from = fromId || "usdc";
+    var to = from === "cob" ? "sol" : "cob";
+    var cur = currency();
+    var model = amountModel(function () { paint(); });
+
+    var fromCard = h("div", { class: "card" });
+    var toCard = h("div", { class: "card" });
+    var summary = h("div", { class: "card" });
+    var error = h("div", { class: "hint hint--bad", style: "display:none" });
+
+    function paint() {
+      var quote = Store.swapQuote(from, to, model.value());
+      var tokenFrom = Market.byId(from), tokenTo = Market.byId(to);
+      var balance = Store.balanceOf(from);
+
+      fromCard.innerHTML =
+        '<div class="rowsplit"><span class="muted" style="font-size:12.5px">Отдаёте</span>' +
+        '<span class="muted num" style="font-size:12.5px">Баланс ' + esc(Market.amount(balance, from)) + "</span></div>" +
+        '<div class="rowsplit" style="margin-top:8px">' + UI.coinBadge(tokenFrom, 34) +
+        '<span class="num" style="font-size:26px;font-weight:700;letter-spacing:-.03em">' + esc(model.get()) + "</span></div>";
+
+      toCard.innerHTML =
+        '<div class="rowsplit"><span class="muted" style="font-size:12.5px">Получаете</span>' +
+        '<span class="muted num" style="font-size:12.5px">' + esc(quote ? Market.money(quote.out * tokenTo.price, cur, { dp: 2 }) : "—") + "</span></div>" +
+        '<div class="rowsplit" style="margin-top:8px">' + UI.coinBadge(tokenTo, 34) +
+        '<span class="num" style="font-size:26px;font-weight:700;letter-spacing:-.03em;color:var(--soft)">' +
+        esc(quote ? Market.amount(quote.out, to) : "0") + "</span></div>";
+
+      summary.innerHTML = "";
+      if (quote) {
+        summary.appendChild(kv("Курс", "1 " + tokenFrom.sym + " = " + Market.amount(quote.rate, to) + " " + tokenTo.sym));
+        summary.appendChild(kv("Комиссия обмена", Market.money(quote.fee, cur, { dp: 2 })));
+        summary.appendChild(kv("Влияние на цену", quote.impact.toFixed(2).replace(".", ",") + " %"));
+      }
+      var over = model.value() > balance;
+      error.style.display = over ? "" : "none";
+      error.textContent = "Больше, чем есть на балансе";
+      confirm.disabled = !(model.value() > 0) || over;
+    }
+
+    var confirm = holdButton("Удерживайте, чтобы обменять", function () {
+      try {
+        var tx = Store.swap(from, to, model.value());
+        UI.closeSheet();
+        showSuccess("Обменяно", Market.amount(tx.amount, from) + " " + Market.byId(from).sym + " → " +
+          Market.amount(tx.toAmount, to) + " " + Market.byId(to).sym);
+      } catch (e) { UI.toast(e.message, "alert"); }
+    });
+
+    var flip = h("button", {
+      class: "swapbtn", "aria-label": "Поменять местами", html: icon("swap"),
+      onclick: function () {
+        var t = from; from = to; to = t;
+        this.classList.toggle("swapbtn--spin");
+        model.clear();
+        renderPickers();
+        paint();
+      }
+    });
+
+    var pickers = h("div");
+    function renderPickers() {
+      pickers.innerHTML = "";
+      pickers.appendChild(h("div", { class: "h", text: "Отдаёте" }));
+      pickers.appendChild(tokenPicker(from, function (id) { if (id === to) to = from; from = id; renderPickers(); model.clear(); paint(); },
+        function (t) { return Store.balanceOf(t.id) > 0; }));
+      pickers.appendChild(h("div", { class: "h", text: "Получаете" }));
+      pickers.appendChild(tokenPicker(to, function (id) { if (id === from) from = to; to = id; renderPickers(); paint(); }));
+    }
+    renderPickers();
+
+    var body = [
+      fromCard,
+      h("div", { class: "swapline" }, [flip]),
+      toCard,
+      pickers,
+      keypad(model),
+      error,
+      summary
+    ];
+    var sheet = UI.openSheet("Обмен", body, [confirm]);
+    bindKeys(sheet, model);
+    paint();
+  }
+
+  /* ============================================================
+     activity, collectibles, accounts
+     ============================================================ */
+
+  var TX_TEXT = {
+    buy:  { title: "Покупка",  icon: "arrow-down",     tone: "in" },
+    sell: { title: "Продажа",  icon: "arrow-up",       tone: "out" },
+    in:   { title: "Получено", icon: "arrow-down-left", tone: "in" },
+    out:  { title: "Отправлено", icon: "arrow-up-right", tone: "out" },
+    swap: { title: "Обмен",    icon: "swap",           tone: "" },
+    stake:   { title: "Стейкинг",        icon: "stake", tone: "out" },
+    unstake: { title: "Вывод из стейкинга", icon: "stake", tone: "in" },
+    reward:  { title: "Награда",         icon: "zap",   tone: "in" }
+  };
+
+  function activityList() {
+    var txs = Store.txs();
+    if (!txs.length) {
+      return h("div", { class: "empty", html: icon("clock") + "<div>Операций пока нет</div>" });
+    }
+    var list = h("div", { class: "list" });
+    var lastDay = "";
+    txs.forEach(function (tx) {
+      var day = UI.dayLabel(tx.at);
+      if (day !== lastDay) {
+        lastDay = day;
+        list.appendChild(h("div", { class: "h", text: day }));
+      }
+      var meta = TX_TEXT[tx.kind];
+      var token = Market.byId(tx.tokenId);
+      var right = tx.kind === "swap"
+        ? Market.amount(tx.toAmount, tx.toTokenId) + " " + Market.byId(tx.toTokenId).sym
+        : (meta.tone === "in" ? "+" : "−") + Market.amount(tx.amount, tx.tokenId) + " " + token.sym;
+      var sub = tx.kind === "swap" ? token.sym + " → " + Market.byId(tx.toTokenId).sym
+        : tx.address ? UI.shortAddress(tx.address, 4, 4)
+        : token.name;
+
+      list.appendChild(h("button", {
+        class: "tx", onclick: function () { txSheet(tx); },
+        html:
+          '<span class="tx__ico' + (meta.tone ? " tx__ico--" + meta.tone : "") + '">' + icon(meta.icon) + "</span>" +
+          '<span><span class="tx__t">' + esc(meta.title) + '</span><br><span class="tx__s mono">' + esc(sub) + " · " + esc(UI.timeLabel(tx.at)) + "</span></span>" +
+          '<span class="tx__a num' + (meta.tone === "in" ? " tx__a--in" : "") + '">' + esc(right) + "</span>"
+      }));
+    });
+    return list;
+  }
+
+  function txSheet(tx) {
+    var meta = TX_TEXT[tx.kind];
+    var token = Market.byId(tx.tokenId);
+    var cur = currency();
+    var rows = [
+      kv("Тип", meta.title),
+      kv("Токен", token.name + " (" + token.sym + ")"),
+      kv("Количество", Market.amount(tx.amount, tx.tokenId) + " " + token.sym)
+    ];
+    if (tx.kind === "swap") rows.push(kv("Получено", Market.amount(tx.toAmount, tx.toTokenId) + " " + Market.byId(tx.toTokenId).sym));
+    if (tx.address) rows.push(kv("Адрес", UI.shortAddress(tx.address, 6, 6)));
+    rows.push(kv("Сумма", Market.money(tx.usd, cur, { dp: 2 })));
+    rows.push(kv("Комиссия", Market.money(tx.fee, cur, { dp: 2 })));
+    rows.push(kv("Когда", UI.dayLabel(tx.at) + ", " + UI.timeLabel(tx.at)));
+    rows.push(kv("Статус", "Подтверждено"));
+
+    UI.openSheet(meta.title, [
+      h("div", { class: "card" }, rows),
+      h("div", { class: "h", text: "Подпись" }),
+      h("div", { class: "card mono", style: "font-size:12px;word-break:break-all;line-height:1.5", text: tx.id })
+    ], [
+      h("button", {
+        class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать подпись</span>",
+        onclick: function () { UI.copy(tx.id, "Подпись скопирована"); }
+      })
+    ]);
+  }
+
+  function collectibles() {
+    var acc = Store.account();
+    var rnd = Vault.seedRandom("nfts/" + acc.address);
+    var count = 4 + Math.floor(rnd() * 3);
+    var grid = h("div", { class: "nftgrid" });
+    var NAMES = ["Синий шум", "Грань", "Полярность", "Тихий сигнал", "Меридиан 001", "Ночная смена"];
+    for (var i = 0; i < count; i++) {
+      var seed = acc.address + "/" + i;
+      var price = (0.4 + rnd() * 6).toFixed(2).replace(".", ",");
+      grid.appendChild(h("button", {
+        class: "nft",
+        html: UI.nftArt(seed) +
+          '<span class="nft__meta"><span class="nft__t">' + esc(NAMES[i % NAMES.length]) + "</span><br>" +
+          '<span class="nft__s num">' + price + " SOL</span></span>",
+        onclick: (function (name, seedValue, priceText) {
+          return function () {
+            UI.openSheet(name, [
+              h("div", { style: "border-radius:18px;overflow:hidden", html: UI.nftArt(seedValue) }),
+              h("div", { class: "h", text: "Свойства" }),
+              h("div", { class: "card" }, [
+                kv("Коллекция", "Meridian Genesis"),
+                kv("Оценка", priceText + " SOL"),
+                kv("Сеть", "Solana"),
+                kv("Стандарт", "Демонстрационный")
+              ])
+            ], [h("button", { class: "btn btn--ghost", text: "Закрыть", onclick: function () { UI.closeSheet(); } })]);
+          };
+        })(NAMES[i % NAMES.length], seed, price)
+      }));
+    }
+    return grid;
+  }
+
+  function accountsSheet() {
+    var list = h("div", { class: "list" });
+    Store.accounts().forEach(function (acc, i) {
+      var value = 0;
+      Market.TOKENS.forEach(function (t) { value += (acc.balances[t.id] || 0) * t.price; });
+      list.appendChild(h("button", {
+        class: "row row--wide", onclick: function () { Store.selectAccount(i); UI.closeSheet(); app().go("home"); },
+        html:
+          '<span class="avatar" style="' + UI.avatarStyle(acc.address) + '">' + esc(acc.name.slice(0, 1).toUpperCase()) + "</span>" +
+          '<span><span class="row__name">' + esc(acc.name) + '</span><br><span class="row__sub mono">' +
+          esc(UI.shortAddress(acc.address, 5, 5)) + "</span></span>" +
+          '<span class="row__right"><span class="row__val num">' + esc(money(value, { dp: 2 })) + "</span>" +
+          (i === Store.state().active ? '<br><span class="row__delta">текущий</span>' : "") + "</span>"
+      }));
+    });
+
+    UI.openSheet("Счета", [
+      list,
+      h("div", { class: "hint", text: "Адрес каждого счёта выводится из вашей секретной фразы." })
+    ], [
+      h("button", {
+        class: "btn btn--ghost", html: icon("plus") + "<span>Добавить счёт</span>",
+        onclick: function () { Store.addAccount(); UI.closeSheet(); app().go("home"); UI.toast("Счёт добавлен", "users"); }
+      }),
+      h("button", {
+        class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать адрес</span>",
+        onclick: function () { UI.copy(Store.account().address, "Адрес скопирован"); }
+      })
+    ]);
+  }
+
+
+  /* ============================================================
+     market: everything listed, not just what you hold
+     ============================================================ */
+
+  var marketQuery = "";
+  var marketSort = "cap";
+
+  function marketList() {
+    var wrap = h("div");
+    var listHost = h("div", { class: "list" });
+
+    var search = h("input", {
+      class: "input", type: "search", placeholder: "Поиск по названию или тикеру",
+      value: marketQuery, spellcheck: "false", "aria-label": "Поиск токенов"
+    });
+    search.addEventListener("input", function () { marketQuery = search.value; paint(); });
+
+    var sorts = h("div", { class: "seg" });
+    [["cap", "Капитализация"], ["change", "Изменение"], ["price", "Цена"]].forEach(function (pair) {
+      sorts.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(marketSort === pair[0]), text: pair[1],
+        onclick: function () {
+          marketSort = pair[0];
+          UI.$(".segbtn", sorts).forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === pair[1])); });
+          paint();
+        }
+      }));
+    });
+
+    function paint() {
+      var query = marketQuery.trim().toLowerCase();
+      var rows = Market.TOKENS.filter(function (t) {
+        return !query || t.name.toLowerCase().indexOf(query) !== -1 || t.sym.toLowerCase().indexOf(query) !== -1;
+      });
+      rows.sort(function (a, b) {
+        if (marketSort === "price") return b.price - a.price;
+        if (marketSort === "change") return Market.change(b.id, "1d") - Market.change(a.id, "1d");
+        return b.cap - a.cap;
+      });
+
+      listHost.innerHTML = "";
+      if (!rows.length) {
+        listHost.appendChild(h("div", { class: "empty", html: icon("search") + "<div>Ничего не нашлось</div>" }));
+        return;
+      }
+      rows.forEach(function (token) {
+        var change = Market.change(token.id, "1d");
+        listHost.appendChild(h("button", {
+          class: "row", onclick: function () { app().go("token", token.id); },
+          html:
+            UI.coinBadge(token) +
+            '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
+            '<span class="row__sub num">' + esc(token.sym) + " · " + esc(capLabel(token.cap)) +
+            (Store.holdingOf(token.id) > 0 ? '<span class="row__tag">в портфеле</span>' : "") + "</span></span>" +
+            UI.sparkline(Market.series(token.id, "1d"), change >= 0) +
+            '<span class="row__right"><span class="row__val num">' + esc(Market.money(token.price, currency())) + "</span><br>" +
+            '<span class="row__delta' + (change < 0 ? " row__delta--down" : "") + ' num">' + esc(Market.percent(change)) + "</span></span>"
+        }));
+      });
+    }
+
+    wrap.appendChild(h("div", { style: "padding-bottom:8px" }, [search]));
+    wrap.appendChild(sorts);
+    wrap.appendChild(h("div", { style: "height:10px" }));
+    wrap.appendChild(listHost);
+    paint();
+    return wrap;
+  }
+
+  /** Market cap, compact and in the wallet's currency. */
+  function capLabel(cap) {
+    var value = cap * Market.rate(currency());
+    var sign = Market.CURRENCIES[currency()].sign;
+    return value >= 1000
+      ? (value / 1000).toFixed(1).replace(".", ",") + " трлн " + sign
+      : value.toFixed(value < 10 ? 1 : 0).replace(".", ",") + " млрд " + sign;
+  }
+
+  /* ============================================================
+     staking
+     ============================================================ */
+
+  function stakingScreen() {
+    var scroll = h("div", { class: "scroll" });
+    var summary = h("div", { class: "card" });
+    var positions = h("div");
+
+    function paintSummary() {
+      var stakedUsd = Store.stakedTotal();
+      var rewards = Store.rewardsTotal();
+      var list = Store.stakes();
+      var avg = list.length
+        ? list.reduce(function (sum, st) { return sum + st.apy * st.amount * Market.byId(st.tokenId).price; }, 0) / (stakedUsd || 1)
+        : 0;
+      summary.innerHTML = "";
+      summary.appendChild(h("div", { class: "stat" }, [
+        h("div", { class: "stat__label", text: "Накоплено наград" }),
+        h("div", { class: "stat__value num", text: maybe(money(rewards, { dp: 2 })) })
+      ]));
+      summary.appendChild(kv("В стейкинге", maybe(money(stakedUsd, { dp: 2 }))));
+      summary.appendChild(kv("Средняя ставка", avg.toFixed(1).replace(".", ",") + " % годовых"));
+      summary.appendChild(kv("Позиций", String(list.length)));
+    }
+
+    function paintPositions() {
+      positions.innerHTML = "";
+      var list = Store.stakes();
+      if (!list.length) {
+        positions.appendChild(h("div", { class: "empty", html: icon("stake") +
+          "<div>Пока ничего не застейкано</div>" }));
+        return;
+      }
+      list.forEach(function (position) {
+        var token = Market.byId(position.tokenId);
+        var validator = Market.VALIDATORS.filter(function (v) { return v.id === position.validator; })[0] || Market.VALIDATORS[0];
+        var reward = Store.rewardsOf(position);
+        positions.appendChild(h("div", { class: "card stakecard" }, [
+          h("div", { class: "rowsplit" }, [
+            h("span", { style: "display:flex;align-items:center;gap:10px",
+              html: UI.coinBadge(token, 34) +
+                '<span><b style="font-size:15px">' + esc(Market.amount(position.amount, position.tokenId)) + " " + esc(token.sym) + "</b><br>" +
+                '<span class="muted" style="font-size:12.5px">' + esc(validator.name) + "</span></span>" }),
+            h("span", { class: "apy num", text: position.apy.toFixed(1).replace(".", ",") + " %" })
+          ]),
+          h("div", { class: "kv", style: "border-top:1px solid var(--line);margin-top:10px" }, [
+            h("span", { class: "kv__k", text: "Награда" }),
+            h("span", { class: "kv__v num reward", dataset: { stake: position.id },
+              text: Market.amount(reward, position.tokenId, 3) + " " + token.sym })
+          ]),
+          h("div", { style: "display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px" }, [
+            h("button", {
+              class: "btn btn--ghost btn--sm", text: "Забрать награду",
+              onclick: function () {
+                try { Store.claim(position.id); UI.toast("Награда зачислена", "check"); repaint(); }
+                catch (e) { UI.toast(e.message, "alert"); }
+              }
+            }),
+            h("button", {
+              class: "btn btn--ghost btn--sm", text: "Вывести",
+              onclick: function () { unstakeSheet(position); }
+            })
+          ])
+        ]));
+      });
+    }
+
+    function repaint() { paintSummary(); paintPositions(); }
+    repaint();
+
+    scroll.appendChild(h("div", { class: "h", text: "Ваш стейкинг" }));
+    scroll.appendChild(summary);
+    scroll.appendChild(h("div", { style: "height:14px" }));
+    scroll.appendChild(h("button", {
+      class: "bigbtn bigbtn--buy", style: "width:100%;height:88px",
+      html: icon("stake") + "<span>ЗАСТЕЙКАТЬ</span><span class='bigbtn__hint'>от 8,4 % годовых</span>",
+      onclick: function () { stakeSheet(); }
+    }));
+    scroll.appendChild(h("div", { class: "h", text: "Позиции" }));
+    scroll.appendChild(positions);
+
+    var free = Market.TOKENS.filter(function (t) { return t.apy > 0 && Store.balanceOf(t.id) > 0; });
+    if (free.length) {
+      scroll.appendChild(h("div", { class: "h", text: "Можно застейкать" }));
+      var list = h("div", { class: "list" });
+      free.forEach(function (token) {
+        list.appendChild(h("button", {
+          class: "row row--wide", onclick: function () { stakeSheet(token.id); },
+          html: UI.coinBadge(token) +
+            '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
+            '<span class="row__sub num">' + esc(Market.amount(Store.balanceOf(token.id), token.id)) + " " + esc(token.sym) + " свободно</span></span>" +
+            '<span class="row__right"><span class="row__val num" style="color:var(--up)">' +
+            esc(token.apy.toFixed(1).replace(".", ",")) + ' %</span><br><span class="row__delta" style="color:var(--dim)">годовых</span></span>'
+        }));
+      });
+      scroll.appendChild(list);
+    }
+
+    scroll.appendChild(h("div", { class: "h", text: "Как это считается" }));
+    scroll.appendChild(h("div", { class: "warn warn--info" }, [
+      h("span", { html: icon("info") }),
+      h("span", { text: "Время в демо ускорено: одна секунда наблюдения = час стейкинга. Награда считается от времени, а не начисляется таймером, поэтому она не сбивается при перезагрузке. В настоящей сети вывод из стейкинга занимает несколько дней." })
+    ]));
+
+    var screen = h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Стейкинг" }),
+        h("div", { class: "spacer" }),
+        bellButton()
+      ]),
+      scroll
+    ]);
+
+    /* rewards tick up on their own, so only those numbers are rewritten */
+    screen.__tick = function () {
+      paintSummary();
+      UI.$(".reward", positions).forEach(function (node) {
+        var position = Store.stakes().filter(function (st) { return st.id === node.dataset.stake; })[0];
+        if (!position) return;
+        node.textContent = Market.amount(Store.rewardsOf(position), position.tokenId, 3) + " " +
+          Market.byId(position.tokenId).sym;
+      });
+    };
+    return screen;
+  }
+
+  function stakeSheet(tokenId) {
+    var free = Market.TOKENS.filter(function (t) { return t.apy > 0 && Store.balanceOf(t.id) > 0; });
+    if (!free.length) { UI.toast("Нет свободных токенов со стейкингом", "info"); return; }
+    var current = tokenId && Store.balanceOf(tokenId) > 0 && Market.byId(tokenId).apy > 0 ? tokenId : free[0].id;
+    var validator = "polaris";
+
+    var display = h("div", { class: "amount" });
+    var summary = h("div", { class: "card" });
+    var error = h("div", { class: "hint hint--bad", style: "display:none" });
+    var validatorHost = h("div", { class: "list" });
+    var model = amountModel(function () { paint(); });
+
+    function paintValidators() {
+      validatorHost.innerHTML = "";
+      Market.VALIDATORS.forEach(function (v) {
+        var apy = Market.apyFor(current, v.id);
+        validatorHost.appendChild(h("button", {
+          class: "row row--wide" + (v.id === validator ? " row--on" : ""),
+          onclick: function () { validator = v.id; paintValidators(); paint(); },
+          html:
+            '<span class="opt__ico">' + icon("shield") + "</span>" +
+            '<span style="min-width:0"><span class="row__name">' + esc(v.name) + "</span>" +
+            '<span class="row__sub">комиссия ' + v.fee + " % · " + esc(v.slots) + "</span></span>" +
+            '<span class="row__right"><span class="row__val num" style="color:var(--up)">' +
+            esc(apy.toFixed(1).replace(".", ",")) + " %</span></span>"
+        }));
+      });
+    }
+
+    function paint() {
+      var token = Market.byId(current);
+      var units = model.value();
+      var apy = Market.apyFor(current, validator);
+      var balance = Store.balanceOf(current);
+
+      display.innerHTML = bigAmount(model.get(), null, token.sym) +
+        '<div class="amount__sub">≈ ' + esc(Market.money(units * token.price, currency(), { dp: 2 })) + "</div>";
+
+      summary.innerHTML = "";
+      summary.appendChild(kv("Свободно", Market.amount(balance, current) + " " + token.sym));
+      summary.appendChild(kv("Ставка", apy.toFixed(1).replace(".", ",") + " % годовых"));
+      summary.appendChild(kv("За месяц", Market.amount(units * apy / 100 / 12, current) + " " + token.sym));
+      summary.appendChild(kv("За год", Market.amount(units * apy / 100, current) + " " + token.sym));
+
+      var over = units > balance;
+      error.style.display = over ? "" : "none";
+      error.textContent = "Больше, чем свободно на балансе";
+      confirm.disabled = !(units > 0) || over;
+    }
+
+    var confirm = holdButton("Удерживайте, чтобы застейкать", function () {
+      try {
+        var units = model.value();
+        Store.stake(current, units, validator);
+        UI.closeSheet();
+        showSuccess("Застейкано", Market.amount(units, current) + " " + Market.byId(current).sym +
+          " под " + Market.apyFor(current, validator).toFixed(1).replace(".", ",") + " %");
+      } catch (e) { UI.toast(e.message, "alert"); }
+    });
+
+    var chips = h("div", { class: "chips" });
+    [[25, "25 %"], [50, "50 %"], [100, "Всё"]].forEach(function (pair) {
+      chips.appendChild(h("button", {
+        class: "chip", text: pair[1],
+        onclick: function () {
+          var part = Store.balanceOf(current) * pair[0] / 100;
+          model.set(trimNumber(part, Market.byId(current).dp));
+        }
+      }));
+    });
+
+    paintValidators();
+    var body = [
+      tokenPicker(current, function (id) { current = id; model.clear(); paintValidators(); paint(); },
+        function (t) { return t.apy > 0 && Store.balanceOf(t.id) > 0; }),
+      display, chips, keypad(model), error,
+      h("div", { class: "h", text: "Валидатор" }), validatorHost,
+      summary
+    ];
+    var sheet = UI.openSheet("Стейкинг", body, [confirm]);
+    bindKeys(sheet, model);
+    paint();
+  }
+
+  function unstakeSheet(position) {
+    var token = Market.byId(position.tokenId);
+    var reward = Store.rewardsOf(position);
+    UI.openSheet("Вывести из стейкинга", [
+      h("div", { class: "card" }, [
+        kv("Позиция", Market.amount(position.amount, position.tokenId) + " " + token.sym),
+        kv("Награда", Market.amount(reward, position.tokenId, 3) + " " + token.sym),
+        kv("Вернётся", Market.amount(position.amount + reward, position.tokenId) + " " + token.sym),
+        kv("Стоимость", money((position.amount + reward) * token.price, { dp: 2 }))
+      ]),
+      h("div", { style: "height:10px" }),
+      h("div", { class: "warn warn--info" }, [
+        h("span", { html: icon("info") }),
+        h("span", { text: "В демо средства возвращаются сразу. В настоящей сети между заявкой и выводом проходит несколько дней, и всё это время награда не начисляется." })
+      ])
+    ], [
+      h("button", { class: "btn btn--ghost", text: "Отмена", onclick: function () { UI.closeSheet(); } }),
+      h("button", {
+        class: "btn btn--primary", text: "Вывести",
+        onclick: function () {
+          try {
+            Store.unstake(position.id);
+            UI.closeSheet();
+            showSuccess("Выведено", Market.amount(position.amount + reward, position.tokenId) + " " + token.sym + " на баланс");
+          } catch (e) { UI.toast(e.message, "alert"); }
+        }
+      })
+    ]);
+  }
+
+  /* ============================================================
+     address book
+     ============================================================ */
+
+  function contactsSheet(onPick) {
+    var listHost = h("div", { class: "list" });
+
+    function paint() {
+      listHost.innerHTML = "";
+      var list = Store.contacts();
+      if (!list.length) {
+        listHost.appendChild(h("div", { class: "empty", html: icon("users") + "<div>Адресная книга пуста</div>" }));
+        return;
+      }
+      list.forEach(function (contact) {
+        listHost.appendChild(h("div", { class: "row row--wide" }, [
+          h("span", { class: "avatar", style: UI.avatarStyle(contact.address), text: contact.name.slice(0, 1).toUpperCase() }),
+          h("button", {
+            class: "contact__pick", onclick: function () {
+              UI.closeSheet(true);
+              if (onPick) onPick(contact);
+              else UI.copy(contact.address, "Адрес скопирован");
+            },
+            html: '<span class="row__name">' + esc(contact.name) + "</span>" +
+              '<span class="row__sub mono">' + esc(UI.shortAddress(contact.address, 5, 5)) +
+              (contact.note ? " · " + esc(contact.note) : "") + "</span>"
+          }),
+          h("button", {
+            class: "iconbtn", "aria-label": "Удалить " + contact.name, html: icon("trash"),
+            onclick: function () { Store.removeContact(contact.id); paint(); UI.toast("Контакт удалён", "trash"); }
+          })
+        ]));
+      });
+    }
+    paint();
+
+    var name = h("input", { class: "input", placeholder: "Имя", autocomplete: "off" });
+    var address = h("input", { class: "input input--mono", placeholder: "Адрес", spellcheck: "false" });
+    var note = h("input", { class: "input", placeholder: "Заметка (необязательно)", autocomplete: "off" });
+    var hint = h("div", { class: "hint" });
+
+    UI.openSheet(onPick ? "Выбрать получателя" : "Адресная книга", [
+      listHost,
+      h("div", { class: "h", text: "Новый контакт" }),
+      h("div", { class: "gap" }, [name, address, note, hint])
+    ], [
+      h("button", {
+        class: "btn btn--primary", html: icon("plus") + "<span>Сохранить контакт</span>",
+        onclick: function () {
+          try {
+            Store.addContact(name.value, address.value, note.value);
+            name.value = address.value = note.value = "";
+            hint.className = "hint";
+            hint.textContent = "Контакт сохранён";
+            paint();
+          } catch (e) {
+            hint.className = "hint hint--bad";
+            hint.textContent = e.message;
+          }
+        }
+      })
+    ]);
+  }
+
+  /* ============================================================
+     notifications and price alerts
+     ============================================================ */
+
+  var NOTE_ICON = { buy: "arrow-down", sell: "arrow-up", out: "arrow-up-right", swap: "swap",
+                    stake: "stake", unstake: "stake", reward: "zap", alert: "bell" };
+
+  function notificationsSheet() {
+    var body = [];
+    var list = Store.notes();
+
+    var alerts = Store.alerts();
+    if (alerts.length) {
+      body.push(h("div", { class: "h", text: "Жду цену" }));
+      var alertHost = h("div", { class: "list" });
+      alerts.forEach(function (alert) {
+        var token = Market.byId(alert.tokenId);
+        alertHost.appendChild(h("div", { class: "row row--wide" }, [
+          UI.frag(UI.coinBadge(token)),
+          h("span", { style: "min-width:0" }, [
+            h("div", { class: "row__name", text: token.sym + (alert.direction === "above" ? " выше " : " ниже ") + Market.money(alert.price, currency()) }),
+            h("div", { class: "row__sub num", text: "сейчас " + Market.money(token.price, currency()) })
+          ]),
+          h("button", {
+            class: "iconbtn", "aria-label": "Убрать оповещение", html: icon("x"),
+            onclick: function () { Store.removeAlert(alert.id); UI.closeSheet(); notificationsSheet(); }
+          })
+        ]));
+      });
+      body.push(alertHost);
+    }
+
+    body.push(h("div", { class: "h", text: "События" }));
+    if (!list.length) {
+      body.push(h("div", { class: "empty", html: icon("bell") + "<div>Событий пока нет</div>" }));
+    } else {
+      var host = h("div", { class: "list" });
+      var lastDay = "";
+      list.forEach(function (note) {
+        var day = UI.dayLabel(note.at);
+        if (day !== lastDay) { lastDay = day; host.appendChild(h("div", { class: "h", text: day })); }
+        host.appendChild(h("div", { class: "tx" + (note.read ? "" : " tx--unread") }, [
+          h("span", { class: "tx__ico", html: icon(NOTE_ICON[note.kind] || "info") }),
+          h("span", { style: "min-width:0" }, [
+            h("div", { class: "tx__t", text: note.title }),
+            h("div", { class: "tx__s", text: note.body })
+          ]),
+          h("span", { class: "tx__s", text: UI.timeLabel(note.at) })
+        ]));
+      });
+      body.push(host);
+    }
+
+    UI.openSheet("Уведомления", body, [
+      h("button", {
+        class: "btn btn--ghost", html: icon("check") + "<span>Прочитать все</span>",
+        onclick: function () { Store.markNotesRead(); UI.closeSheet(); app().refresh(); }
+      })
+    ], { onClose: function () { app().refresh(); } });
+  }
+
+  function alertSheet(tokenId) {
+    var token = Market.byId(tokenId);
+    var direction = "above";
+    var model = amountModel(function () { paint(); });
+    var display = h("div", { class: "amount" });
+    var error = h("div", { class: "hint hint--bad", style: "display:none" });
+
+    var toggle = h("div", { class: "seg" });
+    [["above", "Выше"], ["below", "Ниже"]].forEach(function (pair) {
+      toggle.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(direction === pair[0]), text: pair[1],
+        onclick: function () {
+          direction = pair[0];
+          UI.$(".segbtn", toggle).forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === pair[1])); });
+          model.set(trimNumber(token.price * (direction === "above" ? 1.05 : 0.95), token.price < 10 ? 4 : 2));
+          paint();
+        }
+      }));
+    });
+
+    function paint() {
+      display.innerHTML = bigAmount(model.get(), null, Market.CURRENCIES[currency()].sign) +
+        '<div class="amount__sub">сейчас ' + esc(Market.money(token.price, currency())) + "</div>";
+      var price = model.value() / Market.rate(currency());
+      var bad = direction === "above" ? price <= token.price : price >= token.price;
+      error.style.display = model.value() > 0 && bad ? "" : "none";
+      error.textContent = direction === "above" ? "Цена уже выше указанной" : "Цена уже ниже указанной";
+      confirm.disabled = !(model.value() > 0) || bad;
+    }
+
+    var confirm = h("button", {
+      class: "btn btn--primary", html: icon("bell") + "<span>Оповестить</span>",
+      onclick: function () {
+        try {
+          Store.addAlert(tokenId, direction, model.value() / Market.rate(currency()));
+          UI.closeSheet();
+          UI.toast("Оповещение поставлено", "bell");
+          app().refresh();
+        } catch (e) { UI.toast(e.message, "alert"); }
+      }
+    });
+
+    var sheet = UI.openSheet("Оповещение о цене " + token.sym, [
+      toggle, display, keypad(model), error,
+      h("div", { class: "warn warn--info" }, [
+        h("span", { html: icon("info") }),
+        h("span", { text: "Сработает, как только сгенерированная цена пересечёт отметку — обычно в пределах минуты." })
+      ])
+    ], [confirm]);
+    bindKeys(sheet, model);
+    /* seeded only now: setting it earlier would repaint before the
+       elements it draws into exist */
+    model.set(trimNumber(token.price * 1.05, token.price < 10 ? 4 : 2));
+    paint();
+  }
+
+  /* ============================================================
+     portfolio chart
+     ============================================================ */
+
+  function portfolioSheet() {
+    var localFrame = "1d";
+    var chartHost = h("div", { class: "chartwrap" });
+    var head = h("div", { class: "balance", style: "padding-top:0" });
+
+    function paint() {
+      var values = Store.totalSeries(localFrame);
+      var change = values[0] > 0 ? (values[values.length - 1] - values[0]) / values[0] * 100 : 0;
+      head.innerHTML = "";
+      head.appendChild(h("div", { class: "balance__label", text: "Стоимость портфеля" }));
+      head.appendChild(h("div", { class: "balance__value num", style: "font-size:34px",
+        text: maybe(money(values[values.length - 1], { dp: 2 })) }));
+      head.appendChild(h("span", {
+        class: "delta" + (change < 0 ? " delta--down" : ""),
+        html: icon(change < 0 ? "arrow-down" : "arrow-up") + "<span>" + esc(Market.percent(change)) + "</span>"
+      }));
+      UI.areaChart(chartHost, values, {
+        onHover: function (value) {
+          UI.$(".balance__value", head).textContent =
+            maybe(money(value == null ? values[values.length - 1] : value, { dp: 2 }));
+        }
+      });
+    }
+
+    var seg = h("div", { class: "seg" });
+    Market.FRAMES.forEach(function (f) {
+      seg.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(localFrame === f.id), text: f.label,
+        onclick: function () {
+          localFrame = f.id;
+          UI.$(".segbtn", seg).forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === f.label)); });
+          paint();
+        }
+      }));
+    });
+
+    var total = Store.total();
+    var allocation = h("div", { class: "list" });
+    Market.TOKENS.filter(function (t) { return Store.holdingOf(t.id) > 0; })
+      .sort(function (a, b) { return Store.holdingOf(b.id) * b.price - Store.holdingOf(a.id) * a.price; })
+      .forEach(function (token) {
+        var share = total > 0 ? Store.holdingOf(token.id) * token.price / total * 100 : 0;
+        allocation.appendChild(h("div", { class: "alloc" }, [
+          h("div", { class: "rowsplit" }, [
+            h("span", { style: "display:flex;align-items:center;gap:8px",
+              html: UI.coinBadge(token, 22) + "<b style='font-size:13.5px'>" + esc(token.sym) + "</b>" }),
+            h("span", { class: "num", style: "font-size:13.5px", text: share.toFixed(1).replace(".", ",") + " %" })
+          ]),
+          h("div", { class: "bar" }, [
+            h("div", { class: "bar__fill", style: "width:" + share.toFixed(2) + "%;background:hsl(" + token.hue + " 78% 58%)" })
+          ])
+        ]));
+      });
+
+    UI.openSheet("Портфель", [
+      head, chartHost, seg,
+      h("div", { class: "h", text: "Состав" }),
+      allocation,
+      h("div", { class: "hint", text: "График показывает, сколько стоил бы сегодняшний состав портфеля при прошлых ценах — истории самих покупок кошелёк не ведёт." })
+    ], null);
+    paint();
+  }
+
+  /** A number as a keypad-friendly string: no trailing zeros, comma decimal. */
+  function trimNumber(value, dp) {
+    return value.toFixed(dp + 2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ",");
+  }
+
+  /* ============================================================
+     settings
+     ============================================================ */
+
+  function settingsScreen() {
+    var scroll = h("div", { class: "scroll" });
+
+    scroll.appendChild(h("div", { class: "h", text: "Отображение" }));
+    var seg = h("div", { class: "seg" });
+    ["USD", "RUB", "EUR"].forEach(function (code) {
+      seg.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(currency() === code),
+        text: Market.CURRENCIES[code].sign + " " + code,
+        onclick: function () { Store.setSetting("currency", code); app().refresh(); }
+      }));
+    });
+    scroll.appendChild(seg);
+
+    scroll.appendChild(h("div", { style: "height:8px" }));
+    scroll.appendChild(toggleOpt("eye-off", "Скрывать суммы", "Баланс показывается как ••••••", "hidden"));
+
+    scroll.appendChild(h("div", { class: "h", text: "Безопасность" }));
+    scroll.appendChild(linkOpt("key", "Показать секретную фразу", "Потребуется пароль", revealSheet));
+    scroll.appendChild(linkOpt("lock", "Заблокировать сейчас", "Потребуется пароль для входа", function () {
+      Store.lock(); app().go("lock");
+    }));
+    scroll.appendChild(linkOpt("users", "Счета", Store.accounts().length + " шт.", accountsSheet));
+
+    scroll.appendChild(h("div", { class: "h", text: "Списки" }));
+    scroll.appendChild(linkOpt("users", "Адресная книга", Store.contacts().length + " контактов", function () { contactsSheet(); }));
+    scroll.appendChild(linkOpt("bell", "Уведомления и оповещения",
+      Store.alerts().length + " ждут цену · " + Store.unreadCount() + " непрочитанных", notificationsSheet));
+    scroll.appendChild(linkOpt("stake", "Стейкинг", Store.stakes().length + " позиций", function () { app().go("staking"); }));
+
+    scroll.appendChild(h("div", { class: "h", text: "Сеть" }));
+    scroll.appendChild(h("div", { class: "card" }, [
+      kv("Сеть", "Meridian Mainnet (симуляция)"),
+      kv("RPC", "нет — данные локальные"),
+      kv("Версия", "1.0")
+    ]));
+
+    scroll.appendChild(h("div", { class: "h", text: "Опасная зона" }));
+    scroll.appendChild(h("div", { style: "padding-top:4px" }, [
+      h("button", { class: "btn btn--danger", html: icon("trash") + "<span>Сбросить кошелёк</span>", onclick: confirmReset })
+    ]));
+
+    scroll.appendChild(h("div", { class: "h", text: "О приложении" }));
+    scroll.appendChild(h("div", { class: "card muted", style: "font-size:13px;line-height:1.55", text:
+      BRAND + " — учебный кошелёк. Нет сети, нет биржи, нет реальных средств: котировки генерируются на месте, а всё состояние лежит в localStorage этого браузера." }));
+
+    return h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Настройки" }),
+        h("div", { class: "spacer" }),
+        h("span", { class: "pill", html: '<span class="pill__dot"></span>демо' })
+      ]),
+      scroll
+    ]);
+  }
+
+  function toggleOpt(iconName, title, sub, key) {
+    var on = !!Store.settings()[key];
+    var sw = h("button", { class: "switch", role: "switch", "aria-checked": String(on), "aria-label": title });
+    var node = h("button", { class: "opt", onclick: function () {
+      on = !on;
+      Store.setSetting(key, on);
+      sw.setAttribute("aria-checked", String(on));
+    } }, [
+      h("span", { class: "opt__ico", html: icon(iconName) }),
+      h("span", { style: "flex:1;text-align:left" }, [
+        h("div", { class: "opt__t", text: title }),
+        h("div", { class: "opt__s", text: sub })
+      ]),
+      sw
+    ]);
+    return node;
+  }
+
+  function linkOpt(iconName, title, sub, onclick) {
+    return h("button", { class: "opt", onclick: onclick }, [
+      h("span", { class: "opt__ico", html: icon(iconName) }),
+      h("span", { style: "flex:1;text-align:left" }, [
+        h("div", { class: "opt__t", text: title }),
+        h("div", { class: "opt__s", text: sub })
+      ]),
+      h("span", { style: "color:var(--dim);display:flex", html: icon("chevron-right") })
+    ]);
+  }
+
+  function revealSheet() {
+    var pass = h("input", { class: "input", type: "password", placeholder: "Пароль", autocomplete: "current-password" });
+    var hint = h("div", { class: "hint" });
+    var body = h("div", {}, [
+      h("div", { class: "warn" }, [
+        h("span", { html: icon("alert") }),
+        h("span", { text: "Убедитесь, что экран никто не видит и не записывает." })
+      ]),
+      h("label", { class: "field" }, [h("span", { class: "field__label", text: "Подтвердите пароль" }), pass]),
+      hint
+    ]);
+
+    var show = h("button", { class: "btn btn--primary", html: icon("eye") + "<span>Показать</span>", onclick: function () {
+      var stored = Store.state();
+      if (!Vault.passwordMatches(pass.value, stored.auth.salt, stored.auth.hash)) {
+        hint.className = "hint hint--bad";
+        hint.textContent = "Неверный пароль";
+        return;
+      }
+      var grid = h("div", { class: "seedgrid" });
+      Store.recoveryPhrase().split(" ").forEach(function (word, i) {
+        grid.appendChild(h("div", { class: "seedword" }, [
+          h("span", { class: "seedword__i", text: String(i + 1) }),
+          h("span", { text: word })
+        ]));
+      });
+      UI.openSheet("Секретная фраза", [grid], [
+        h("button", {
+          class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать</span>",
+          onclick: function () { UI.copy(Store.recoveryPhrase(), "Фраза скопирована"); }
+        }),
+        h("button", { class: "btn btn--primary", text: "Скрыть", onclick: function () { UI.closeSheet(); } })
+      ]);
+    } });
+
+    UI.openSheet("Секретная фраза", [body], [show]);
+    setTimeout(function () { pass.focus(); }, 80);
+  }
+
+  /* ============================================================
+     success overlay
+     ============================================================ */
+
+  function showSuccess(title, sub) {
+    var node = h("div", { class: "done" }, [
+      h("div", { class: "done__ring", html:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path class="tick" d="M20 6 9 17l-5-5"/></svg>' }),
+      h("div", { class: "done__t", text: title }),
+      h("div", { class: "done__s", text: sub }),
+      h("div", { style: "position:absolute;left:16px;right:16px;bottom:22px" }, [
+        h("button", { class: "btn btn--primary", text: "Готово", onclick: function () { close(); } })
+      ])
+    ]);
+    function close() {
+      node.remove();
+      clearTimeout(timer);
+      app().refresh();
+    }
+    var timer = setTimeout(close, 3200);
+    UI.$("#device").appendChild(node);
+  }
+
+  global.Screens = {
+    BRAND: BRAND, MARK: MARK,
+    welcome: welcome, createFlow: createFlow, importFlow: importFlow, lockScreen: lockScreen,
+    home: home, tokenScreen: tokenScreen, settingsScreen: settingsScreen,
+    buySheet: buySheet, sellSheet: sellSheet, sendSheet: sendSheet,
+    receiveSheet: receiveSheet, swapSheet: swapSheet, accountsSheet: accountsSheet,
+    stakingScreen: stakingScreen, stakeSheet: stakeSheet, contactsSheet: contactsSheet,
+    notificationsSheet: notificationsSheet, alertSheet: alertSheet, portfolioSheet: portfolioSheet
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<!-- app.js -->
+<script>
+/**
+ * Router and boot.
+ *
+ * Five routes, one mount point. Which one opens first is decided by the
+ * stored state: no wallet -> welcome, wallet but locked -> lock screen,
+ * unlocked -> home.
+ */
+(function (global) {
+  "use strict";
+
+  var UI = global.UI, Store = global.WalletStore, Market = global.Market, Screens = global.Screens;
+
+  var TICK_MS = 2600;
+  var route = "welcome";
+  var param = null;
+  var current = null;
+  var timer = null;
+
+  var ROUTES = {
+    welcome:  function () { return Screens.welcome(); },
+    create:   function () { return Screens.createFlow(); },
+    import:   function () { return Screens.importFlow(); },
+    lock:     function () { return Screens.lockScreen(); },
+    home:     function () { return Screens.home(); },
+    token:    function () { return Screens.tokenScreen(param); },
+    staking:  function () { return Screens.stakingScreen(); },
+    settings: function () { return Screens.settingsScreen(); }
+  };
+
+  var NEEDS_WALLET = { home: 1, token: 1, staking: 1, settings: 1 };
+
+  function mount(node) {
+    var host = UI.$("#app");
+    host.innerHTML = "";
+    host.appendChild(node);
+    current = node;
+  }
+
+  function render() {
+    if (NEEDS_WALLET[route] && !Store.isUnlocked()) route = Store.exists() ? "lock" : "welcome";
+    mount((ROUTES[route] || ROUTES.welcome)());
+  }
+
+  function go(name, value) {
+    route = name;
+    param = value == null ? null : value;
+    UI.closeSheet(true);
+    render();
+    var scroll = UI.$(".scroll", current);
+    if (scroll) scroll.scrollTop = 0;
+  }
+
+  function refresh() { render(); }
+
+  /** One market step: prices move, alerts fire, the screen catches up. */
+  function tick() {
+    Market.tick();
+
+    if (Store.isUnlocked()) {
+      var fired = Store.checkAlerts();
+      if (fired.length) {
+        var first = Market.byId(fired[0].tokenId);
+        UI.toast(first.sym + " " + (fired[0].direction === "above" ? "выше" : "ниже") + " " +
+          Market.money(fired[0].price, Store.settings().currency), "bell");
+        if (!UI.sheetIsOpen()) render();       // the bell badge has to change
+        return;
+      }
+    }
+
+    if (current && current.__tick && !UI.sheetIsOpen()) {
+      try { current.__tick(); } catch (e) { /* a half-rendered screen is not worth crashing over */ }
+    }
+  }
+
+  function start() {
+    route = !Store.exists() ? "welcome" : Store.isUnlocked() ? "home" : "lock";
+    render();
+    clearInterval(timer);
+    timer = setInterval(tick, TICK_MS);
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && UI.sheetIsOpen()) UI.closeSheet();
+    });
+
+    /* Pause the market while the tab is in the background: a wallet that
+       churns numbers nobody is looking at only burns battery. */
+    document.addEventListener("visibilitychange", function () {
+      clearInterval(timer);
+      if (!document.hidden) timer = setInterval(tick, TICK_MS);
+    });
+  }
+
+  global.App = { go: go, refresh: refresh, start: start, route: function () { return route; } };
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+</body>
+</html>

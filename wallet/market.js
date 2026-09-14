@@ -10,14 +10,27 @@
 (function (global) {
   "use strict";
 
+  /* `cap` is a simulated market capitalisation in billions — it exists so the
+     market list can be sorted by something other than the alphabet. `apy`
+     marks the tokens the staking screen accepts. */
   var TOKENS = [
-    { id: "cob",  sym: "COB",  name: "Cobalt",   hue: 218, price: 2.184,   vol: 0.055, dp: 2, chain: "Cobalt",   note: "Токен сети Cobalt" },
-    { id: "btc",  sym: "BTC",  name: "Bitcoin",  hue: 34,  price: 71240,   vol: 0.022, dp: 5, chain: "Bitcoin",  note: "Первая криптовалюта" },
-    { id: "eth",  sym: "ETH",  name: "Ethereum", hue: 232, price: 3824.50, vol: 0.026, dp: 4, chain: "Ethereum", note: "Смарт-контракты" },
-    { id: "sol",  sym: "SOL",  name: "Solana",   hue: 158, price: 184.20,  vol: 0.038, dp: 3, chain: "Solana",   note: "Быстрые расчёты" },
-    { id: "ton",  sym: "TON",  name: "Toncoin",  hue: 202, price: 6.42,    vol: 0.033, dp: 2, chain: "TON",      note: "Сеть TON" },
-    { id: "usdc", sym: "USDC", name: "USD Coin", hue: 214, price: 1.0,     vol: 0.001, dp: 2, chain: "Solana",   note: "Стейблкоин, привязан к доллару" },
-    { id: "doge", sym: "DOGE", name: "Dogecoin", hue: 46,  price: 0.1642,  vol: 0.048, dp: 0, chain: "Dogecoin", note: "Мем-монета" }
+    { id: "mrd",  sym: "MRD",  name: "Meridian", hue: 218, price: 2.184,   vol: 0.055, dp: 2, cap: 4.1,   apy: 8.4, chain: "Meridian", note: "Токен сети Meridian" },
+    { id: "btc",  sym: "BTC",  name: "Bitcoin",  hue: 34,  price: 71240,   vol: 0.022, dp: 5, cap: 1410,  apy: 0,   chain: "Bitcoin",  note: "Первая криптовалюта" },
+    { id: "eth",  sym: "ETH",  name: "Ethereum", hue: 232, price: 3824.50, vol: 0.026, dp: 4, cap: 460,   apy: 3.2, chain: "Ethereum", note: "Смарт-контракты" },
+    { id: "sol",  sym: "SOL",  name: "Solana",   hue: 158, price: 184.20,  vol: 0.038, dp: 3, cap: 86,    apy: 6.9, chain: "Solana",   note: "Быстрые расчёты" },
+    { id: "ton",  sym: "TON",  name: "Toncoin",  hue: 202, price: 6.42,    vol: 0.033, dp: 2, cap: 16,    apy: 4.1, chain: "TON",      note: "Сеть TON" },
+    { id: "usdc", sym: "USDC", name: "USD Coin", hue: 214, price: 1.0,     vol: 0.001, dp: 2, cap: 34,    apy: 0,   chain: "Solana",   note: "Стейблкоин, привязан к доллару" },
+    { id: "doge", sym: "DOGE", name: "Dogecoin", hue: 46,  price: 0.1642,  vol: 0.048, dp: 0, cap: 24,    apy: 0,   chain: "Dogecoin", note: "Мем-монета" },
+
+    /* not in the starting portfolio — these are what the market tab is for */
+    { id: "xrp",  sym: "XRP",  name: "XRP",       hue: 196, price: 0.6284,  vol: 0.041, dp: 2, cap: 35,   apy: 0,   chain: "XRP Ledger", note: "Расчёты между банками" },
+    { id: "ada",  sym: "ADA",  name: "Cardano",   hue: 210, price: 0.4712,  vol: 0.044, dp: 2, cap: 17,   apy: 3.8, chain: "Cardano",    note: "Научный подход к протоколу" },
+    { id: "avax", sym: "AVAX", name: "Avalanche", hue: 356, price: 34.18,   vol: 0.046, dp: 3, cap: 13,   apy: 7.4, chain: "Avalanche",  note: "Подсети под свои задачи" },
+    { id: "link", sym: "LINK", name: "Chainlink", hue: 224, price: 17.62,   vol: 0.043, dp: 3, cap: 11,   apy: 4.6, chain: "Ethereum",   note: "Оракулы: данные извне сети" },
+    { id: "dot",  sym: "DOT",  name: "Polkadot",  hue: 322, price: 6.84,    vol: 0.045, dp: 2, cap: 9.8,  apy: 11.2, chain: "Polkadot",  note: "Парачейны и общая безопасность" },
+    { id: "ltc",  sym: "LTC",  name: "Litecoin",  hue: 206, price: 82.40,   vol: 0.031, dp: 4, cap: 6.2,  apy: 0,   chain: "Litecoin",   note: "Быстрее и дешевле биткоина" },
+    { id: "atom", sym: "ATOM", name: "Cosmos",    hue: 240, price: 8.16,    vol: 0.047, dp: 2, cap: 3.4,  apy: 14.6, chain: "Cosmos",    note: "Связь между независимыми сетями" },
+    { id: "near", sym: "NEAR", name: "NEAR",      hue: 172, price: 5.28,    vol: 0.049, dp: 2, cap: 5.9,  apy: 9.1, chain: "NEAR",       note: "Шардинг и простые адреса" }
   ];
 
   var BY_ID = {};
@@ -32,6 +45,23 @@
     { id: "1y", label: "1Г",  points: 120, step: 4380,   vol: 0.0330 },
     { id: "all", label: "ВСЁ", points: 140, step: 13140, vol: 0.0480 }
   ];
+
+  /* Named validators, so a stake is placed somewhere rather than nowhere.
+     `bonus` shifts the token's base APY; `fee` is the operator's cut. */
+  var VALIDATORS = [
+    { id: "polaris", name: "Полярная станция", fee: 5,  bonus: 0.0,  slots: "надёжный, работает с 2021" },
+    { id: "signal9", name: "Сигнал-9",         fee: 2,  bonus: 0.6,  slots: "молодой, комиссия ниже рынка" },
+    { id: "quiet",   name: "Тихий узел",       fee: 8,  bonus: -0.4, slots: "минимум пропусков блоков" },
+    { id: "meridian", name: "Узел Meridian",    fee: 0,  bonus: 0.9,  slots: "собственный узел кошелька" }
+  ];
+
+  /** Effective yearly rate of a token staked with a given validator. */
+  function apyFor(tokenId, validatorId) {
+    var token = BY_ID[tokenId];
+    var validator = VALIDATORS.filter(function (v) { return v.id === validatorId; })[0] || VALIDATORS[0];
+    if (!token || !token.apy) return 0;
+    return Math.max(0, (token.apy + validator.bonus) * (1 - validator.fee / 100));
+  }
 
   function mulberry(seed) {
     var s = seed >>> 0;
@@ -137,13 +167,16 @@
     }).format(value);
   }
 
-  /** A token amount with the precision that token deserves. */
-  function amount(value, tokenId) {
+  /**
+   * A token amount with the precision that token deserves. `extra` adds
+   * digits — staking rewards need them, or the figure would sit still.
+   */
+  function amount(value, tokenId, extra) {
     var t = BY_ID[tokenId];
-    var dp = t ? t.dp : 4;
-    if (value !== 0 && Math.abs(value) < Math.pow(10, -dp)) dp = Math.min(dp + 4, 8);
+    var dp = (t ? t.dp : 4) + (extra || 0);
+    if (value !== 0 && Math.abs(value) < Math.pow(10, -dp)) dp = Math.min(dp + 4, 10);
     return new Intl.NumberFormat("ru-RU", {
-      minimumFractionDigits: 0, maximumFractionDigits: dp
+      minimumFractionDigits: 0, maximumFractionDigits: Math.min(dp, 20)
     }).format(value);
   }
 
@@ -152,7 +185,8 @@
   }
 
   var api = {
-    TOKENS: TOKENS, FRAMES: FRAMES, CURRENCIES: CURRENCIES,
+    TOKENS: TOKENS, FRAMES: FRAMES, CURRENCIES: CURRENCIES, VALIDATORS: VALIDATORS,
+    apyFor: apyFor,
     byId: function (id) { return BY_ID[id]; },
     series: series, change: change, tick: tick,
     money: money, amount: amount, percent: percent, rate: rate,

@@ -1,7 +1,7 @@
 /* ============================================================
-   COBALT — a blue-black wallet skin.
+   MERIDIAN — a blue-black wallet skin.
 
-   One accent family (cobalt -> cyan) carries every action, so the two
+   One accent family (cobalt blue -> cyan) carries every action, so the two
    buttons that matter — buy and sell — are never competing with a
    rainbow of other colours. Green and rose appear only on numbers that
    went up or down, where a hue actually means something.
@@ -415,6 +415,79 @@ input { border: 0; outline: 0; background: none; }
   .spark { display: none; }
 }
 
+/* a small count riding on the bell */
+.badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 16px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--app);
+}
+.iconbtn { position: relative; }
+
+/* a note under the balance: what part of it is locked up */
+.balance__note { margin-top: 7px; font-size: 12.5px; color: var(--dim); }
+button.balance { display: block; width: 100%; border-radius: var(--r-md); }
+button.balance:hover { background: rgb(255 255 255 / 3%); }
+
+/* an inline qualifier on a row's second line */
+.row__tag {
+  margin-left: 7px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--soft);
+  background: rgb(46 107 255 / 16%);
+  white-space: nowrap;
+}
+.row__sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row--on { background: rgb(46 107 255 / 14%); border-color: rgb(46 107 255 / 45%); }
+
+/* ---------- staking ---------- */
+
+.stat { padding: 2px 0 10px; }
+.stat__label { font-size: 12.5px; color: var(--dim); }
+.stat__value { font-size: 28px; font-weight: 740; letter-spacing: -.03em; margin-top: 2px; }
+
+.apy {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--up);
+  background: rgb(36 214 160 / 12%);
+}
+.stakecard + .stakecard { margin-top: 10px; }
+.reward { color: var(--up); }
+
+/* allocation bars in the portfolio sheet */
+.alloc { padding: 8px 2px; }
+.bar {
+  height: 6px;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 7%);
+  overflow: hidden;
+}
+.bar__fill { height: 100%; border-radius: 999px; }
+
+/* a contact row: the body picks, the trailing button deletes */
+.contact__pick {
+  min-width: 0;
+  text-align: left;
+  display: block;
+}
+.contact__pick .row__sub { display: block; }
+
+.tx--unread { background: rgb(46 107 255 / 8%); }
+
 /* ---------- section headings & empty states ---------- */
 
 .h {
@@ -736,7 +809,7 @@ input { border: 0; outline: 0; background: none; }
 
 /* ---------- activity ---------- */
 
-.tx { display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border-radius: var(--r-md); text-align: left; border: 1px solid transparent; }
+.tx { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border-radius: var(--r-md); text-align: left; border: 1px solid transparent; }
 .tx:hover { background: rgb(255 255 255 / 4%); border-color: var(--line); }
 .tx__ico {
   width: 38px; height: 38px;

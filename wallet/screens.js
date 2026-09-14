@@ -11,15 +11,18 @@
   var UI = global.UI, Market = global.Market, Store = global.WalletStore, Vault = global.Vault;
   var h = UI.h, icon = UI.icon, esc = UI.esc;
 
-  var BRAND = "Cobalt";
+  var BRAND = "Meridian";
 
+  /* A globe with its prime meridian picked out — the name drawn literally. */
   var MARK =
     '<svg class="hero__mark" viewBox="0 0 64 64" aria-hidden="true">' +
     '<defs><linearGradient id="mk" x1="0" y1="0" x2="1" y2="1">' +
     '<stop offset="0" stop-color="#5b93ff"/><stop offset="1" stop-color="#12b6ff"/></linearGradient></defs>' +
-    '<path d="M32 3 57 17v30L32 61 7 47V17z" fill="url(#mk)"/>' +
-    '<path d="M32 3 57 17 32 31 7 17z" fill="#fff" opacity=".24"/>' +
-    '<path d="M32 31v30L7 47V17z" fill="#000" opacity=".2"/>' +
+    '<circle cx="32" cy="32" r="27" fill="url(#mk)"/>' +
+    '<g fill="none" stroke="#04070f" stroke-opacity=".34" stroke-width="2.4">' +
+    '<ellipse cx="32" cy="32" rx="20" ry="27"/><ellipse cx="32" cy="32" rx="9" ry="27"/>' +
+    '<path d="M7 32h50M11.5 19h41M11.5 45h41"/></g>' +
+    '<path d="M32 5v54" stroke="#fff" stroke-opacity=".85" stroke-width="3" stroke-linecap="round"/>' +
     "</svg>";
 
   function app() { return global.App; }
@@ -346,6 +349,7 @@
               '<span style="color:var(--dim);display:flex">' + icon("chevron-down") + "</span>"
       }),
       h("div", { class: "spacer" }),
+      bellButton(),
       h("button", {
         class: "iconbtn", "aria-label": Store.settings().hidden ? "Показать суммы" : "Скрыть суммы",
         html: icon(Store.settings().hidden ? "eye-off" : "eye"),
@@ -353,6 +357,16 @@
       }),
       h("button", { class: "iconbtn", "aria-label": "Настройки", html: icon("settings"), onclick: function () { app().go("settings"); } })
     ]);
+  }
+
+  function bellButton() {
+    var unread = Store.unreadCount();
+    return h("button", {
+      class: "iconbtn" + (unread ? " iconbtn--on" : ""),
+      "aria-label": unread ? "Уведомления, непрочитанных: " + unread : "Уведомления",
+      html: icon("bell") + (unread ? '<span class="badge">' + (unread > 9 ? "9+" : unread) + "</span>" : ""),
+      onclick: notificationsSheet
+    });
   }
 
   function hidden() { return Store.settings().hidden; }
@@ -373,10 +387,15 @@
     var screen = h("div", { class: "screen screen--enter" }, [topBar(), scroll]);
 
     var change = Store.totalChange();
-    scroll.appendChild(h("div", { class: "balance" }, [
+    var staked = Store.stakedTotal();
+    scroll.appendChild(h("button", {
+      class: "balance", onclick: portfolioSheet, "aria-label": "Открыть график портфеля"
+    }, [
       h("div", { class: "balance__label", text: "Общий баланс" }),
       h("div", { class: "balance__value num" + (hidden() ? " balance__value--hidden" : ""), id: "total", text: maybe(money(Store.total(), { dp: 2 })) }),
-      deltaPill(change)
+      deltaPill(change),
+      staked > 0 ? h("div", { class: "balance__note num", id: "staked-note",
+        text: "в стейкинге " + maybe(money(staked, { dp: 2 })) }) : null
     ]));
 
     scroll.appendChild(h("div", { class: "bigrow" }, [
@@ -396,11 +415,11 @@
       quick("arrow-up-right", "Отправить", function () { sendSheet(); }),
       quick("qr", "Получить", receiveSheet),
       quick("swap", "Обмен", function () { swapSheet(); }),
-      quick("clock", "История", function () { homeTab = "history"; app().refresh(); })
+      quick("stake", "Стейкинг", function () { app().go("staking"); })
     ]));
 
     var tabs = h("div", { class: "tabs", role: "tablist" });
-    [["tokens", "Токены"], ["nfts", "Коллекции"], ["history", "История"]].forEach(function (pair) {
+    [["tokens", "Токены"], ["market", "Рынок"], ["nfts", "Коллекции"], ["history", "История"]].forEach(function (pair) {
       tabs.appendChild(h("button", {
         class: "tab", role: "tab", "aria-selected": String(homeTab === pair[0]), text: pair[1],
         onclick: function () { homeTab = pair[0]; app().refresh(); }
@@ -412,6 +431,7 @@
     function renderTab() {
       tabHost.innerHTML = "";
       tabHost.appendChild(homeTab === "tokens" ? tokenList()
+        : homeTab === "market" ? marketList()
         : homeTab === "nfts" ? collectibles() : activityList());
     }
     renderTab();
@@ -422,7 +442,9 @@
     screen.__tick = function () {
       var totalEl = UI.$("#total", scroll);
       if (totalEl) totalEl.textContent = maybe(money(Store.total(), { dp: 2 }));
-      if (homeTab === "tokens") renderTab();
+      var stakedEl = UI.$("#staked-note", scroll);
+      if (stakedEl) stakedEl.textContent = "в стейкинге " + maybe(money(Store.stakedTotal(), { dp: 2 }));
+      if (homeTab === "tokens" || homeTab === "market") renderTab();
     };
 
     return screen;
@@ -434,19 +456,31 @@
 
   function tokenList() {
     var list = h("div", { class: "list" });
-    var owned = Market.TOKENS.slice().sort(function (a, b) {
-      return Store.balanceOf(b.id) * b.price - Store.balanceOf(a.id) * a.price;
-    });
+    var owned = Market.TOKENS.filter(function (t) { return Store.holdingOf(t.id) > 0; })
+      .sort(function (a, b) {
+        return Store.holdingOf(b.id) * b.price - Store.holdingOf(a.id) * a.price;
+      });
+    if (!owned.length) {
+      list.appendChild(h("div", { class: "empty", html: icon("wallet") + "<div>Пока ничего нет</div>" }));
+      list.appendChild(h("button", {
+        class: "btn btn--ghost btn--sm", html: icon("search") + "<span>Найти токены на рынке</span>",
+        onclick: function () { homeTab = "market"; app().refresh(); }
+      }));
+      return list;
+    }
     owned.forEach(function (token) {
       var change = Market.change(token.id, "1d");
-      var value = Store.balanceOf(token.id) * token.price;
+      var value = Store.holdingOf(token.id) * token.price;
       list.appendChild(h("button", {
         class: "row", dataset: { token: token.id },
         onclick: function () { app().go("token", token.id); },
         html:
           UI.coinBadge(token) +
           '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
-          '<span class="row__sub num">' + esc(maybe(Market.amount(Store.balanceOf(token.id), token.id) + " " + token.sym)) +
+          '<span class="row__sub num">' + esc(maybe(Market.amount(Store.holdingOf(token.id), token.id) + " " + token.sym)) +
+          (Store.stakedOf(token.id) > 0
+            ? '<span class="row__tag">' + esc(Market.amount(Store.stakedOf(token.id), token.id)) + " в стейкинге</span>"
+            : "") +
           "</span></span>" +
           UI.sparkline(Market.series(token.id, "1d"), change >= 0) +
           '<span class="row__right"><span class="row__val num">' + esc(maybe(Market.money(value, currency(), { dp: 2 }))) + "</span><br>" +
@@ -525,16 +559,26 @@
       quick("swap", "Обмен", function () { swapSheet(tokenId); })
     ]));
 
+    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:1fr 1fr;padding-bottom:6px" }, [
+      quick("bell", "Оповестить о цене", function () { alertSheet(tokenId); }),
+      token.apy > 0
+        ? quick("stake", "Застейкать · " + token.apy.toFixed(1).replace(".", ",") + " %", function () { stakeSheet(tokenId); })
+        : quick("info", "Стейкинг недоступен", function () { UI.toast(token.sym + " не поддерживает стейкинг", "info"); })
+    ]));
+
     var balance = Store.balanceOf(tokenId);
-    var share = Store.total() > 0 ? (balance * token.price) / Store.total() * 100 : 0;
+    var staked = Store.stakedOf(tokenId);
+    var holding = balance + staked;
+    var share = Store.total() > 0 ? (holding * token.price) / Store.total() * 100 : 0;
     scroll.appendChild(h("div", { class: "h", text: "Ваш баланс" }));
     scroll.appendChild(h("div", { class: "card" }, [
-      kv("В кошельке", maybe(Market.amount(balance, tokenId) + " " + token.sym)),
-      kv("Стоимость", maybe(money(balance * token.price, { dp: 2 }))),
+      kv("Свободно", maybe(Market.amount(balance, tokenId) + " " + token.sym)),
+      staked > 0 ? kv("В стейкинге", maybe(Market.amount(staked, tokenId) + " " + token.sym)) : null,
+      kv("Стоимость", maybe(money(holding * token.price, { dp: 2 }))),
       kv("Доля портфеля", share.toFixed(1).replace(".", ",") + " %"),
       kv("Сеть", token.chain),
       kv("Комиссия сети", Market.amount(Store.networkFee(tokenId), tokenId) + " " + token.sym)
-    ]));
+    ].filter(Boolean)));
 
     scroll.appendChild(h("div", { class: "h", text: "О токене" }));
     scroll.appendChild(h("div", { class: "card muted", style: "font-size:13.5px;line-height:1.5", text: token.note + ". Котировки в этом приложении сгенерированы и не связаны с биржами." }));
@@ -544,6 +588,7 @@
         h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
         h("div", { style: "display:flex;align-items:center;gap:9px" , html: UI.coinBadge(token, 26) + '<b style="font-size:16px;letter-spacing:-.02em">' + esc(token.name) + "</b>" }),
         h("div", { class: "spacer" }),
+        bellButton(),
         h("button", { class: "iconbtn", "aria-label": "Настройки", html: icon("settings"), onclick: function () { app().go("settings"); } })
       ]),
       scroll
@@ -799,13 +844,38 @@
     var summary = h("div", { class: "card" });
     var error = h("div", { class: "hint hint--bad", style: "display:none" });
     var model = amountModel(function () { paint(); });
+    var recipientHint = h("div", { class: "hint" });
     address.addEventListener("input", paint);
+
+    /* Saved recipients sit right in the form — sending to a known address
+       should not mean opening a second sheet and losing the amount. */
+    var contactChips = h("div", { class: "picker" });
+    Store.contacts().forEach(function (contact) {
+      contactChips.appendChild(h("button", {
+        class: "pick", title: contact.address,
+        html: '<span class="avatar" style="width:24px;height:24px;font-size:11px;' + UI.avatarStyle(contact.address) + '">' +
+          esc(contact.name.slice(0, 1).toUpperCase()) + "</span><span>" + esc(contact.name) + "</span>",
+        onclick: function () {
+          address.value = contact.address;
+          UI.$$(".pick", contactChips).forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+          this.setAttribute("aria-pressed", "true");
+          paint();
+        }
+      }));
+    });
+    contactChips.appendChild(h("button", {
+      class: "pick", html: icon("users") + "<span>Все контакты</span>",
+      onclick: function () { contactsSheet(); }
+    }));
 
     function paint() {
       var token = Market.byId(current);
       var units = model.value();
       var fee = Store.networkFee(current);
       var balance = Store.balanceOf(current);
+      var known = Store.contactFor(address.value.trim());
+      recipientHint.textContent = known ? "Из книги: " + known.name
+        : Store.addressLooksValid(address.value) ? "Адрес не сохранён в книге" : "";
 
       display.innerHTML = bigAmount(model.get(), null, token.sym) +
         '<div class="amount__sub">≈ ' + esc(Market.money(units * token.price, cur, { dp: 2 })) + "</div>";
@@ -849,6 +919,8 @@
       tokenPicker(current, function (id) { current = id; model.clear(); paint(); },
         function (t) { return Store.balanceOf(t.id) > 0; }),
       h("label", { class: "field" }, [h("span", { class: "field__label", text: "Кому" }), address]),
+      recipientHint,
+      contactChips,
       h("button", {
         class: "btn btn--ghost btn--sm", html: icon("copy") + "<span>Вставить из буфера</span>",
         onclick: function () {
@@ -984,7 +1056,10 @@
     sell: { title: "Продажа",  icon: "arrow-up",       tone: "out" },
     in:   { title: "Получено", icon: "arrow-down-left", tone: "in" },
     out:  { title: "Отправлено", icon: "arrow-up-right", tone: "out" },
-    swap: { title: "Обмен",    icon: "swap",           tone: "" }
+    swap: { title: "Обмен",    icon: "swap",           tone: "" },
+    stake:   { title: "Стейкинг",        icon: "stake", tone: "out" },
+    unstake: { title: "Вывод из стейкинга", icon: "stake", tone: "in" },
+    reward:  { title: "Награда",         icon: "zap",   tone: "in" }
   };
 
   function activityList() {
@@ -1053,7 +1128,7 @@
     var rnd = Vault.seedRandom("nfts/" + acc.address);
     var count = 4 + Math.floor(rnd() * 3);
     var grid = h("div", { class: "nftgrid" });
-    var NAMES = ["Синий шум", "Грань", "Полярность", "Тихий сигнал", "Кобальт 001", "Ночная смена"];
+    var NAMES = ["Синий шум", "Грань", "Полярность", "Тихий сигнал", "Меридиан 001", "Ночная смена"];
     for (var i = 0; i < count; i++) {
       var seed = acc.address + "/" + i;
       var price = (0.4 + rnd() * 6).toFixed(2).replace(".", ",");
@@ -1068,7 +1143,7 @@
               h("div", { style: "border-radius:18px;overflow:hidden", html: UI.nftArt(seedValue) }),
               h("div", { class: "h", text: "Свойства" }),
               h("div", { class: "card" }, [
-                kv("Коллекция", "Cobalt Genesis"),
+                kv("Коллекция", "Meridian Genesis"),
                 kv("Оценка", priceText + " SOL"),
                 kv("Сеть", "Solana"),
                 kv("Стандарт", "Демонстрационный")
@@ -1112,6 +1187,580 @@
     ]);
   }
 
+
+  /* ============================================================
+     market: everything listed, not just what you hold
+     ============================================================ */
+
+  var marketQuery = "";
+  var marketSort = "cap";
+
+  function marketList() {
+    var wrap = h("div");
+    var listHost = h("div", { class: "list" });
+
+    var search = h("input", {
+      class: "input", type: "search", placeholder: "Поиск по названию или тикеру",
+      value: marketQuery, spellcheck: "false", "aria-label": "Поиск токенов"
+    });
+    search.addEventListener("input", function () { marketQuery = search.value; paint(); });
+
+    var sorts = h("div", { class: "seg" });
+    [["cap", "Капитализация"], ["change", "Изменение"], ["price", "Цена"]].forEach(function (pair) {
+      sorts.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(marketSort === pair[0]), text: pair[1],
+        onclick: function () {
+          marketSort = pair[0];
+          UI.$$(".segbtn", sorts).forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === pair[1])); });
+          paint();
+        }
+      }));
+    });
+
+    function paint() {
+      var query = marketQuery.trim().toLowerCase();
+      var rows = Market.TOKENS.filter(function (t) {
+        return !query || t.name.toLowerCase().indexOf(query) !== -1 || t.sym.toLowerCase().indexOf(query) !== -1;
+      });
+      rows.sort(function (a, b) {
+        if (marketSort === "price") return b.price - a.price;
+        if (marketSort === "change") return Market.change(b.id, "1d") - Market.change(a.id, "1d");
+        return b.cap - a.cap;
+      });
+
+      listHost.innerHTML = "";
+      if (!rows.length) {
+        listHost.appendChild(h("div", { class: "empty", html: icon("search") + "<div>Ничего не нашлось</div>" }));
+        return;
+      }
+      rows.forEach(function (token) {
+        var change = Market.change(token.id, "1d");
+        listHost.appendChild(h("button", {
+          class: "row", onclick: function () { app().go("token", token.id); },
+          html:
+            UI.coinBadge(token) +
+            '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
+            '<span class="row__sub num">' + esc(token.sym) + " · " + esc(capLabel(token.cap)) +
+            (Store.holdingOf(token.id) > 0 ? '<span class="row__tag">в портфеле</span>' : "") + "</span></span>" +
+            UI.sparkline(Market.series(token.id, "1d"), change >= 0) +
+            '<span class="row__right"><span class="row__val num">' + esc(Market.money(token.price, currency())) + "</span><br>" +
+            '<span class="row__delta' + (change < 0 ? " row__delta--down" : "") + ' num">' + esc(Market.percent(change)) + "</span></span>"
+        }));
+      });
+    }
+
+    wrap.appendChild(h("div", { style: "padding-bottom:8px" }, [search]));
+    wrap.appendChild(sorts);
+    wrap.appendChild(h("div", { style: "height:10px" }));
+    wrap.appendChild(listHost);
+    paint();
+    return wrap;
+  }
+
+  /** Market cap, compact and in the wallet's currency. */
+  function capLabel(cap) {
+    var value = cap * Market.rate(currency());
+    var sign = Market.CURRENCIES[currency()].sign;
+    return value >= 1000
+      ? (value / 1000).toFixed(1).replace(".", ",") + " трлн " + sign
+      : value.toFixed(value < 10 ? 1 : 0).replace(".", ",") + " млрд " + sign;
+  }
+
+  /* ============================================================
+     staking
+     ============================================================ */
+
+  function stakingScreen() {
+    var scroll = h("div", { class: "scroll" });
+    var summary = h("div", { class: "card" });
+    var positions = h("div");
+
+    function paintSummary() {
+      var stakedUsd = Store.stakedTotal();
+      var rewards = Store.rewardsTotal();
+      var list = Store.stakes();
+      var avg = list.length
+        ? list.reduce(function (sum, st) { return sum + st.apy * st.amount * Market.byId(st.tokenId).price; }, 0) / (stakedUsd || 1)
+        : 0;
+      summary.innerHTML = "";
+      summary.appendChild(h("div", { class: "stat" }, [
+        h("div", { class: "stat__label", text: "Накоплено наград" }),
+        h("div", { class: "stat__value num", text: maybe(money(rewards, { dp: 2 })) })
+      ]));
+      summary.appendChild(kv("В стейкинге", maybe(money(stakedUsd, { dp: 2 }))));
+      summary.appendChild(kv("Средняя ставка", avg.toFixed(1).replace(".", ",") + " % годовых"));
+      summary.appendChild(kv("Позиций", String(list.length)));
+    }
+
+    function paintPositions() {
+      positions.innerHTML = "";
+      var list = Store.stakes();
+      if (!list.length) {
+        positions.appendChild(h("div", { class: "empty", html: icon("stake") +
+          "<div>Пока ничего не застейкано</div>" }));
+        return;
+      }
+      list.forEach(function (position) {
+        var token = Market.byId(position.tokenId);
+        var validator = Market.VALIDATORS.filter(function (v) { return v.id === position.validator; })[0] || Market.VALIDATORS[0];
+        var reward = Store.rewardsOf(position);
+        positions.appendChild(h("div", { class: "card stakecard" }, [
+          h("div", { class: "rowsplit" }, [
+            h("span", { style: "display:flex;align-items:center;gap:10px",
+              html: UI.coinBadge(token, 34) +
+                '<span><b style="font-size:15px">' + esc(Market.amount(position.amount, position.tokenId)) + " " + esc(token.sym) + "</b><br>" +
+                '<span class="muted" style="font-size:12.5px">' + esc(validator.name) + "</span></span>" }),
+            h("span", { class: "apy num", text: position.apy.toFixed(1).replace(".", ",") + " %" })
+          ]),
+          h("div", { class: "kv", style: "border-top:1px solid var(--line);margin-top:10px" }, [
+            h("span", { class: "kv__k", text: "Награда" }),
+            h("span", { class: "kv__v num reward", dataset: { stake: position.id },
+              text: Market.amount(reward, position.tokenId, 3) + " " + token.sym })
+          ]),
+          h("div", { style: "display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px" }, [
+            h("button", {
+              class: "btn btn--ghost btn--sm", text: "Забрать награду",
+              onclick: function () {
+                try { Store.claim(position.id); UI.toast("Награда зачислена", "check"); repaint(); }
+                catch (e) { UI.toast(e.message, "alert"); }
+              }
+            }),
+            h("button", {
+              class: "btn btn--ghost btn--sm", text: "Вывести",
+              onclick: function () { unstakeSheet(position); }
+            })
+          ])
+        ]));
+      });
+    }
+
+    function repaint() { paintSummary(); paintPositions(); }
+    repaint();
+
+    scroll.appendChild(h("div", { class: "h", text: "Ваш стейкинг" }));
+    scroll.appendChild(summary);
+    scroll.appendChild(h("div", { style: "height:14px" }));
+    scroll.appendChild(h("button", {
+      class: "bigbtn bigbtn--buy", style: "width:100%;height:88px",
+      html: icon("stake") + "<span>ЗАСТЕЙКАТЬ</span><span class='bigbtn__hint'>от 8,4 % годовых</span>",
+      onclick: function () { stakeSheet(); }
+    }));
+    scroll.appendChild(h("div", { class: "h", text: "Позиции" }));
+    scroll.appendChild(positions);
+
+    var free = Market.TOKENS.filter(function (t) { return t.apy > 0 && Store.balanceOf(t.id) > 0; });
+    if (free.length) {
+      scroll.appendChild(h("div", { class: "h", text: "Можно застейкать" }));
+      var list = h("div", { class: "list" });
+      free.forEach(function (token) {
+        list.appendChild(h("button", {
+          class: "row row--wide", onclick: function () { stakeSheet(token.id); },
+          html: UI.coinBadge(token) +
+            '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
+            '<span class="row__sub num">' + esc(Market.amount(Store.balanceOf(token.id), token.id)) + " " + esc(token.sym) + " свободно</span></span>" +
+            '<span class="row__right"><span class="row__val num" style="color:var(--up)">' +
+            esc(token.apy.toFixed(1).replace(".", ",")) + ' %</span><br><span class="row__delta" style="color:var(--dim)">годовых</span></span>'
+        }));
+      });
+      scroll.appendChild(list);
+    }
+
+    scroll.appendChild(h("div", { class: "h", text: "Как это считается" }));
+    scroll.appendChild(h("div", { class: "warn warn--info" }, [
+      h("span", { html: icon("info") }),
+      h("span", { text: "Время в демо ускорено: одна секунда наблюдения = час стейкинга. Награда считается от времени, а не начисляется таймером, поэтому она не сбивается при перезагрузке. В настоящей сети вывод из стейкинга занимает несколько дней." })
+    ]));
+
+    var screen = h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Стейкинг" }),
+        h("div", { class: "spacer" }),
+        bellButton()
+      ]),
+      scroll
+    ]);
+
+    /* rewards tick up on their own, so only those numbers are rewritten */
+    screen.__tick = function () {
+      paintSummary();
+      UI.$$(".reward", positions).forEach(function (node) {
+        var position = Store.stakes().filter(function (st) { return st.id === node.dataset.stake; })[0];
+        if (!position) return;
+        node.textContent = Market.amount(Store.rewardsOf(position), position.tokenId, 3) + " " +
+          Market.byId(position.tokenId).sym;
+      });
+    };
+    return screen;
+  }
+
+  function stakeSheet(tokenId) {
+    var free = Market.TOKENS.filter(function (t) { return t.apy > 0 && Store.balanceOf(t.id) > 0; });
+    if (!free.length) { UI.toast("Нет свободных токенов со стейкингом", "info"); return; }
+    var current = tokenId && Store.balanceOf(tokenId) > 0 && Market.byId(tokenId).apy > 0 ? tokenId : free[0].id;
+    var validator = "polaris";
+
+    var display = h("div", { class: "amount" });
+    var summary = h("div", { class: "card" });
+    var error = h("div", { class: "hint hint--bad", style: "display:none" });
+    var validatorHost = h("div", { class: "list" });
+    var model = amountModel(function () { paint(); });
+
+    function paintValidators() {
+      validatorHost.innerHTML = "";
+      Market.VALIDATORS.forEach(function (v) {
+        var apy = Market.apyFor(current, v.id);
+        validatorHost.appendChild(h("button", {
+          class: "row row--wide" + (v.id === validator ? " row--on" : ""),
+          onclick: function () { validator = v.id; paintValidators(); paint(); },
+          html:
+            '<span class="opt__ico">' + icon("shield") + "</span>" +
+            '<span style="min-width:0"><span class="row__name">' + esc(v.name) + "</span>" +
+            '<span class="row__sub">комиссия ' + v.fee + " % · " + esc(v.slots) + "</span></span>" +
+            '<span class="row__right"><span class="row__val num" style="color:var(--up)">' +
+            esc(apy.toFixed(1).replace(".", ",")) + " %</span></span>"
+        }));
+      });
+    }
+
+    function paint() {
+      var token = Market.byId(current);
+      var units = model.value();
+      var apy = Market.apyFor(current, validator);
+      var balance = Store.balanceOf(current);
+
+      display.innerHTML = bigAmount(model.get(), null, token.sym) +
+        '<div class="amount__sub">≈ ' + esc(Market.money(units * token.price, currency(), { dp: 2 })) + "</div>";
+
+      summary.innerHTML = "";
+      summary.appendChild(kv("Свободно", Market.amount(balance, current) + " " + token.sym));
+      summary.appendChild(kv("Ставка", apy.toFixed(1).replace(".", ",") + " % годовых"));
+      summary.appendChild(kv("За месяц", Market.amount(units * apy / 100 / 12, current) + " " + token.sym));
+      summary.appendChild(kv("За год", Market.amount(units * apy / 100, current) + " " + token.sym));
+
+      var over = units > balance;
+      error.style.display = over ? "" : "none";
+      error.textContent = "Больше, чем свободно на балансе";
+      confirm.disabled = !(units > 0) || over;
+    }
+
+    var confirm = holdButton("Удерживайте, чтобы застейкать", function () {
+      try {
+        var units = model.value();
+        Store.stake(current, units, validator);
+        UI.closeSheet();
+        showSuccess("Застейкано", Market.amount(units, current) + " " + Market.byId(current).sym +
+          " под " + Market.apyFor(current, validator).toFixed(1).replace(".", ",") + " %");
+      } catch (e) { UI.toast(e.message, "alert"); }
+    });
+
+    var chips = h("div", { class: "chips" });
+    [[25, "25 %"], [50, "50 %"], [100, "Всё"]].forEach(function (pair) {
+      chips.appendChild(h("button", {
+        class: "chip", text: pair[1],
+        onclick: function () {
+          var part = Store.balanceOf(current) * pair[0] / 100;
+          model.set(trimNumber(part, Market.byId(current).dp));
+        }
+      }));
+    });
+
+    paintValidators();
+    var body = [
+      tokenPicker(current, function (id) { current = id; model.clear(); paintValidators(); paint(); },
+        function (t) { return t.apy > 0 && Store.balanceOf(t.id) > 0; }),
+      display, chips, keypad(model), error,
+      h("div", { class: "h", text: "Валидатор" }), validatorHost,
+      summary
+    ];
+    var sheet = UI.openSheet("Стейкинг", body, [confirm]);
+    bindKeys(sheet, model);
+    paint();
+  }
+
+  function unstakeSheet(position) {
+    var token = Market.byId(position.tokenId);
+    var reward = Store.rewardsOf(position);
+    UI.openSheet("Вывести из стейкинга", [
+      h("div", { class: "card" }, [
+        kv("Позиция", Market.amount(position.amount, position.tokenId) + " " + token.sym),
+        kv("Награда", Market.amount(reward, position.tokenId, 3) + " " + token.sym),
+        kv("Вернётся", Market.amount(position.amount + reward, position.tokenId) + " " + token.sym),
+        kv("Стоимость", money((position.amount + reward) * token.price, { dp: 2 }))
+      ]),
+      h("div", { style: "height:10px" }),
+      h("div", { class: "warn warn--info" }, [
+        h("span", { html: icon("info") }),
+        h("span", { text: "В демо средства возвращаются сразу. В настоящей сети между заявкой и выводом проходит несколько дней, и всё это время награда не начисляется." })
+      ])
+    ], [
+      h("button", { class: "btn btn--ghost", text: "Отмена", onclick: function () { UI.closeSheet(); } }),
+      h("button", {
+        class: "btn btn--primary", text: "Вывести",
+        onclick: function () {
+          try {
+            Store.unstake(position.id);
+            UI.closeSheet();
+            showSuccess("Выведено", Market.amount(position.amount + reward, position.tokenId) + " " + token.sym + " на баланс");
+          } catch (e) { UI.toast(e.message, "alert"); }
+        }
+      })
+    ]);
+  }
+
+  /* ============================================================
+     address book
+     ============================================================ */
+
+  function contactsSheet(onPick) {
+    var listHost = h("div", { class: "list" });
+
+    function paint() {
+      listHost.innerHTML = "";
+      var list = Store.contacts();
+      if (!list.length) {
+        listHost.appendChild(h("div", { class: "empty", html: icon("users") + "<div>Адресная книга пуста</div>" }));
+        return;
+      }
+      list.forEach(function (contact) {
+        listHost.appendChild(h("div", { class: "row row--wide" }, [
+          h("span", { class: "avatar", style: UI.avatarStyle(contact.address), text: contact.name.slice(0, 1).toUpperCase() }),
+          h("button", {
+            class: "contact__pick", onclick: function () {
+              UI.closeSheet(true);
+              if (onPick) onPick(contact);
+              else UI.copy(contact.address, "Адрес скопирован");
+            },
+            html: '<span class="row__name">' + esc(contact.name) + "</span>" +
+              '<span class="row__sub mono">' + esc(UI.shortAddress(contact.address, 5, 5)) +
+              (contact.note ? " · " + esc(contact.note) : "") + "</span>"
+          }),
+          h("button", {
+            class: "iconbtn", "aria-label": "Удалить " + contact.name, html: icon("trash"),
+            onclick: function () { Store.removeContact(contact.id); paint(); UI.toast("Контакт удалён", "trash"); }
+          })
+        ]));
+      });
+    }
+    paint();
+
+    var name = h("input", { class: "input", placeholder: "Имя", autocomplete: "off" });
+    var address = h("input", { class: "input input--mono", placeholder: "Адрес", spellcheck: "false" });
+    var note = h("input", { class: "input", placeholder: "Заметка (необязательно)", autocomplete: "off" });
+    var hint = h("div", { class: "hint" });
+
+    UI.openSheet(onPick ? "Выбрать получателя" : "Адресная книга", [
+      listHost,
+      h("div", { class: "h", text: "Новый контакт" }),
+      h("div", { class: "gap" }, [name, address, note, hint])
+    ], [
+      h("button", {
+        class: "btn btn--primary", html: icon("plus") + "<span>Сохранить контакт</span>",
+        onclick: function () {
+          try {
+            Store.addContact(name.value, address.value, note.value);
+            name.value = address.value = note.value = "";
+            hint.className = "hint";
+            hint.textContent = "Контакт сохранён";
+            paint();
+          } catch (e) {
+            hint.className = "hint hint--bad";
+            hint.textContent = e.message;
+          }
+        }
+      })
+    ]);
+  }
+
+  /* ============================================================
+     notifications and price alerts
+     ============================================================ */
+
+  var NOTE_ICON = { buy: "arrow-down", sell: "arrow-up", out: "arrow-up-right", swap: "swap",
+                    stake: "stake", unstake: "stake", reward: "zap", alert: "bell" };
+
+  function notificationsSheet() {
+    var body = [];
+    var list = Store.notes();
+
+    var alerts = Store.alerts();
+    if (alerts.length) {
+      body.push(h("div", { class: "h", text: "Жду цену" }));
+      var alertHost = h("div", { class: "list" });
+      alerts.forEach(function (alert) {
+        var token = Market.byId(alert.tokenId);
+        alertHost.appendChild(h("div", { class: "row row--wide" }, [
+          UI.frag(UI.coinBadge(token)),
+          h("span", { style: "min-width:0" }, [
+            h("div", { class: "row__name", text: token.sym + (alert.direction === "above" ? " выше " : " ниже ") + Market.money(alert.price, currency()) }),
+            h("div", { class: "row__sub num", text: "сейчас " + Market.money(token.price, currency()) })
+          ]),
+          h("button", {
+            class: "iconbtn", "aria-label": "Убрать оповещение", html: icon("x"),
+            onclick: function () { Store.removeAlert(alert.id); UI.closeSheet(); notificationsSheet(); }
+          })
+        ]));
+      });
+      body.push(alertHost);
+    }
+
+    body.push(h("div", { class: "h", text: "События" }));
+    if (!list.length) {
+      body.push(h("div", { class: "empty", html: icon("bell") + "<div>Событий пока нет</div>" }));
+    } else {
+      var host = h("div", { class: "list" });
+      var lastDay = "";
+      list.forEach(function (note) {
+        var day = UI.dayLabel(note.at);
+        if (day !== lastDay) { lastDay = day; host.appendChild(h("div", { class: "h", text: day })); }
+        host.appendChild(h("div", { class: "tx" + (note.read ? "" : " tx--unread") }, [
+          h("span", { class: "tx__ico", html: icon(NOTE_ICON[note.kind] || "info") }),
+          h("span", { style: "min-width:0" }, [
+            h("div", { class: "tx__t", text: note.title }),
+            h("div", { class: "tx__s", text: note.body })
+          ]),
+          h("span", { class: "tx__s", text: UI.timeLabel(note.at) })
+        ]));
+      });
+      body.push(host);
+    }
+
+    UI.openSheet("Уведомления", body, [
+      h("button", {
+        class: "btn btn--ghost", html: icon("check") + "<span>Прочитать все</span>",
+        onclick: function () { Store.markNotesRead(); UI.closeSheet(); app().refresh(); }
+      })
+    ], { onClose: function () { app().refresh(); } });
+  }
+
+  function alertSheet(tokenId) {
+    var token = Market.byId(tokenId);
+    var direction = "above";
+    var model = amountModel(function () { paint(); });
+    var display = h("div", { class: "amount" });
+    var error = h("div", { class: "hint hint--bad", style: "display:none" });
+
+    var toggle = h("div", { class: "seg" });
+    [["above", "Выше"], ["below", "Ниже"]].forEach(function (pair) {
+      toggle.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(direction === pair[0]), text: pair[1],
+        onclick: function () {
+          direction = pair[0];
+          UI.$$(".segbtn", toggle).forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === pair[1])); });
+          model.set(trimNumber(token.price * (direction === "above" ? 1.05 : 0.95), token.price < 10 ? 4 : 2));
+          paint();
+        }
+      }));
+    });
+
+    function paint() {
+      display.innerHTML = bigAmount(model.get(), null, Market.CURRENCIES[currency()].sign) +
+        '<div class="amount__sub">сейчас ' + esc(Market.money(token.price, currency())) + "</div>";
+      var price = model.value() / Market.rate(currency());
+      var bad = direction === "above" ? price <= token.price : price >= token.price;
+      error.style.display = model.value() > 0 && bad ? "" : "none";
+      error.textContent = direction === "above" ? "Цена уже выше указанной" : "Цена уже ниже указанной";
+      confirm.disabled = !(model.value() > 0) || bad;
+    }
+
+    var confirm = h("button", {
+      class: "btn btn--primary", html: icon("bell") + "<span>Оповестить</span>",
+      onclick: function () {
+        try {
+          Store.addAlert(tokenId, direction, model.value() / Market.rate(currency()));
+          UI.closeSheet();
+          UI.toast("Оповещение поставлено", "bell");
+          app().refresh();
+        } catch (e) { UI.toast(e.message, "alert"); }
+      }
+    });
+
+    var sheet = UI.openSheet("Оповещение о цене " + token.sym, [
+      toggle, display, keypad(model), error,
+      h("div", { class: "warn warn--info" }, [
+        h("span", { html: icon("info") }),
+        h("span", { text: "Сработает, как только сгенерированная цена пересечёт отметку — обычно в пределах минуты." })
+      ])
+    ], [confirm]);
+    bindKeys(sheet, model);
+    /* seeded only now: setting it earlier would repaint before the
+       elements it draws into exist */
+    model.set(trimNumber(token.price * 1.05, token.price < 10 ? 4 : 2));
+    paint();
+  }
+
+  /* ============================================================
+     portfolio chart
+     ============================================================ */
+
+  function portfolioSheet() {
+    var localFrame = "1d";
+    var chartHost = h("div", { class: "chartwrap" });
+    var head = h("div", { class: "balance", style: "padding-top:0" });
+
+    function paint() {
+      var values = Store.totalSeries(localFrame);
+      var change = values[0] > 0 ? (values[values.length - 1] - values[0]) / values[0] * 100 : 0;
+      head.innerHTML = "";
+      head.appendChild(h("div", { class: "balance__label", text: "Стоимость портфеля" }));
+      head.appendChild(h("div", { class: "balance__value num", style: "font-size:34px",
+        text: maybe(money(values[values.length - 1], { dp: 2 })) }));
+      head.appendChild(h("span", {
+        class: "delta" + (change < 0 ? " delta--down" : ""),
+        html: icon(change < 0 ? "arrow-down" : "arrow-up") + "<span>" + esc(Market.percent(change)) + "</span>"
+      }));
+      UI.areaChart(chartHost, values, {
+        onHover: function (value) {
+          UI.$(".balance__value", head).textContent =
+            maybe(money(value == null ? values[values.length - 1] : value, { dp: 2 }));
+        }
+      });
+    }
+
+    var seg = h("div", { class: "seg" });
+    Market.FRAMES.forEach(function (f) {
+      seg.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(localFrame === f.id), text: f.label,
+        onclick: function () {
+          localFrame = f.id;
+          UI.$$(".segbtn", seg).forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === f.label)); });
+          paint();
+        }
+      }));
+    });
+
+    var total = Store.total();
+    var allocation = h("div", { class: "list" });
+    Market.TOKENS.filter(function (t) { return Store.holdingOf(t.id) > 0; })
+      .sort(function (a, b) { return Store.holdingOf(b.id) * b.price - Store.holdingOf(a.id) * a.price; })
+      .forEach(function (token) {
+        var share = total > 0 ? Store.holdingOf(token.id) * token.price / total * 100 : 0;
+        allocation.appendChild(h("div", { class: "alloc" }, [
+          h("div", { class: "rowsplit" }, [
+            h("span", { style: "display:flex;align-items:center;gap:8px",
+              html: UI.coinBadge(token, 22) + "<b style='font-size:13.5px'>" + esc(token.sym) + "</b>" }),
+            h("span", { class: "num", style: "font-size:13.5px", text: share.toFixed(1).replace(".", ",") + " %" })
+          ]),
+          h("div", { class: "bar" }, [
+            h("div", { class: "bar__fill", style: "width:" + share.toFixed(2) + "%;background:hsl(" + token.hue + " 78% 58%)" })
+          ])
+        ]));
+      });
+
+    UI.openSheet("Портфель", [
+      head, chartHost, seg,
+      h("div", { class: "h", text: "Состав" }),
+      allocation,
+      h("div", { class: "hint", text: "График показывает, сколько стоил бы сегодняшний состав портфеля при прошлых ценах — истории самих покупок кошелёк не ведёт." })
+    ], null);
+    paint();
+  }
+
+  /** A number as a keypad-friendly string: no trailing zeros, comma decimal. */
+  function trimNumber(value, dp) {
+    return value.toFixed(dp + 2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ",");
+  }
+
   /* ============================================================
      settings
      ============================================================ */
@@ -1140,9 +1789,15 @@
     }));
     scroll.appendChild(linkOpt("users", "Счета", Store.accounts().length + " шт.", accountsSheet));
 
+    scroll.appendChild(h("div", { class: "h", text: "Списки" }));
+    scroll.appendChild(linkOpt("users", "Адресная книга", Store.contacts().length + " контактов", function () { contactsSheet(); }));
+    scroll.appendChild(linkOpt("bell", "Уведомления и оповещения",
+      Store.alerts().length + " ждут цену · " + Store.unreadCount() + " непрочитанных", notificationsSheet));
+    scroll.appendChild(linkOpt("stake", "Стейкинг", Store.stakes().length + " позиций", function () { app().go("staking"); }));
+
     scroll.appendChild(h("div", { class: "h", text: "Сеть" }));
     scroll.appendChild(h("div", { class: "card" }, [
-      kv("Сеть", "Cobalt Mainnet (симуляция)"),
+      kv("Сеть", "Meridian Mainnet (симуляция)"),
       kv("RPC", "нет — данные локальные"),
       kv("Версия", "1.0")
     ]));
@@ -1264,6 +1919,8 @@
     welcome: welcome, createFlow: createFlow, importFlow: importFlow, lockScreen: lockScreen,
     home: home, tokenScreen: tokenScreen, settingsScreen: settingsScreen,
     buySheet: buySheet, sellSheet: sellSheet, sendSheet: sendSheet,
-    receiveSheet: receiveSheet, swapSheet: swapSheet, accountsSheet: accountsSheet
+    receiveSheet: receiveSheet, swapSheet: swapSheet, accountsSheet: accountsSheet,
+    stakingScreen: stakingScreen, stakeSheet: stakeSheet, contactsSheet: contactsSheet,
+    notificationsSheet: notificationsSheet, alertSheet: alertSheet, portfolioSheet: portfolioSheet
   };
 })(typeof window !== "undefined" ? window : globalThis);

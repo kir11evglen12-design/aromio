@@ -23,10 +23,11 @@
     lock:     function () { return Screens.lockScreen(); },
     home:     function () { return Screens.home(); },
     token:    function () { return Screens.tokenScreen(param); },
+    staking:  function () { return Screens.stakingScreen(); },
     settings: function () { return Screens.settingsScreen(); }
   };
 
-  var NEEDS_WALLET = { home: 1, token: 1, settings: 1 };
+  var NEEDS_WALLET = { home: 1, token: 1, staking: 1, settings: 1 };
 
   function mount(node) {
     var host = UI.$("#app");
@@ -51,9 +52,21 @@
 
   function refresh() { render(); }
 
-  /** One market step: prices move, then whatever is on screen catches up. */
+  /** One market step: prices move, alerts fire, the screen catches up. */
   function tick() {
     Market.tick();
+
+    if (Store.isUnlocked()) {
+      var fired = Store.checkAlerts();
+      if (fired.length) {
+        var first = Market.byId(fired[0].tokenId);
+        UI.toast(first.sym + " " + (fired[0].direction === "above" ? "выше" : "ниже") + " " +
+          Market.money(fired[0].price, Store.settings().currency), "bell");
+        if (!UI.sheetIsOpen()) render();       // the bell badge has to change
+        return;
+      }
+    }
+
     if (current && current.__tick && !UI.sheetIsOpen()) {
       try { current.__tick(); } catch (e) { /* a half-rendered screen is not worth crashing over */ }
     }
