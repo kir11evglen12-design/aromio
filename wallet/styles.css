@@ -117,6 +117,26 @@ input { border: 0; outline: 0; background: none; }
   padding: 0 16px 28px;
   scrollbar-width: none;
 }
+.scroll--bar { padding-bottom: 12px; }
+
+/* Buy and sell live here: always in reach, never scrolled away. */
+.bottombar {
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: var(--app);
+  border-top: 1px solid var(--line);
+}
+.bottombar .bigbtn {
+  height: 66px;
+  border-radius: 18px;
+  gap: 3px;
+  font-size: 17px;
+}
+.bottombar .bigbtn svg { width: 20px; height: 20px; }
+.bottombar .bigbtn__hint { font-size: 10.5px; }
 
 .screen[hidden] { display: none; }
 
@@ -286,9 +306,9 @@ input { border: 0; outline: 0; background: none; }
 
 .quickrow {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  padding-bottom: 18px;
+  padding-bottom: 16px;
 }
 
 .quick {
@@ -681,6 +701,75 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 }
 .pick[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--ink); }
 .pick .coin { width: 26px; height: 26px; font-size: 10px; }
+
+/* ---------- calculator ---------- */
+
+.calcline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 14px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.calcline--active { border-color: var(--blue); background: var(--card-hi); }
+.calcline__value {
+  font-size: 30px;
+  font-weight: 720;
+  letter-spacing: -.03em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.calcline__unit {
+  flex: none;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--card-hi);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--soft);
+}
+.calcline--active .calcline__unit { background: var(--blue); color: var(--ink); }
+.calcline__label { font-size: 12px; color: var(--dim); margin-bottom: 4px; }
+
+.calcswap { display: flex; justify-content: center; margin: -12px 0; position: relative; z-index: 2; }
+
+/* ---------- address generator ---------- */
+
+.addr {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+}
+.addr:hover { background: var(--card); border-color: var(--line); }
+.addr__i {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--card-hi);
+  color: var(--dim);
+  font-size: 13px;
+  font-weight: 700;
+}
+.addr__value { display: block; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.addr__note { display: block; font-size: 11.5px; color: var(--dim); margin-top: 1px; }
+.addr--used .addr__i { background: var(--blue); color: var(--ink); }
+
+.qrcard {
+  display: inline-block;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff;
+}
 
 /* ---------- sheets ---------- */
 

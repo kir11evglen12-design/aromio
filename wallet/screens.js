@@ -383,7 +383,8 @@
 
   function home() {
     var scroll = h("div", { class: "scroll" });
-    var screen = h("div", { class: "screen screen--enter" }, [topBar(), scroll]);
+    var screen = h("div", { class: "screen screen--enter" }, [topBar(), scroll, bottomBar()]);
+    scroll.className = "scroll scroll--bar";
 
     var change = Store.totalChange();
     var staked = Store.stakedTotal();
@@ -397,28 +398,17 @@
         text: "в стейкинге " + maybe(money(staked, { dp: 2 })) }) : null
     ]));
 
-    scroll.appendChild(h("div", { class: "bigrow" }, [
-      h("button", {
-        class: "bigbtn bigbtn--buy",
-        html: icon("arrow-down") + "<span>КУПИТЬ</span><span class='bigbtn__hint'>с карты •• " + esc(Store.card().last4) + "</span>",
-        onclick: function () { buySheet(); }
-      }),
-      h("button", {
-        class: "bigbtn bigbtn--sell",
-        html: icon("arrow-up") + "<span>ПРОДАТЬ</span><span class='bigbtn__hint'>вывод на карту</span>",
-        onclick: function () { sellSheet(); }
-      })
-    ]));
-
     scroll.appendChild(h("div", { class: "quickrow" }, [
       quick("arrow-up-right", "Отправить", function () { sendSheet(); }),
       quick("qr", "Получить", receiveSheet),
       quick("swap", "Обмен", function () { swapSheet(); }),
-      quick("stake", "Стейкинг", function () { app().go("staking"); })
+      quick("stake", "Стейкинг", function () { app().go("staking"); }),
+      quick("calc", "Калькулятор", function () { app().go("calc"); }),
+      quick("key", "Адреса", function () { app().go("addresses"); })
     ]));
 
     var tabs = h("div", { class: "tabs", role: "tablist" });
-    [["tokens", "Токены"], ["market", "Рынок"], ["nfts", "Коллекции"], ["history", "История"]].forEach(function (pair) {
+    [["tokens", "Токены"], ["nfts", "Коллекции"], ["history", "История"]].forEach(function (pair) {
       tabs.appendChild(h("button", {
         class: "tab", role: "tab", "aria-selected": String(homeTab === pair[0]), text: pair[1],
         onclick: function () { homeTab = pair[0]; app().refresh(); }
@@ -430,7 +420,6 @@
     function renderTab() {
       tabHost.innerHTML = "";
       tabHost.appendChild(homeTab === "tokens" ? tokenList()
-        : homeTab === "market" ? marketList()
         : homeTab === "nfts" ? collectibles() : activityList());
     }
     renderTab();
@@ -443,7 +432,7 @@
       if (totalEl) totalEl.textContent = maybe(money(Store.total(), { dp: 2 }));
       var stakedEl = UI.$("#staked-note", scroll);
       if (stakedEl) stakedEl.textContent = "в стейкинге " + maybe(money(Store.stakedTotal(), { dp: 2 }));
-      if (homeTab === "tokens" || homeTab === "market") renderTab();
+      if (homeTab === "tokens") renderTab();
     };
 
     return screen;
@@ -451,6 +440,28 @@
 
   function quick(name, label, onclick) {
     return h("button", { class: "quick", html: icon(name) + "<span>" + esc(label) + "</span>", onclick: onclick });
+  }
+
+  /**
+   * The two buttons that matter, pinned to the foot of the screen so they
+   * are reachable with a thumb and never scroll out of view.
+   */
+  function bottomBar(tokenId) {
+    var token = tokenId ? Market.byId(tokenId) : null;
+    return h("div", { class: "bottombar" }, [
+      h("button", {
+        class: "bigbtn bigbtn--buy",
+        html: icon("arrow-down") + "<span>КУПИТЬ</span><span class='bigbtn__hint'>" +
+          (token ? esc(token.sym) : "с карты •• " + esc(Store.card().last4)) + "</span>",
+        onclick: function () { buySheet(tokenId); }
+      }),
+      h("button", {
+        class: "bigbtn bigbtn--sell",
+        html: icon("arrow-up") + "<span>ПРОДАТЬ</span><span class='bigbtn__hint'>" +
+          (token ? esc(token.sym) : "вывод на карту") + "</span>",
+        onclick: function () { sellSheet(tokenId); }
+      })
+    ]);
   }
 
   function tokenList() {
@@ -462,8 +473,8 @@
     if (!owned.length) {
       list.appendChild(h("div", { class: "empty", html: icon("wallet") + "<div>Пока ничего нет</div>" }));
       list.appendChild(h("button", {
-        class: "btn btn--ghost btn--sm", html: icon("search") + "<span>Найти токены на рынке</span>",
-        onclick: function () { homeTab = "market"; app().refresh(); }
+        class: "btn btn--ghost btn--sm", html: icon("arrow-down") + "<span>Купить первый токен</span>",
+        onclick: function () { buySheet(); }
       }));
       return list;
     }
@@ -544,24 +555,13 @@
     scroll.appendChild(chartHost);
     scroll.appendChild(seg);
 
-    scroll.appendChild(h("div", { class: "bigrow" }, [
-      h("button", {
-        class: "bigbtn bigbtn--buy", html: icon("arrow-down") + "<span>КУПИТЬ</span><span class='bigbtn__hint'>" + esc(token.sym) + "</span>",
-        onclick: function () { buySheet(tokenId); }
-      }),
-      h("button", {
-        class: "bigbtn bigbtn--sell", html: icon("arrow-up") + "<span>ПРОДАТЬ</span><span class='bigbtn__hint'>" + esc(token.sym) + "</span>",
-        onclick: function () { sellSheet(tokenId); }
-      })
-    ]));
-
-    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:repeat(3,1fr)" }, [
+    scroll.appendChild(h("div", { class: "quickrow" }, [
       quick("arrow-up-right", "Отправить", function () { sendSheet(tokenId); }),
       quick("qr", "Получить", receiveSheet),
       quick("swap", "Обмен", function () { swapSheet(tokenId); })
     ]));
 
-    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:1fr 1fr;padding-bottom:6px" }, [
+    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:1fr 1fr" }, [
       quick("bell", "Оповестить о цене", function () { alertSheet(tokenId); }),
       token.apy > 0
         ? quick("stake", "Застейкать · " + token.apy.toFixed(1).replace(".", ",") + " %", function () { stakeSheet(tokenId); })
@@ -587,14 +587,16 @@
 
     var screen = h("div", { class: "screen screen--enter" }, [
       h("div", { class: "topbar" }, [
-        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
         h("div", { style: "display:flex;align-items:center;gap:9px" , html: UI.coinBadge(token, 26) + '<b style="font-size:16px;letter-spacing:-.02em">' + esc(token.name) + "</b>" }),
         h("div", { class: "spacer" }),
         bellButton(),
         h("button", { class: "iconbtn", "aria-label": "Настройки", html: icon("settings"), onclick: function () { app().go("settings"); } })
       ]),
-      scroll
+      scroll,
+      bottomBar(tokenId)
     ]);
+    scroll.className = "scroll scroll--bar";
     paint();
     screen.__tick = function () { if (!hovering) paint(); };
     return screen;
@@ -611,9 +613,15 @@
      amount entry
      ============================================================ */
 
-  /** Digits-and-one-dot model shared by the buy, sell and send sheets. */
-  function amountModel(onChange) {
-    var text = "0";
+  /**
+   * Digits-and-one-dot model shared by every amount field.
+   *
+   * The initial value is passed in rather than assigned afterwards: calling
+   * `set` before the elements the callback paints into exist is an easy
+   * mistake to make, and it costs a blank screen.
+   */
+  function amountModel(onChange, initial) {
+    var text = initial == null ? "0" : String(initial);
     var api = {
       get: function () { return text; },
       value: function () { return parseFloat(text.replace(",", ".")) || 0; },
@@ -1049,6 +1057,228 @@
     paint();
   }
 
+
+  /* ============================================================
+     calculator
+     ============================================================ */
+
+  var calcToken = "sol";
+  var calcCurrency = null;
+
+  /**
+   * A converter between one coin and one currency. Whichever line you are
+   * typing into drives the other, so there is never a stale figure on screen.
+   */
+  function calcScreen() {
+    var cur = calcCurrency || currency();
+    var side = "token";                    // which line the keypad edits
+    var model = amountModel(function () { paint(); }, "1");
+
+    var tokenLine = h("button", { class: "calcline", onclick: function () { switchTo("token"); } });
+    var fiatLine = h("button", { class: "calcline", onclick: function () { switchTo("fiat"); } });
+    var rateLine = h("div", { class: "hint center" });
+
+    function rate() { return Market.byId(calcToken).price * Market.rate(cur); }
+
+    function switchTo(next) {
+      if (side === next) return;
+      /* carry the visible figure over, so switching sides is not a reset */
+      var shown = side === "token" ? model.value() * rate() : model.value() / rate();
+      side = next;
+      model.set(next === "token" ? trimNumber(shown, Market.byId(calcToken).dp) : moneyString(shown));
+      paint();
+    }
+
+    function paint() {
+      var token = Market.byId(calcToken);
+      var sign = Market.CURRENCIES[cur].sign;
+      var typed = model.value();
+      var tokenAmount = side === "token" ? typed : typed / rate();
+      var fiatAmount = side === "token" ? typed * rate() : typed;
+
+      tokenLine.className = "calcline" + (side === "token" ? " calcline--active" : "");
+      tokenLine.innerHTML =
+        '<span style="min-width:0;text-align:left"><span class="calcline__label">Монета</span>' +
+        '<span class="calcline__value num">' +
+        esc(side === "token" ? model.get() : Market.amount(tokenAmount, calcToken)) + "</span></span>" +
+        '<span class="calcline__unit">' + esc(token.sym) + "</span>";
+
+      fiatLine.className = "calcline" + (side === "fiat" ? " calcline--active" : "");
+      fiatLine.innerHTML =
+        '<span style="min-width:0;text-align:left"><span class="calcline__label">Валюта</span>' +
+        '<span class="calcline__value num">' +
+        esc(side === "fiat" ? model.get() : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(fiatAmount)) +
+        "</span></span>" +
+        '<span class="calcline__unit">' + esc(sign + " " + cur) + "</span>";
+
+      rateLine.textContent = "1 " + token.sym + " = " + Market.money(Market.byId(calcToken).price, cur) +
+        " · 1 " + Market.CURRENCIES[cur].sign + " = " + Market.amount(1 / rate(), calcToken, 3) + " " + token.sym;
+    }
+
+    var currencies = h("div", { class: "seg" });
+    ["USD", "RUB", "EUR"].forEach(function (code) {
+      currencies.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(cur === code),
+        text: Market.CURRENCIES[code].sign + " " + code,
+        onclick: function () {
+          cur = calcCurrency = code;
+          UI.$$(".segbtn", currencies).forEach(function (b) {
+            b.setAttribute("aria-pressed", String(b.textContent.indexOf(code) !== -1));
+          });
+          paint();
+        }
+      }));
+    });
+
+    var screen = h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Калькулятор" }),
+        h("div", { class: "spacer" }),
+        bellButton()
+      ]),
+      h("div", { class: "scroll" }, [
+        tokenPicker(calcToken, function (id) { calcToken = id; paint(); }),
+        tokenLine,
+        h("div", { class: "calcswap" }, [
+          h("button", {
+            class: "swapbtn", "aria-label": "Считать в обратную сторону", html: icon("swap"),
+            onclick: function () { switchTo(side === "token" ? "fiat" : "token"); }
+          })
+        ]),
+        fiatLine,
+        h("div", { style: "height:8px" }),
+        currencies,
+        rateLine,
+        keypad(model),
+        h("div", { class: "gap", style: "padding-top:6px" }, [
+          h("button", {
+            class: "btn btn--primary", html: icon("arrow-down") + "<span>Купить на эту сумму</span>",
+            onclick: function () { buySheet(calcToken); }
+          }),
+          h("button", {
+            class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать результат</span>",
+            onclick: function () {
+              var token = Market.byId(calcToken);
+              var typed = model.value();
+              var line = side === "token"
+                ? Market.amount(typed, calcToken) + " " + token.sym + " = " + Market.money(typed * rate() / Market.rate(cur), cur)
+                : Market.money(typed / Market.rate(cur), cur) + " = " + Market.amount(typed / rate(), calcToken) + " " + token.sym;
+              UI.copy(line, "Расчёт скопирован");
+            }
+          })
+        ]),
+        h("div", { class: "hint", text: "Курсы здесь те же, что и на графиках, и меняются вместе с ними." })
+      ])
+    ]);
+
+    bindKeys(screen, model);
+    paint();
+    screen.__tick = paint;
+    return screen;
+  }
+
+  /* ============================================================
+     address generator
+     ============================================================ */
+
+  var addressCount = 5;
+
+  /**
+   * Addresses are derived, not invented: index N of the recovery phrase
+   * always gives the same address, so anything generated here comes back
+   * from the phrase alone.
+   */
+  function addressesScreen() {
+    var phrase = Store.recoveryPhrase();
+    var namespace = Store.state().derive;
+    var scroll = h("div", { class: "scroll" });
+
+    var used = h("div", { class: "list" });
+    Store.accounts().forEach(function (acc, i) {
+      used.appendChild(addressRow(i, acc.address, acc.name, true));
+    });
+
+    var fresh = h("div", { class: "list" });
+    function paintFresh() {
+      fresh.innerHTML = "";
+      var start = Store.accounts().length;
+      for (var i = start; i < start + addressCount; i++) {
+        fresh.appendChild(addressRow(i, Vault.addressFor(phrase, i, namespace), null, false));
+      }
+    }
+    paintFresh();
+
+    function addressRow(index, address, name, isUsed) {
+      return h("button", {
+        class: "addr" + (isUsed ? " addr--used" : ""),
+        onclick: function () { addressSheet(index, address, name, isUsed); },
+        html:
+          '<span class="addr__i">' + index + "</span>" +
+          '<span style="min-width:0"><span class="addr__value mono">' + esc(UI.shortAddress(address, 10, 8)) + "</span>" +
+          '<span class="addr__note">' + (name ? esc(name) : "свободен · счёт № " + index) + "</span></span>" +
+          '<span style="color:var(--dim);display:flex">' + icon("chevron-right") + "</span>"
+      });
+    }
+
+    scroll.appendChild(h("div", { class: "warn warn--info" }, [
+      h("span", { html: icon("info") }),
+      h("span", { text: "Адрес — это номер счёта, посчитанный из вашей секретной фразы. Ничего не «выдаётся» и никуда не отправляется: те же двенадцать слов на любом устройстве дадут ровно эти же адреса." })
+    ]));
+
+    scroll.appendChild(h("div", { class: "h", text: "Уже используются" }));
+    scroll.appendChild(used);
+    scroll.appendChild(h("div", { class: "h", text: "Готовы к использованию" }));
+    scroll.appendChild(fresh);
+    scroll.appendChild(h("div", { class: "gap", style: "padding-top:12px" }, [
+      h("button", {
+        class: "btn btn--ghost", html: icon("plus") + "<span>Показать ещё пять</span>",
+        onclick: function () { addressCount += 5; paintFresh(); }
+      })
+    ]));
+
+    return h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Адреса" }),
+        h("div", { class: "spacer" }),
+        bellButton()
+      ]),
+      scroll
+    ]);
+  }
+
+  function addressSheet(index, address, name, isUsed) {
+    var qr = global.QR.svg(address, 196, { dark: "#08111f", light: "#ffffff", quiet: 2, radius: 1 });
+    UI.openSheet(name || "Адрес № " + index, [
+      h("div", { class: "center", style: "padding:4px 0 12px" }, [
+        h("div", { class: "qrcard", html: qr })
+      ]),
+      h("div", { class: "card mono", style: "font-size:13px;word-break:break-all;line-height:1.5", text: address }),
+      h("div", { class: "h", text: "Как получен" }),
+      h("div", { class: "card" }, [
+        kv("Номер счёта", String(index)),
+        kv("Источник", "секретная фраза"),
+        kv("Формат", "base58, 32 байта"),
+        kv("Статус", isUsed ? "используется" : "свободен")
+      ])
+    ], [
+      h("button", {
+        class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать</span>",
+        onclick: function () { UI.copy(address, "Адрес скопирован"); }
+      }),
+      isUsed ? null : h("button", {
+        class: "btn btn--primary", html: icon("plus") + "<span>Сделать счётом</span>",
+        onclick: function () {
+          while (Store.accounts().length <= index) Store.addAccount();
+          UI.closeSheet();
+          app().go("addresses");
+          UI.toast("Счёт № " + index + " создан", "users");
+        }
+      })
+    ].filter(Boolean));
+  }
+
   /* ============================================================
      activity, collectibles, accounts
      ============================================================ */
@@ -1196,6 +1426,23 @@
 
   var marketQuery = "";
   var marketSort = "cap";
+
+  /** Rates for everything listed — a reference, not part of "my money". */
+  function marketScreen() {
+    return h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Курсы" }),
+        h("div", { class: "spacer" }),
+        bellButton()
+      ]),
+      h("div", { class: "scroll" }, [
+        h("div", { class: "hint", style: "padding:10px 2px 12px",
+          text: "Справочник курсов. Баланс кошелька считается только по вашим монетам — эти котировки на него не влияют." }),
+        marketList()
+      ])
+    ]);
+  }
 
   function marketList() {
     var wrap = h("div");
@@ -1377,7 +1624,7 @@
 
     var screen = h("div", { class: "screen screen--enter" }, [
       h("div", { class: "topbar" }, [
-        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
         h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Стейкинг" }),
         h("div", { class: "spacer" }),
         bellButton()
@@ -1640,7 +1887,7 @@
   function alertSheet(tokenId) {
     var token = Market.byId(tokenId);
     var direction = "above";
-    var model = amountModel(function () { paint(); });
+    var model = amountModel(function () { paint(); }, priceString(token.price * 1.05));
     var display = h("div", { class: "amount" });
     var error = h("div", { class: "hint hint--bad", style: "display:none" });
 
@@ -1687,9 +1934,6 @@
       ])
     ], [confirm]);
     bindKeys(sheet, model);
-    /* seeded only now: setting it earlier would repaint before the
-       elements it draws into exist */
-    model.set(priceString(token.price * 1.05));
     paint();
   }
 
@@ -1770,6 +2014,11 @@
     return price.toFixed(price < 10 ? 4 : 2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ",");
   }
 
+  /** Money: two decimals, no more — nobody types kopecks of a kopeck. */
+  function moneyString(value) {
+    return value.toFixed(2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ",");
+  }
+
   /* ============================================================
      settings
      ============================================================ */
@@ -1799,6 +2048,11 @@
     scroll.appendChild(linkOpt("users", "Счета",
       UI.plural(Store.accounts().length, "счёт", "счёта", "счетов"), accountsSheet));
 
+    scroll.appendChild(h("div", { class: "h", text: "Инструменты" }));
+    scroll.appendChild(linkOpt("calc", "Калькулятор", "Пересчёт монет и валюты", function () { app().go("calc"); }));
+    scroll.appendChild(linkOpt("key", "Генератор адресов", "Новые адреса из вашей фразы", function () { app().go("addresses"); }));
+    scroll.appendChild(linkOpt("search", "Курсы токенов", Market.TOKENS.length + " инструментов", function () { app().go("market"); }));
+
     scroll.appendChild(h("div", { class: "h", text: "Списки" }));
     scroll.appendChild(linkOpt("users", "Адресная книга",
       UI.plural(Store.contacts().length, "контакт", "контакта", "контактов"), function () { contactsSheet(); }));
@@ -1824,9 +2078,21 @@
     scroll.appendChild(h("div", { class: "card muted", style: "font-size:13px;line-height:1.55", text:
       BRAND + " — учебный кошелёк. Нет сети, нет биржи, нет реальных средств: котировки генерируются на месте, а всё состояние лежит в localStorage этого браузера." }));
 
+    scroll.appendChild(h("div", { class: "h", text: "Что приложение делает и чего не делает" }));
+    scroll.appendChild(h("div", { class: "card" }, [
+      kv("Хранит ваши средства", "нет"),
+      kv("Проводит обмен", "нет"),
+      kv("Передаёт данные наружу", "нет"),
+      kv("Считает и пересчитывает", "да, локально"),
+      kv("Выводит адреса из фразы", "да, локально"),
+      kv("Покупка и продажа", "смоделированы")
+    ]));
+    scroll.appendChild(h("div", { class: "hint", text:
+      "Калькулятор и генератор адресов — это вычисления в вашем браузере. Настоящий обмен рублей на монеты — деятельность, которую в большинстве стран ведут только по разрешению; здесь он не проводится, а показан." }));
+
     return h("div", { class: "screen screen--enter" }, [
       h("div", { class: "topbar" }, [
-        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
         h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Настройки" }),
         h("div", { class: "spacer" }),
         h("span", { class: "pill", html: '<span class="pill__dot"></span>демо' })
@@ -1934,6 +2200,7 @@
     buySheet: buySheet, sellSheet: sellSheet, sendSheet: sendSheet,
     receiveSheet: receiveSheet, swapSheet: swapSheet, accountsSheet: accountsSheet,
     stakingScreen: stakingScreen, stakeSheet: stakeSheet, contactsSheet: contactsSheet,
-    notificationsSheet: notificationsSheet, alertSheet: alertSheet, portfolioSheet: portfolioSheet
+    notificationsSheet: notificationsSheet, alertSheet: alertSheet, portfolioSheet: portfolioSheet,
+    marketScreen: marketScreen, calcScreen: calcScreen, addressesScreen: addressesScreen
   };
 })(typeof window !== "undefined" ? window : globalThis);

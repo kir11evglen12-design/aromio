@@ -130,6 +130,26 @@ input { border: 0; outline: 0; background: none; }
   padding: 0 16px 28px;
   scrollbar-width: none;
 }
+.scroll--bar { padding-bottom: 12px; }
+
+/* Buy and sell live here: always in reach, never scrolled away. */
+.bottombar {
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: var(--app);
+  border-top: 1px solid var(--line);
+}
+.bottombar .bigbtn {
+  height: 66px;
+  border-radius: 18px;
+  gap: 3px;
+  font-size: 17px;
+}
+.bottombar .bigbtn svg { width: 20px; height: 20px; }
+.bottombar .bigbtn__hint { font-size: 10.5px; }
 
 .screen[hidden] { display: none; }
 
@@ -299,9 +319,9 @@ input { border: 0; outline: 0; background: none; }
 
 .quickrow {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  padding-bottom: 18px;
+  padding-bottom: 16px;
 }
 
 .quick {
@@ -694,6 +714,75 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 }
 .pick[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--ink); }
 .pick .coin { width: 26px; height: 26px; font-size: 10px; }
+
+/* ---------- calculator ---------- */
+
+.calcline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 14px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.calcline--active { border-color: var(--blue); background: var(--card-hi); }
+.calcline__value {
+  font-size: 30px;
+  font-weight: 720;
+  letter-spacing: -.03em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.calcline__unit {
+  flex: none;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--card-hi);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--soft);
+}
+.calcline--active .calcline__unit { background: var(--blue); color: var(--ink); }
+.calcline__label { font-size: 12px; color: var(--dim); margin-bottom: 4px; }
+
+.calcswap { display: flex; justify-content: center; margin: -12px 0; position: relative; z-index: 2; }
+
+/* ---------- address generator ---------- */
+
+.addr {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+}
+.addr:hover { background: var(--card); border-color: var(--line); }
+.addr__i {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--card-hi);
+  color: var(--dim);
+  font-size: 13px;
+  font-weight: 700;
+}
+.addr__value { display: block; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.addr__note { display: block; font-size: 11.5px; color: var(--dim); margin-top: 1px; }
+.addr--used .addr__i { background: var(--blue); color: var(--ink); }
+
+.qrcard {
+  display: inline-block;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff;
+}
 
 /* ---------- sheets ---------- */
 
@@ -2516,7 +2605,8 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     "refresh":         "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6",
     "bell":            "M10.3 21a1.9 1.9 0 0 0 3.4 0M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9",
     "stake":           "M12 2 3 7l9 5 9-5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5",
-    "search":          "m21 21-4.3-4.3"
+    "search":          "m21 21-4.3-4.3",
+    "calc":            "M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h4M16 18h.01"
   };
 
   /* icons that need a circle or rect alongside the path */
@@ -2532,7 +2622,8 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     "settings": '<circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
     "key":      '<circle cx="7.5" cy="15.5" r="5.5"/>',
     "users":    '<circle cx="9" cy="7" r="4"/>',
-    "search":   '<circle cx="11" cy="11" r="8"/>'
+    "search":   '<circle cx="11" cy="11" r="8"/>',
+    "calc":     '<rect x="4" y="2" width="16" height="20" rx="2"/>'
   };
 
   function icon(name, size) {
@@ -3216,7 +3307,8 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
   function home() {
     var scroll = h("div", { class: "scroll" });
-    var screen = h("div", { class: "screen screen--enter" }, [topBar(), scroll]);
+    var screen = h("div", { class: "screen screen--enter" }, [topBar(), scroll, bottomBar()]);
+    scroll.className = "scroll scroll--bar";
 
     var change = Store.totalChange();
     var staked = Store.stakedTotal();
@@ -3230,28 +3322,17 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
         text: "в стейкинге " + maybe(money(staked, { dp: 2 })) }) : null
     ]));
 
-    scroll.appendChild(h("div", { class: "bigrow" }, [
-      h("button", {
-        class: "bigbtn bigbtn--buy",
-        html: icon("arrow-down") + "<span>КУПИТЬ</span><span class='bigbtn__hint'>с карты •• " + esc(Store.card().last4) + "</span>",
-        onclick: function () { buySheet(); }
-      }),
-      h("button", {
-        class: "bigbtn bigbtn--sell",
-        html: icon("arrow-up") + "<span>ПРОДАТЬ</span><span class='bigbtn__hint'>вывод на карту</span>",
-        onclick: function () { sellSheet(); }
-      })
-    ]));
-
     scroll.appendChild(h("div", { class: "quickrow" }, [
       quick("arrow-up-right", "Отправить", function () { sendSheet(); }),
       quick("qr", "Получить", receiveSheet),
       quick("swap", "Обмен", function () { swapSheet(); }),
-      quick("stake", "Стейкинг", function () { app().go("staking"); })
+      quick("stake", "Стейкинг", function () { app().go("staking"); }),
+      quick("calc", "Калькулятор", function () { app().go("calc"); }),
+      quick("key", "Адреса", function () { app().go("addresses"); })
     ]));
 
     var tabs = h("div", { class: "tabs", role: "tablist" });
-    [["tokens", "Токены"], ["market", "Рынок"], ["nfts", "Коллекции"], ["history", "История"]].forEach(function (pair) {
+    [["tokens", "Токены"], ["nfts", "Коллекции"], ["history", "История"]].forEach(function (pair) {
       tabs.appendChild(h("button", {
         class: "tab", role: "tab", "aria-selected": String(homeTab === pair[0]), text: pair[1],
         onclick: function () { homeTab = pair[0]; app().refresh(); }
@@ -3263,7 +3344,6 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     function renderTab() {
       tabHost.innerHTML = "";
       tabHost.appendChild(homeTab === "tokens" ? tokenList()
-        : homeTab === "market" ? marketList()
         : homeTab === "nfts" ? collectibles() : activityList());
     }
     renderTab();
@@ -3276,7 +3356,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
       if (totalEl) totalEl.textContent = maybe(money(Store.total(), { dp: 2 }));
       var stakedEl = UI.$("#staked-note", scroll);
       if (stakedEl) stakedEl.textContent = "в стейкинге " + maybe(money(Store.stakedTotal(), { dp: 2 }));
-      if (homeTab === "tokens" || homeTab === "market") renderTab();
+      if (homeTab === "tokens") renderTab();
     };
 
     return screen;
@@ -3284,6 +3364,28 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
   function quick(name, label, onclick) {
     return h("button", { class: "quick", html: icon(name) + "<span>" + esc(label) + "</span>", onclick: onclick });
+  }
+
+  /**
+   * The two buttons that matter, pinned to the foot of the screen so they
+   * are reachable with a thumb and never scroll out of view.
+   */
+  function bottomBar(tokenId) {
+    var token = tokenId ? Market.byId(tokenId) : null;
+    return h("div", { class: "bottombar" }, [
+      h("button", {
+        class: "bigbtn bigbtn--buy",
+        html: icon("arrow-down") + "<span>КУПИТЬ</span><span class='bigbtn__hint'>" +
+          (token ? esc(token.sym) : "с карты •• " + esc(Store.card().last4)) + "</span>",
+        onclick: function () { buySheet(tokenId); }
+      }),
+      h("button", {
+        class: "bigbtn bigbtn--sell",
+        html: icon("arrow-up") + "<span>ПРОДАТЬ</span><span class='bigbtn__hint'>" +
+          (token ? esc(token.sym) : "вывод на карту") + "</span>",
+        onclick: function () { sellSheet(tokenId); }
+      })
+    ]);
   }
 
   function tokenList() {
@@ -3295,8 +3397,8 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     if (!owned.length) {
       list.appendChild(h("div", { class: "empty", html: icon("wallet") + "<div>Пока ничего нет</div>" }));
       list.appendChild(h("button", {
-        class: "btn btn--ghost btn--sm", html: icon("search") + "<span>Найти токены на рынке</span>",
-        onclick: function () { homeTab = "market"; app().refresh(); }
+        class: "btn btn--ghost btn--sm", html: icon("arrow-down") + "<span>Купить первый токен</span>",
+        onclick: function () { buySheet(); }
       }));
       return list;
     }
@@ -3377,24 +3479,13 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     scroll.appendChild(chartHost);
     scroll.appendChild(seg);
 
-    scroll.appendChild(h("div", { class: "bigrow" }, [
-      h("button", {
-        class: "bigbtn bigbtn--buy", html: icon("arrow-down") + "<span>КУПИТЬ</span><span class='bigbtn__hint'>" + esc(token.sym) + "</span>",
-        onclick: function () { buySheet(tokenId); }
-      }),
-      h("button", {
-        class: "bigbtn bigbtn--sell", html: icon("arrow-up") + "<span>ПРОДАТЬ</span><span class='bigbtn__hint'>" + esc(token.sym) + "</span>",
-        onclick: function () { sellSheet(tokenId); }
-      })
-    ]));
-
-    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:repeat(3,1fr)" }, [
+    scroll.appendChild(h("div", { class: "quickrow" }, [
       quick("arrow-up-right", "Отправить", function () { sendSheet(tokenId); }),
       quick("qr", "Получить", receiveSheet),
       quick("swap", "Обмен", function () { swapSheet(tokenId); })
     ]));
 
-    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:1fr 1fr;padding-bottom:6px" }, [
+    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:1fr 1fr" }, [
       quick("bell", "Оповестить о цене", function () { alertSheet(tokenId); }),
       token.apy > 0
         ? quick("stake", "Застейкать · " + token.apy.toFixed(1).replace(".", ",") + " %", function () { stakeSheet(tokenId); })
@@ -3420,14 +3511,16 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
     var screen = h("div", { class: "screen screen--enter" }, [
       h("div", { class: "topbar" }, [
-        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
         h("div", { style: "display:flex;align-items:center;gap:9px" , html: UI.coinBadge(token, 26) + '<b style="font-size:16px;letter-spacing:-.02em">' + esc(token.name) + "</b>" }),
         h("div", { class: "spacer" }),
         bellButton(),
         h("button", { class: "iconbtn", "aria-label": "Настройки", html: icon("settings"), onclick: function () { app().go("settings"); } })
       ]),
-      scroll
+      scroll,
+      bottomBar(tokenId)
     ]);
+    scroll.className = "scroll scroll--bar";
     paint();
     screen.__tick = function () { if (!hovering) paint(); };
     return screen;
@@ -3444,9 +3537,15 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
      amount entry
      ============================================================ */
 
-  /** Digits-and-one-dot model shared by the buy, sell and send sheets. */
-  function amountModel(onChange) {
-    var text = "0";
+  /**
+   * Digits-and-one-dot model shared by every amount field.
+   *
+   * The initial value is passed in rather than assigned afterwards: calling
+   * `set` before the elements the callback paints into exist is an easy
+   * mistake to make, and it costs a blank screen.
+   */
+  function amountModel(onChange, initial) {
+    var text = initial == null ? "0" : String(initial);
     var api = {
       get: function () { return text; },
       value: function () { return parseFloat(text.replace(",", ".")) || 0; },
@@ -3882,6 +3981,228 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     paint();
   }
 
+
+  /* ============================================================
+     calculator
+     ============================================================ */
+
+  var calcToken = "sol";
+  var calcCurrency = null;
+
+  /**
+   * A converter between one coin and one currency. Whichever line you are
+   * typing into drives the other, so there is never a stale figure on screen.
+   */
+  function calcScreen() {
+    var cur = calcCurrency || currency();
+    var side = "token";                    // which line the keypad edits
+    var model = amountModel(function () { paint(); }, "1");
+
+    var tokenLine = h("button", { class: "calcline", onclick: function () { switchTo("token"); } });
+    var fiatLine = h("button", { class: "calcline", onclick: function () { switchTo("fiat"); } });
+    var rateLine = h("div", { class: "hint center" });
+
+    function rate() { return Market.byId(calcToken).price * Market.rate(cur); }
+
+    function switchTo(next) {
+      if (side === next) return;
+      /* carry the visible figure over, so switching sides is not a reset */
+      var shown = side === "token" ? model.value() * rate() : model.value() / rate();
+      side = next;
+      model.set(next === "token" ? trimNumber(shown, Market.byId(calcToken).dp) : moneyString(shown));
+      paint();
+    }
+
+    function paint() {
+      var token = Market.byId(calcToken);
+      var sign = Market.CURRENCIES[cur].sign;
+      var typed = model.value();
+      var tokenAmount = side === "token" ? typed : typed / rate();
+      var fiatAmount = side === "token" ? typed * rate() : typed;
+
+      tokenLine.className = "calcline" + (side === "token" ? " calcline--active" : "");
+      tokenLine.innerHTML =
+        '<span style="min-width:0;text-align:left"><span class="calcline__label">Монета</span>' +
+        '<span class="calcline__value num">' +
+        esc(side === "token" ? model.get() : Market.amount(tokenAmount, calcToken)) + "</span></span>" +
+        '<span class="calcline__unit">' + esc(token.sym) + "</span>";
+
+      fiatLine.className = "calcline" + (side === "fiat" ? " calcline--active" : "");
+      fiatLine.innerHTML =
+        '<span style="min-width:0;text-align:left"><span class="calcline__label">Валюта</span>' +
+        '<span class="calcline__value num">' +
+        esc(side === "fiat" ? model.get() : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(fiatAmount)) +
+        "</span></span>" +
+        '<span class="calcline__unit">' + esc(sign + " " + cur) + "</span>";
+
+      rateLine.textContent = "1 " + token.sym + " = " + Market.money(Market.byId(calcToken).price, cur) +
+        " · 1 " + Market.CURRENCIES[cur].sign + " = " + Market.amount(1 / rate(), calcToken, 3) + " " + token.sym;
+    }
+
+    var currencies = h("div", { class: "seg" });
+    ["USD", "RUB", "EUR"].forEach(function (code) {
+      currencies.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(cur === code),
+        text: Market.CURRENCIES[code].sign + " " + code,
+        onclick: function () {
+          cur = calcCurrency = code;
+          UI.$(".segbtn", currencies).forEach(function (b) {
+            b.setAttribute("aria-pressed", String(b.textContent.indexOf(code) !== -1));
+          });
+          paint();
+        }
+      }));
+    });
+
+    var screen = h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Калькулятор" }),
+        h("div", { class: "spacer" }),
+        bellButton()
+      ]),
+      h("div", { class: "scroll" }, [
+        tokenPicker(calcToken, function (id) { calcToken = id; paint(); }),
+        tokenLine,
+        h("div", { class: "calcswap" }, [
+          h("button", {
+            class: "swapbtn", "aria-label": "Считать в обратную сторону", html: icon("swap"),
+            onclick: function () { switchTo(side === "token" ? "fiat" : "token"); }
+          })
+        ]),
+        fiatLine,
+        h("div", { style: "height:8px" }),
+        currencies,
+        rateLine,
+        keypad(model),
+        h("div", { class: "gap", style: "padding-top:6px" }, [
+          h("button", {
+            class: "btn btn--primary", html: icon("arrow-down") + "<span>Купить на эту сумму</span>",
+            onclick: function () { buySheet(calcToken); }
+          }),
+          h("button", {
+            class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать результат</span>",
+            onclick: function () {
+              var token = Market.byId(calcToken);
+              var typed = model.value();
+              var line = side === "token"
+                ? Market.amount(typed, calcToken) + " " + token.sym + " = " + Market.money(typed * rate() / Market.rate(cur), cur)
+                : Market.money(typed / Market.rate(cur), cur) + " = " + Market.amount(typed / rate(), calcToken) + " " + token.sym;
+              UI.copy(line, "Расчёт скопирован");
+            }
+          })
+        ]),
+        h("div", { class: "hint", text: "Курсы здесь те же, что и на графиках, и меняются вместе с ними." })
+      ])
+    ]);
+
+    bindKeys(screen, model);
+    paint();
+    screen.__tick = paint;
+    return screen;
+  }
+
+  /* ============================================================
+     address generator
+     ============================================================ */
+
+  var addressCount = 5;
+
+  /**
+   * Addresses are derived, not invented: index N of the recovery phrase
+   * always gives the same address, so anything generated here comes back
+   * from the phrase alone.
+   */
+  function addressesScreen() {
+    var phrase = Store.recoveryPhrase();
+    var namespace = Store.state().derive;
+    var scroll = h("div", { class: "scroll" });
+
+    var used = h("div", { class: "list" });
+    Store.accounts().forEach(function (acc, i) {
+      used.appendChild(addressRow(i, acc.address, acc.name, true));
+    });
+
+    var fresh = h("div", { class: "list" });
+    function paintFresh() {
+      fresh.innerHTML = "";
+      var start = Store.accounts().length;
+      for (var i = start; i < start + addressCount; i++) {
+        fresh.appendChild(addressRow(i, Vault.addressFor(phrase, i, namespace), null, false));
+      }
+    }
+    paintFresh();
+
+    function addressRow(index, address, name, isUsed) {
+      return h("button", {
+        class: "addr" + (isUsed ? " addr--used" : ""),
+        onclick: function () { addressSheet(index, address, name, isUsed); },
+        html:
+          '<span class="addr__i">' + index + "</span>" +
+          '<span style="min-width:0"><span class="addr__value mono">' + esc(UI.shortAddress(address, 10, 8)) + "</span>" +
+          '<span class="addr__note">' + (name ? esc(name) : "свободен · счёт № " + index) + "</span></span>" +
+          '<span style="color:var(--dim);display:flex">' + icon("chevron-right") + "</span>"
+      });
+    }
+
+    scroll.appendChild(h("div", { class: "warn warn--info" }, [
+      h("span", { html: icon("info") }),
+      h("span", { text: "Адрес — это номер счёта, посчитанный из вашей секретной фразы. Ничего не «выдаётся» и никуда не отправляется: те же двенадцать слов на любом устройстве дадут ровно эти же адреса." })
+    ]));
+
+    scroll.appendChild(h("div", { class: "h", text: "Уже используются" }));
+    scroll.appendChild(used);
+    scroll.appendChild(h("div", { class: "h", text: "Готовы к использованию" }));
+    scroll.appendChild(fresh);
+    scroll.appendChild(h("div", { class: "gap", style: "padding-top:12px" }, [
+      h("button", {
+        class: "btn btn--ghost", html: icon("plus") + "<span>Показать ещё пять</span>",
+        onclick: function () { addressCount += 5; paintFresh(); }
+      })
+    ]));
+
+    return h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Адреса" }),
+        h("div", { class: "spacer" }),
+        bellButton()
+      ]),
+      scroll
+    ]);
+  }
+
+  function addressSheet(index, address, name, isUsed) {
+    var qr = global.QR.svg(address, 196, { dark: "#08111f", light: "#ffffff", quiet: 2, radius: 1 });
+    UI.openSheet(name || "Адрес № " + index, [
+      h("div", { class: "center", style: "padding:4px 0 12px" }, [
+        h("div", { class: "qrcard", html: qr })
+      ]),
+      h("div", { class: "card mono", style: "font-size:13px;word-break:break-all;line-height:1.5", text: address }),
+      h("div", { class: "h", text: "Как получен" }),
+      h("div", { class: "card" }, [
+        kv("Номер счёта", String(index)),
+        kv("Источник", "секретная фраза"),
+        kv("Формат", "base58, 32 байта"),
+        kv("Статус", isUsed ? "используется" : "свободен")
+      ])
+    ], [
+      h("button", {
+        class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать</span>",
+        onclick: function () { UI.copy(address, "Адрес скопирован"); }
+      }),
+      isUsed ? null : h("button", {
+        class: "btn btn--primary", html: icon("plus") + "<span>Сделать счётом</span>",
+        onclick: function () {
+          while (Store.accounts().length <= index) Store.addAccount();
+          UI.closeSheet();
+          app().go("addresses");
+          UI.toast("Счёт № " + index + " создан", "users");
+        }
+      })
+    ].filter(Boolean));
+  }
+
   /* ============================================================
      activity, collectibles, accounts
      ============================================================ */
@@ -4029,6 +4350,23 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
   var marketQuery = "";
   var marketSort = "cap";
+
+  /** Rates for everything listed — a reference, not part of "my money". */
+  function marketScreen() {
+    return h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Курсы" }),
+        h("div", { class: "spacer" }),
+        bellButton()
+      ]),
+      h("div", { class: "scroll" }, [
+        h("div", { class: "hint", style: "padding:10px 2px 12px",
+          text: "Справочник курсов. Баланс кошелька считается только по вашим монетам — эти котировки на него не влияют." }),
+        marketList()
+      ])
+    ]);
+  }
 
   function marketList() {
     var wrap = h("div");
@@ -4210,7 +4548,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
     var screen = h("div", { class: "screen screen--enter" }, [
       h("div", { class: "topbar" }, [
-        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
         h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Стейкинг" }),
         h("div", { class: "spacer" }),
         bellButton()
@@ -4473,7 +4811,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   function alertSheet(tokenId) {
     var token = Market.byId(tokenId);
     var direction = "above";
-    var model = amountModel(function () { paint(); });
+    var model = amountModel(function () { paint(); }, priceString(token.price * 1.05));
     var display = h("div", { class: "amount" });
     var error = h("div", { class: "hint hint--bad", style: "display:none" });
 
@@ -4520,9 +4858,6 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
       ])
     ], [confirm]);
     bindKeys(sheet, model);
-    /* seeded only now: setting it earlier would repaint before the
-       elements it draws into exist */
-    model.set(priceString(token.price * 1.05));
     paint();
   }
 
@@ -4603,6 +4938,11 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     return price.toFixed(price < 10 ? 4 : 2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ",");
   }
 
+  /** Money: two decimals, no more — nobody types kopecks of a kopeck. */
+  function moneyString(value) {
+    return value.toFixed(2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ",");
+  }
+
   /* ============================================================
      settings
      ============================================================ */
@@ -4632,6 +4972,11 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     scroll.appendChild(linkOpt("users", "Счета",
       UI.plural(Store.accounts().length, "счёт", "счёта", "счетов"), accountsSheet));
 
+    scroll.appendChild(h("div", { class: "h", text: "Инструменты" }));
+    scroll.appendChild(linkOpt("calc", "Калькулятор", "Пересчёт монет и валюты", function () { app().go("calc"); }));
+    scroll.appendChild(linkOpt("key", "Генератор адресов", "Новые адреса из вашей фразы", function () { app().go("addresses"); }));
+    scroll.appendChild(linkOpt("search", "Курсы токенов", Market.TOKENS.length + " инструментов", function () { app().go("market"); }));
+
     scroll.appendChild(h("div", { class: "h", text: "Списки" }));
     scroll.appendChild(linkOpt("users", "Адресная книга",
       UI.plural(Store.contacts().length, "контакт", "контакта", "контактов"), function () { contactsSheet(); }));
@@ -4657,9 +5002,21 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     scroll.appendChild(h("div", { class: "card muted", style: "font-size:13px;line-height:1.55", text:
       BRAND + " — учебный кошелёк. Нет сети, нет биржи, нет реальных средств: котировки генерируются на месте, а всё состояние лежит в localStorage этого браузера." }));
 
+    scroll.appendChild(h("div", { class: "h", text: "Что приложение делает и чего не делает" }));
+    scroll.appendChild(h("div", { class: "card" }, [
+      kv("Хранит ваши средства", "нет"),
+      kv("Проводит обмен", "нет"),
+      kv("Передаёт данные наружу", "нет"),
+      kv("Считает и пересчитывает", "да, локально"),
+      kv("Выводит адреса из фразы", "да, локально"),
+      kv("Покупка и продажа", "смоделированы")
+    ]));
+    scroll.appendChild(h("div", { class: "hint", text:
+      "Калькулятор и генератор адресов — это вычисления в вашем браузере. Настоящий обмен рублей на монеты — деятельность, которую в большинстве стран ведут только по разрешению; здесь он не проводится, а показан." }));
+
     return h("div", { class: "screen screen--enter" }, [
       h("div", { class: "topbar" }, [
-        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().go("home"); } }),
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
         h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Настройки" }),
         h("div", { class: "spacer" }),
         h("span", { class: "pill", html: '<span class="pill__dot"></span>демо' })
@@ -4767,7 +5124,8 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     buySheet: buySheet, sellSheet: sellSheet, sendSheet: sendSheet,
     receiveSheet: receiveSheet, swapSheet: swapSheet, accountsSheet: accountsSheet,
     stakingScreen: stakingScreen, stakeSheet: stakeSheet, contactsSheet: contactsSheet,
-    notificationsSheet: notificationsSheet, alertSheet: alertSheet, portfolioSheet: portfolioSheet
+    notificationsSheet: notificationsSheet, alertSheet: alertSheet, portfolioSheet: portfolioSheet,
+    marketScreen: marketScreen, calcScreen: calcScreen, addressesScreen: addressesScreen
   };
 })(typeof window !== "undefined" ? window : globalThis);
 
@@ -4791,6 +5149,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   var param = null;
   var current = null;
   var timer = null;
+  var trail = [];        // where the back arrow goes, in order
 
   var ROUTES = {
     welcome:  function () { return Screens.welcome(); },
@@ -4800,13 +5159,19 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     home:     function () { return Screens.home(); },
     token:    function () { return Screens.tokenScreen(param); },
     staking:  function () { return Screens.stakingScreen(); },
+    calc:     function () { return Screens.calcScreen(); },
+    addresses: function () { return Screens.addressesScreen(); },
+    market:   function () { return Screens.marketScreen(); },
     settings: function () { return Screens.settingsScreen(); }
   };
 
-  var NEEDS_WALLET = { home: 1, token: 1, staking: 1, settings: 1 };
+  var NEEDS_WALLET = { home: 1, token: 1, staking: 1, calc: 1, addresses: 1, market: 1, settings: 1 };
 
   function mount(node) {
     var host = UI.$("#app");
+    /* Screens can register document-level listeners (the keypad does).
+       Same teardown signal a closing sheet gets, so nothing outlives it. */
+    if (current) current.dispatchEvent(new CustomEvent("sheet-teardown"));
     host.innerHTML = "";
     host.appendChild(node);
     current = node;
@@ -4818,12 +5183,28 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   }
 
   function go(name, value) {
+    if (route !== name || param !== value) trail.push({ route: route, param: param });
+    if (trail.length > 12) trail.shift();
     route = name;
     param = value == null ? null : value;
     UI.closeSheet(true);
     render();
     var scroll = UI.$(".scroll", current);
     if (scroll) scroll.scrollTop = 0;
+  }
+
+  /** One step back through the trail; home when there is nothing behind. */
+  function back() {
+    var previous = trail.pop();
+    while (previous && (previous.route === route || previous.route === "welcome" ||
+                        previous.route === "create" || previous.route === "import" ||
+                        previous.route === "lock")) {
+      previous = trail.pop();
+    }
+    route = previous ? previous.route : "home";
+    param = previous ? previous.param : null;
+    UI.closeSheet(true);
+    render();
   }
 
   function refresh() { render(); }
@@ -4849,6 +5230,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   }
 
   function start() {
+    trail = [];
     route = !Store.exists() ? "welcome" : Store.isUnlocked() ? "home" : "lock";
     render();
     clearInterval(timer);
@@ -4866,7 +5248,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     });
   }
 
-  global.App = { go: go, refresh: refresh, start: start, route: function () { return route; } };
+  global.App = { go: go, back: back, refresh: refresh, start: start, route: function () { return route; } };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
   else start();

@@ -81,7 +81,8 @@
     "refresh":         "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6",
     "bell":            "M10.3 21a1.9 1.9 0 0 0 3.4 0M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9",
     "stake":           "M12 2 3 7l9 5 9-5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5",
-    "search":          "m21 21-4.3-4.3"
+    "search":          "m21 21-4.3-4.3",
+    "calc":            "M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h4M16 18h.01"
   };
 
   /* icons that need a circle or rect alongside the path */
@@ -97,7 +98,8 @@
     "settings": '<circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
     "key":      '<circle cx="7.5" cy="15.5" r="5.5"/>',
     "users":    '<circle cx="9" cy="7" r="4"/>',
-    "search":   '<circle cx="11" cy="11" r="8"/>'
+    "search":   '<circle cx="11" cy="11" r="8"/>',
+    "calc":     '<rect x="4" y="2" width="16" height="20" rx="2"/>'
   };
 
   function icon(name, size) {
