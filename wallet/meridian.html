@@ -3,41 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#04060d">
+<meta name="theme-color" content="#070a11">
 <meta name="description" content="Meridian — демонстрационный криптокошелёк с большими кнопками «Купить» и «Продать». Сине-чёрная тема, симуляция рынка, без сети и реальных средств.">
 <title>Meridian — криптокошелёк</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%232e6bff'/><ellipse cx='32' cy='32' rx='10' ry='28' fill='none' stroke='%2304070f' stroke-opacity='.4' stroke-width='3'/><path d='M32 4v56' stroke='%23fff' stroke-width='4'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%239cbbff'/><ellipse cx='32' cy='32' rx='10' ry='28' fill='none' stroke='%2304070f' stroke-opacity='.4' stroke-width='3'/><path d='M32 4v56' stroke='%2308111f' stroke-width='4'/></svg>">
 <style>
 /* ============================================================
    MERIDIAN — a blue-black wallet skin.
 
-   One accent family (cobalt blue -> cyan) carries every action, so the two
-   buttons that matter — buy and sell — are never competing with a
-   rainbow of other colours. Green and rose appear only on numbers that
-   went up or down, where a hue actually means something.
+   Flat by rule: every surface is one solid colour, and the hierarchy is
+   carried by lightness alone — a light accent fill with dark type for the
+   one action that matters on a screen, plain dark plates for everything
+   else. No gradients, no glows. Green and rose appear only on numbers
+   that went up or down, where a hue actually means something.
    ============================================================ */
 
 :root {
-  --void:      #04060d;
-  --app:       #070b14;
-  --card:      #0d1322;
-  --card-hi:   #121a2d;
-  --card-lo:   #0a0f1c;
+  --void:      #070a11;
+  --app:       #0c111b;
+  --card:      #141a27;
+  --card-hi:   #1b2333;
+  --card-lo:   #10161f;
 
-  --line:      rgb(122 158 255 / 10%);
-  --line-hi:   rgb(122 158 255 / 20%);
+  --line:      rgb(255 255 255 / 8%);
+  --line-hi:   rgb(255 255 255 / 15%);
 
-  --txt:       #e9eefb;
-  --dim:       #8593b4;
-  --dim-lo:    #5b6786;
+  --txt:       #ffffff;
+  --dim:       #8b95ab;
+  --dim-lo:    #5c6577;
 
-  --blue:      #2e6bff;
-  --blue-lo:   #1b47c8;
-  --cyan:      #17c1ff;
-  --soft:      #9dbbff;
+  --blue:      #9cbbff;      /* the fill: light, so type on it is dark */
+  --blue-lo:   #7ea4f5;
+  --ink:       #08111f;      /* type on the fill */
+  --cyan:      #6fd3ff;
+  --soft:      #9cbbff;
 
   --up:        #24d6a0;
   --down:      #ff5c7c;
@@ -82,10 +84,7 @@ input { border: 0; outline: 0; background: none; }
   display: grid;
   place-items: center;
   padding: 28px 16px;
-  background:
-    radial-gradient(900px 620px at 22% -8%,  rgb(46 107 255 / 22%), transparent 62%),
-    radial-gradient(760px 540px at 88% 108%, rgb(23 193 255 / 14%), transparent 60%),
-    var(--void);
+  background: var(--void);
 }
 
 .device {
@@ -96,24 +95,9 @@ input { border: 0; outline: 0; background: none; }
   border-radius: 42px;
   background: var(--app);
   border: 1px solid var(--line-hi);
-  box-shadow:
-    0 0 0 1px rgb(4 6 13 / 90%),
-    0 60px 140px -30px rgb(4 8 24 / 90%),
-    0 0 120px -40px rgb(46 107 255 / 55%);
+  box-shadow: 0 40px 90px -30px rgb(0 0 0 / 80%);
   overflow: hidden;
   isolation: isolate;
-}
-
-/* faint aurora inside the shell, so flat cards sit on something */
-.device::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(520px 300px at 50% -12%, rgb(46 107 255 / 20%), transparent 70%),
-    radial-gradient(420px 260px at 110% 12%, rgb(23 193 255 / 10%), transparent 70%);
-  z-index: 0;
 }
 
 @media (max-width: 480px) {
@@ -202,7 +186,7 @@ input { border: 0; outline: 0; background: none; }
   transition: background .18s, color .18s, border-color .18s;
 }
 .iconbtn:hover { background: rgb(255 255 255 / 6%); color: var(--txt); border-color: var(--line); }
-.iconbtn--on { color: var(--soft); background: rgb(46 107 255 / 14%); border-color: var(--line-hi); }
+.iconbtn--on { color: var(--soft); background: var(--card-hi); border-color: var(--line-hi); }
 
 .spacer { flex: 1; }
 
@@ -218,14 +202,14 @@ input { border: 0; outline: 0; background: none; }
   letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--soft);
-  background: rgb(46 107 255 / 14%);
-  border: 1px solid var(--line-hi);
+  background: var(--card-hi);
+  border: 1px solid var(--line);
 }
 .pill__dot {
   width: 6px; height: 6px;
   border-radius: 50%;
   background: var(--cyan);
-  box-shadow: 0 0 0 3px rgb(23 193 255 / 18%);
+  box-shadow: 0 0 0 3px rgb(111 211 255 / 18%);
 }
 
 /* ---------- balance block ---------- */
@@ -293,30 +277,16 @@ input { border: 0; outline: 0; background: none; }
 .bigbtn svg { width: 26px; height: 26px; }
 
 .bigbtn--buy {
-  color: #fff;
-  background: linear-gradient(150deg, #3d7bff 0%, #2e6bff 44%, #17a8ff 100%);
-  box-shadow:
-    0 16px 34px -14px rgb(46 107 255 / 90%),
-    inset 0 1px 0 rgb(255 255 255 / 28%);
+  color: var(--ink);
+  background: var(--blue);
 }
-.bigbtn--buy::after {
-  content: "";
-  position: absolute;
-  inset: -60% -20% auto;
-  height: 140%;
-  background: radial-gradient(closest-side, rgb(255 255 255 / 26%), transparent);
-  opacity: .8;
-  pointer-events: none;
-}
-.bigbtn--buy:hover { box-shadow: 0 20px 44px -14px rgb(46 107 255 / 100%), inset 0 1px 0 rgb(255 255 255 / 32%); }
+.bigbtn--buy:hover { background: #b1caff; }
 
 .bigbtn--sell {
-  color: var(--soft);
-  background: linear-gradient(180deg, var(--card-hi), var(--card-lo));
-  border: 1px solid var(--line-hi);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+  color: var(--txt);
+  background: var(--card-hi);
 }
-.bigbtn--sell:hover { background: linear-gradient(180deg, #16203a, #0d1425); border-color: rgb(122 158 255 / 32%); }
+.bigbtn--sell:hover { background: #222c40; }
 
 .bigbtn__hint {
   font-size: 11.5px;
@@ -349,7 +319,7 @@ input { border: 0; outline: 0; background: none; }
   transition: background .18s, color .18s, transform .18s var(--pop);
 }
 .quick svg { width: 19px; height: 19px; color: var(--soft); }
-.quick:hover { background: rgb(46 107 255 / 12%); color: var(--txt); }
+.quick:hover { background: var(--card-hi); color: var(--txt); }
 .quick:active { transform: scale(.94); }
 
 /* ---------- tabs ---------- */
@@ -375,8 +345,7 @@ input { border: 0; outline: 0; background: none; }
 }
 .tab[aria-selected="true"] {
   color: var(--txt);
-  background: linear-gradient(180deg, rgb(46 107 255 / 30%), rgb(46 107 255 / 16%));
-  box-shadow: inset 0 0 0 1px var(--line-hi);
+  background: var(--card-hi);
 }
 
 /* ---------- asset rows ---------- */
@@ -414,7 +383,16 @@ input { border: 0; outline: 0; background: none; }
 }
 
 .row__name { font-weight: 620; font-size: 15px; letter-spacing: -.01em; }
-.row__sub { font-size: 12.5px; color: var(--dim); display: flex; align-items: center; gap: 6px; }
+/* the amount gives way, the qualifier never does */
+.row__sub {
+  font-size: 12.5px;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.row__sub > .row__amount { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row__right { text-align: right; }
 .row__val { font-weight: 620; font-size: 15px; }
 .row__delta { font-size: 12.5px; font-weight: 560; color: var(--up); }
@@ -436,7 +414,7 @@ input { border: 0; outline: 0; background: none; }
   padding: 0 4px;
   border-radius: 999px;
   background: var(--blue);
-  color: #fff;
+  color: var(--ink);
   font-size: 10px;
   font-weight: 750;
   line-height: 16px;
@@ -451,17 +429,23 @@ button.balance { display: block; width: 100%; border-radius: var(--r-md); }
 button.balance:hover { background: rgb(255 255 255 / 3%); }
 
 /* an inline qualifier on a row's second line */
+/* A qualifier on a row's second line. Kept to an icon and a number: the
+   column is barely 140 px, and the balance must not lose room to it. */
 .row__tag {
-  margin-left: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
   padding: 1px 6px;
   border-radius: 6px;
   font-size: 11px;
+  font-weight: 600;
   color: var(--soft);
-  background: rgb(46 107 255 / 16%);
+  background: var(--card-hi);
   white-space: nowrap;
 }
-.row__sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row--on { background: rgb(46 107 255 / 14%); border-color: rgb(46 107 255 / 45%); }
+.row__tag svg { width: 11px; height: 11px; }
+.row--on { background: var(--card-hi); border-color: var(--line-hi); }
 
 /* ---------- staking ---------- */
 
@@ -499,7 +483,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 }
 .contact__pick .row__sub { display: block; }
 
-.tx--unread { background: rgb(46 107 255 / 8%); }
+.tx--unread { background: var(--card); }
 
 /* ---------- section headings & empty states ---------- */
 
@@ -524,7 +508,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
 .card {
   border-radius: var(--r-md);
-  background: linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 2%));
+  background: var(--card);
   border: 1px solid var(--line);
   padding: 14px;
 }
@@ -557,7 +541,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   color: var(--dim);
   transition: color .16s, background .16s;
 }
-.segbtn[aria-pressed="true"] { color: var(--txt); background: rgb(46 107 255 / 26%); }
+.segbtn[aria-pressed="true"] { color: var(--txt); background: var(--card-hi); }
 
 /* ---------- buttons ---------- */
 
@@ -579,15 +563,16 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 .btn[disabled] { opacity: .38; pointer-events: none; }
 
 .btn--primary {
-  color: #fff;
-  background: linear-gradient(150deg, #3d7bff, #2e6bff 50%, #17a8ff);
-  box-shadow: 0 14px 30px -14px rgb(46 107 255 / 95%), inset 0 1px 0 rgb(255 255 255 / 26%);
+  color: var(--ink);
+  background: var(--blue);
 }
+.btn--primary:hover { background: #b1caff; }
+
 .btn--ghost {
-  color: var(--soft);
-  background: rgb(255 255 255 / 5%);
-  border: 1px solid var(--line-hi);
+  color: var(--txt);
+  background: var(--card-hi);
 }
+.btn--ghost:hover { background: #222c40; }
 .btn--danger { color: var(--down); background: rgb(255 92 124 / 10%); border: 1px solid rgb(255 92 124 / 26%); }
 .btn--sm { height: 44px; font-size: 14.5px; border-radius: 13px; }
 
@@ -597,7 +582,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   position: absolute;
   inset: 0 auto 0 0;
   width: 0;
-  background: rgb(255 255 255 / 22%);
+  background: rgb(8 17 31 / 16%);
   pointer-events: none;
 }
 .hold__label { position: relative; display: flex; align-items: center; gap: 9px; }
@@ -623,7 +608,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   font-size: 15px;
   transition: border-color .18s, background .18s;
 }
-.input:focus { border-color: rgb(46 107 255 / 60%); background: rgb(46 107 255 / 8%); }
+.input:focus { border-color: var(--blue); background: var(--card-hi); }
 .input::placeholder { color: var(--dim-lo); }
 .input--mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px; letter-spacing: -.01em; }
 .input--bad { border-color: rgb(255 92 124 / 60%); }
@@ -675,7 +660,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   transition: background .14s, transform .14s var(--pop);
 }
 .key:hover { background: rgb(255 255 255 / 6%); }
-.key:active { background: rgb(46 107 255 / 26%); transform: scale(.93); }
+.key:active { background: var(--card-hi); transform: scale(.93); }
 .key svg { width: 22px; height: 22px; }
 
 .chips { display: flex; gap: 7px; padding: 2px 0 4px; }
@@ -685,12 +670,11 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   border-radius: 12px;
   font-size: 13px;
   font-weight: 620;
-  color: var(--soft);
-  background: rgb(46 107 255 / 12%);
-  border: 1px solid var(--line-hi);
+  color: var(--txt);
+  background: var(--card-hi);
   transition: background .16s, transform .16s var(--pop);
 }
-.chip:hover { background: rgb(46 107 255 / 22%); }
+.chip:hover { background: #222c40; }
 .chip:active { transform: scale(.94); }
 
 /* horizontal token picker */
@@ -708,7 +692,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   font-size: 13.5px;
   transition: background .16s, border-color .16s;
 }
-.pick[aria-pressed="true"] { background: rgb(46 107 255 / 22%); border-color: rgb(46 107 255 / 55%); }
+.pick[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--ink); }
 .pick .coin { width: 26px; height: 26px; font-size: 10px; }
 
 /* ---------- sheets ---------- */
@@ -738,7 +722,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   display: flex;
   flex-direction: column;
   border-radius: 28px 28px 0 0;
-  background: linear-gradient(180deg, #101830, #080d1a 42%);
+  background: var(--app);
   border: 1px solid var(--line-hi);
   border-bottom: 0;
   box-shadow: 0 -30px 70px -30px rgb(0 0 0 / 90%);
@@ -817,7 +801,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   border: 1px solid rgb(255 92 124 / 26%);
 }
 .warn svg { width: 17px; height: 17px; flex: none; margin-top: 1px; color: var(--down); }
-.warn--info { color: var(--soft); background: rgb(46 107 255 / 10%); border-color: var(--line-hi); }
+.warn--info { color: var(--soft); background: var(--card); border-color: var(--line-hi); }
 .warn--info svg { color: var(--cyan); }
 
 /* ---------- activity ---------- */
@@ -829,7 +813,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: rgb(46 107 255 / 14%);
+  background: var(--card-hi);
   color: var(--soft);
 }
 .tx__ico svg { width: 17px; height: 17px; }
@@ -864,7 +848,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   transition: background .16s;
 }
 .opt:hover { background: rgb(255 255 255 / 4%); }
-.opt__ico { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: rgb(46 107 255 / 13%); color: var(--soft); flex: none; }
+.opt__ico { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--card-hi); color: var(--soft); flex: none; }
 .opt__ico svg { width: 16px; height: 16px; }
 .opt__t { font-weight: 600; font-size: 14.5px; }
 .opt__s { font-size: 12px; color: var(--dim); }
@@ -887,6 +871,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   transition: transform .22s var(--pop);
 }
 .switch[aria-checked="true"] { background: var(--blue); }
+.switch[aria-checked="true"]::after { background: var(--ink); }
 .switch[aria-checked="true"]::after { transform: translateX(18px); }
 
 /* ---------- onboarding ---------- */
@@ -935,7 +920,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   font-size: 13.5px;
   font-weight: 580;
   color: var(--txt);
-  background: rgb(16 24 46 / 96%);
+  background: var(--card-hi);
   border: 1px solid var(--line-hi);
   box-shadow: 0 18px 40px -18px rgb(0 0 0 / 90%);
   animation: toast-in .28s var(--pop) both;
@@ -958,7 +943,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   gap: 12px;
   padding: 28px;
   text-align: center;
-  background: linear-gradient(180deg, rgb(10 18 38 / 98%), rgb(5 8 15 / 99%));
+  background: var(--app);
   animation: fade .2s ease both;
 }
 .done__ring {
@@ -966,10 +951,10 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: radial-gradient(circle, rgb(46 107 255 / 30%), transparent 70%);
+  background: var(--card-hi);
   animation: ring 2.6s ease-out infinite;
 }
-@keyframes ring { 0% { box-shadow: 0 0 0 0 rgb(46 107 255 / 45%); } 70%, 100% { box-shadow: 0 0 0 34px rgb(46 107 255 / 0%); } }
+@keyframes ring { 0% { box-shadow: 0 0 0 0 rgb(156 187 255 / 30%); } 70%, 100% { box-shadow: 0 0 0 34px rgb(156 187 255 / 0%); } }
 .done__ring svg { width: 54px; height: 54px; color: var(--cyan); }
 .done__t { font-size: 24px; font-weight: 740; letter-spacing: -.03em; }
 .done__s { font-size: 14px; color: var(--dim); }
@@ -997,12 +982,12 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: #131c33;
+  background: var(--card-hi);
   border: 1px solid var(--line-hi);
   color: var(--soft);
   transition: transform .3s var(--ease), background .18s;
 }
-.swapbtn:hover { background: #1a2543; }
+.swapbtn:hover { background: #222c40; }
 .swapbtn--spin { transform: rotate(180deg); }
 .swapbtn svg { width: 17px; height: 17px; }
 
@@ -2561,11 +2546,9 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
   /* ---------- identity colours ---------- */
 
-  /** A coin badge in the token's own hue, pulled toward the app's blue. */
+  /** A coin badge in the token's own hue — one flat colour, dark type. */
   function coinBadge(token, size) {
-    var a = "hsl(" + token.hue + " 82% 63%)";
-    var b = "hsl(" + (token.hue + 16) + " 68% 44%)";
-    var style = "background:linear-gradient(140deg," + a + "," + b + ")" +
+    var style = "background:hsl(" + token.hue + " 72% 62%)" +
       (size ? ";width:" + size + "px;height:" + size + "px;font-size:" + Math.round(size * 0.31) + "px" : "");
     return '<span class="coin" style="' + style + '">' + esc(token.sym.slice(0, 3)) + "</span>";
   }
@@ -2573,11 +2556,10 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
   /** Account avatar: two deterministic hues from the address. */
   function avatarStyle(seed) {
     var rnd = Vault.seedRandom("avatar/" + seed);
-    /* Every avatar runs cobalt blue -> cyan. Letting the second hue drift upward
-       lands in violet, which reads as a different product. */
-    var hue = 200 + Math.floor(rnd() * 38);
-    var hue2 = hue - 34 + Math.floor(rnd() * 14);
-    return "background:linear-gradient(135deg,hsl(" + hue + " 85% 64%),hsl(" + hue2 + " 72% 48%))";
+    /* One flat hue per account, kept inside cobalt-through-cyan so an
+       avatar never reads as a different product's colour. */
+    var hue = 194 + Math.floor(rnd() * 44);
+    return "background:hsl(" + hue + " 76% 64%)";
   }
 
   function shortAddress(address, head, tail) {
@@ -2639,7 +2621,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
           'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
         '<line class="cross" x1="0" y1="0" x2="0" y2="' + hgt + '" stroke="' + stroke +
           '" stroke-opacity=".45" stroke-width="1" vector-effect="non-scaling-stroke" style="display:none"/>' +
-        '<circle class="dot" r="4" fill="' + stroke + '" stroke="#070b14" stroke-width="2" ' +
+        '<circle class="dot" r="4" fill="' + stroke + '" stroke="#0c111b" stroke-width="2" ' +
           'cx="' + x(values.length - 1) + '" cy="' + y(values[values.length - 1]) + '"/>' +
       "</svg>";
 
@@ -2826,8 +2808,16 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
   }
 
+  /** Russian counts: 1 контакт, 2 контакта, 5 контактов. */
+  function plural(n, one, few, many) {
+    var mod10 = Math.abs(n) % 10, mod100 = Math.abs(n) % 100;
+    if (mod10 === 1 && mod100 !== 11) return n + " " + one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return n + " " + few;
+    return n + " " + many;
+  }
+
   var api = {
-    h: h, frag: frag, esc: esc, $: $, $: $, icon: icon,
+    h: h, frag: frag, esc: esc, $: $, $: $, icon: icon, plural: plural,
     coinBadge: coinBadge, avatarStyle: avatarStyle, shortAddress: shortAddress,
     sparkline: sparkline, areaChart: areaChart, nftArt: nftArt,
     toast: toast, copy: copy,
@@ -2856,16 +2846,15 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
   var BRAND = "Meridian";
 
-  /* A globe with its prime meridian picked out — the name drawn literally. */
+  /* A globe with its prime meridian picked out — the name drawn literally,
+     in one flat colour like everything else. */
   var MARK =
     '<svg class="hero__mark" viewBox="0 0 64 64" aria-hidden="true">' +
-    '<defs><linearGradient id="mk" x1="0" y1="0" x2="1" y2="1">' +
-    '<stop offset="0" stop-color="#5b93ff"/><stop offset="1" stop-color="#12b6ff"/></linearGradient></defs>' +
-    '<circle cx="32" cy="32" r="27" fill="url(#mk)"/>' +
-    '<g fill="none" stroke="#04070f" stroke-opacity=".34" stroke-width="2.4">' +
+    '<circle cx="32" cy="32" r="27" fill="#9cbbff"/>' +
+    '<g fill="none" stroke="#08111f" stroke-opacity=".38" stroke-width="2.4">' +
     '<ellipse cx="32" cy="32" rx="20" ry="27"/><ellipse cx="32" cy="32" rx="9" ry="27"/>' +
     '<path d="M7 32h50M11.5 19h41M11.5 45h41"/></g>' +
-    '<path d="M32 5v54" stroke="#fff" stroke-opacity=".85" stroke-width="3" stroke-linecap="round"/>' +
+    '<path d="M32 5v54" stroke="#08111f" stroke-width="3.4" stroke-linecap="round"/>' +
     "</svg>";
 
   function app() { return global.App; }
@@ -3320,9 +3309,12 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
         html:
           UI.coinBadge(token) +
           '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
-          '<span class="row__sub num">' + esc(maybe(Market.amount(Store.holdingOf(token.id), token.id) + " " + token.sym)) +
+          '<span class="row__sub num"><span class="row__amount">' +
+          esc(maybe(Market.amount(Store.holdingOf(token.id), token.id) + " " + token.sym)) + "</span>" +
           (Store.stakedOf(token.id) > 0
-            ? '<span class="row__tag">' + esc(Market.amount(Store.stakedOf(token.id), token.id)) + " в стейкинге</span>"
+            ? '<span class="row__tag" title="' + esc(Market.amount(Store.stakedOf(token.id), token.id)) +
+              " " + esc(token.sym) + ' в стейкинге">' + icon("stake") +
+              esc(Market.amount(Store.stakedOf(token.id), token.id)) + "</span>"
             : "") +
           "</span></span>" +
           UI.sparkline(Market.series(token.id, "1d"), change >= 0) +
@@ -4083,8 +4075,10 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
           html:
             UI.coinBadge(token) +
             '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
-            '<span class="row__sub num">' + esc(token.sym) + " · " + esc(capLabel(token.cap)) +
-            (Store.holdingOf(token.id) > 0 ? '<span class="row__tag">в портфеле</span>' : "") + "</span></span>" +
+            '<span class="row__sub num"><span class="row__amount">' + esc(token.sym) + " · " + esc(capLabel(token.cap)) + "</span>" +
+            (Store.holdingOf(token.id) > 0
+              ? '<span class="row__tag" title="есть в портфеле">' + icon("check") + "</span>" : "") +
+            "</span></span>" +
             UI.sparkline(Market.series(token.id, "1d"), change >= 0) +
             '<span class="row__right"><span class="row__val num">' + esc(Market.money(token.price, currency())) + "</span><br>" +
             '<span class="row__delta' + (change < 0 ? " row__delta--down" : "") + ' num">' + esc(Market.percent(change)) + "</span></span>"
@@ -4635,13 +4629,17 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     scroll.appendChild(linkOpt("lock", "Заблокировать сейчас", "Потребуется пароль для входа", function () {
       Store.lock(); app().go("lock");
     }));
-    scroll.appendChild(linkOpt("users", "Счета", Store.accounts().length + " шт.", accountsSheet));
+    scroll.appendChild(linkOpt("users", "Счета",
+      UI.plural(Store.accounts().length, "счёт", "счёта", "счетов"), accountsSheet));
 
     scroll.appendChild(h("div", { class: "h", text: "Списки" }));
-    scroll.appendChild(linkOpt("users", "Адресная книга", Store.contacts().length + " контактов", function () { contactsSheet(); }));
+    scroll.appendChild(linkOpt("users", "Адресная книга",
+      UI.plural(Store.contacts().length, "контакт", "контакта", "контактов"), function () { contactsSheet(); }));
     scroll.appendChild(linkOpt("bell", "Уведомления и оповещения",
-      Store.alerts().length + " ждут цену · " + Store.unreadCount() + " непрочитанных", notificationsSheet));
-    scroll.appendChild(linkOpt("stake", "Стейкинг", Store.stakes().length + " позиций", function () { app().go("staking"); }));
+      UI.plural(Store.alerts().length, "оповещение ждёт цену", "оповещения ждут цену", "оповещений ждут цену") +
+      " · " + UI.plural(Store.unreadCount(), "непрочитанное", "непрочитанных", "непрочитанных"), notificationsSheet));
+    scroll.appendChild(linkOpt("stake", "Стейкинг",
+      UI.plural(Store.stakes().length, "позиция", "позиции", "позиций"), function () { app().go("staking"); }));
 
     scroll.appendChild(h("div", { class: "h", text: "Сеть" }));
     scroll.appendChild(h("div", { class: "card" }, [

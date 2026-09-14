@@ -13,16 +13,15 @@
 
   var BRAND = "Meridian";
 
-  /* A globe with its prime meridian picked out — the name drawn literally. */
+  /* A globe with its prime meridian picked out — the name drawn literally,
+     in one flat colour like everything else. */
   var MARK =
     '<svg class="hero__mark" viewBox="0 0 64 64" aria-hidden="true">' +
-    '<defs><linearGradient id="mk" x1="0" y1="0" x2="1" y2="1">' +
-    '<stop offset="0" stop-color="#5b93ff"/><stop offset="1" stop-color="#12b6ff"/></linearGradient></defs>' +
-    '<circle cx="32" cy="32" r="27" fill="url(#mk)"/>' +
-    '<g fill="none" stroke="#04070f" stroke-opacity=".34" stroke-width="2.4">' +
+    '<circle cx="32" cy="32" r="27" fill="#9cbbff"/>' +
+    '<g fill="none" stroke="#08111f" stroke-opacity=".38" stroke-width="2.4">' +
     '<ellipse cx="32" cy="32" rx="20" ry="27"/><ellipse cx="32" cy="32" rx="9" ry="27"/>' +
     '<path d="M7 32h50M11.5 19h41M11.5 45h41"/></g>' +
-    '<path d="M32 5v54" stroke="#fff" stroke-opacity=".85" stroke-width="3" stroke-linecap="round"/>' +
+    '<path d="M32 5v54" stroke="#08111f" stroke-width="3.4" stroke-linecap="round"/>' +
     "</svg>";
 
   function app() { return global.App; }
@@ -477,9 +476,12 @@
         html:
           UI.coinBadge(token) +
           '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
-          '<span class="row__sub num">' + esc(maybe(Market.amount(Store.holdingOf(token.id), token.id) + " " + token.sym)) +
+          '<span class="row__sub num"><span class="row__amount">' +
+          esc(maybe(Market.amount(Store.holdingOf(token.id), token.id) + " " + token.sym)) + "</span>" +
           (Store.stakedOf(token.id) > 0
-            ? '<span class="row__tag">' + esc(Market.amount(Store.stakedOf(token.id), token.id)) + " в стейкинге</span>"
+            ? '<span class="row__tag" title="' + esc(Market.amount(Store.stakedOf(token.id), token.id)) +
+              " " + esc(token.sym) + ' в стейкинге">' + icon("stake") +
+              esc(Market.amount(Store.stakedOf(token.id), token.id)) + "</span>"
             : "") +
           "</span></span>" +
           UI.sparkline(Market.series(token.id, "1d"), change >= 0) +
@@ -1240,8 +1242,10 @@
           html:
             UI.coinBadge(token) +
             '<span style="min-width:0"><span class="row__name">' + esc(token.name) + "</span>" +
-            '<span class="row__sub num">' + esc(token.sym) + " · " + esc(capLabel(token.cap)) +
-            (Store.holdingOf(token.id) > 0 ? '<span class="row__tag">в портфеле</span>' : "") + "</span></span>" +
+            '<span class="row__sub num"><span class="row__amount">' + esc(token.sym) + " · " + esc(capLabel(token.cap)) + "</span>" +
+            (Store.holdingOf(token.id) > 0
+              ? '<span class="row__tag" title="есть в портфеле">' + icon("check") + "</span>" : "") +
+            "</span></span>" +
             UI.sparkline(Market.series(token.id, "1d"), change >= 0) +
             '<span class="row__right"><span class="row__val num">' + esc(Market.money(token.price, currency())) + "</span><br>" +
             '<span class="row__delta' + (change < 0 ? " row__delta--down" : "") + ' num">' + esc(Market.percent(change)) + "</span></span>"
@@ -1792,13 +1796,17 @@
     scroll.appendChild(linkOpt("lock", "Заблокировать сейчас", "Потребуется пароль для входа", function () {
       Store.lock(); app().go("lock");
     }));
-    scroll.appendChild(linkOpt("users", "Счета", Store.accounts().length + " шт.", accountsSheet));
+    scroll.appendChild(linkOpt("users", "Счета",
+      UI.plural(Store.accounts().length, "счёт", "счёта", "счетов"), accountsSheet));
 
     scroll.appendChild(h("div", { class: "h", text: "Списки" }));
-    scroll.appendChild(linkOpt("users", "Адресная книга", Store.contacts().length + " контактов", function () { contactsSheet(); }));
+    scroll.appendChild(linkOpt("users", "Адресная книга",
+      UI.plural(Store.contacts().length, "контакт", "контакта", "контактов"), function () { contactsSheet(); }));
     scroll.appendChild(linkOpt("bell", "Уведомления и оповещения",
-      Store.alerts().length + " ждут цену · " + Store.unreadCount() + " непрочитанных", notificationsSheet));
-    scroll.appendChild(linkOpt("stake", "Стейкинг", Store.stakes().length + " позиций", function () { app().go("staking"); }));
+      UI.plural(Store.alerts().length, "оповещение ждёт цену", "оповещения ждут цену", "оповещений ждут цену") +
+      " · " + UI.plural(Store.unreadCount(), "непрочитанное", "непрочитанных", "непрочитанных"), notificationsSheet));
+    scroll.appendChild(linkOpt("stake", "Стейкинг",
+      UI.plural(Store.stakes().length, "позиция", "позиции", "позиций"), function () { app().go("staking"); }));
 
     scroll.appendChild(h("div", { class: "h", text: "Сеть" }));
     scroll.appendChild(h("div", { class: "card" }, [

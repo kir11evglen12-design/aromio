@@ -111,11 +111,9 @@
 
   /* ---------- identity colours ---------- */
 
-  /** A coin badge in the token's own hue, pulled toward the app's blue. */
+  /** A coin badge in the token's own hue — one flat colour, dark type. */
   function coinBadge(token, size) {
-    var a = "hsl(" + token.hue + " 82% 63%)";
-    var b = "hsl(" + (token.hue + 16) + " 68% 44%)";
-    var style = "background:linear-gradient(140deg," + a + "," + b + ")" +
+    var style = "background:hsl(" + token.hue + " 72% 62%)" +
       (size ? ";width:" + size + "px;height:" + size + "px;font-size:" + Math.round(size * 0.31) + "px" : "");
     return '<span class="coin" style="' + style + '">' + esc(token.sym.slice(0, 3)) + "</span>";
   }
@@ -123,11 +121,10 @@
   /** Account avatar: two deterministic hues from the address. */
   function avatarStyle(seed) {
     var rnd = Vault.seedRandom("avatar/" + seed);
-    /* Every avatar runs cobalt blue -> cyan. Letting the second hue drift upward
-       lands in violet, which reads as a different product. */
-    var hue = 200 + Math.floor(rnd() * 38);
-    var hue2 = hue - 34 + Math.floor(rnd() * 14);
-    return "background:linear-gradient(135deg,hsl(" + hue + " 85% 64%),hsl(" + hue2 + " 72% 48%))";
+    /* One flat hue per account, kept inside cobalt-through-cyan so an
+       avatar never reads as a different product's colour. */
+    var hue = 194 + Math.floor(rnd() * 44);
+    return "background:hsl(" + hue + " 76% 64%)";
   }
 
   function shortAddress(address, head, tail) {
@@ -189,7 +186,7 @@
           'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
         '<line class="cross" x1="0" y1="0" x2="0" y2="' + hgt + '" stroke="' + stroke +
           '" stroke-opacity=".45" stroke-width="1" vector-effect="non-scaling-stroke" style="display:none"/>' +
-        '<circle class="dot" r="4" fill="' + stroke + '" stroke="#070b14" stroke-width="2" ' +
+        '<circle class="dot" r="4" fill="' + stroke + '" stroke="#0c111b" stroke-width="2" ' +
           'cx="' + x(values.length - 1) + '" cy="' + y(values[values.length - 1]) + '"/>' +
       "</svg>";
 
@@ -376,8 +373,16 @@
     return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
   }
 
+  /** Russian counts: 1 контакт, 2 контакта, 5 контактов. */
+  function plural(n, one, few, many) {
+    var mod10 = Math.abs(n) % 10, mod100 = Math.abs(n) % 100;
+    if (mod10 === 1 && mod100 !== 11) return n + " " + one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return n + " " + few;
+    return n + " " + many;
+  }
+
   var api = {
-    h: h, frag: frag, esc: esc, $: $, $$: $$, icon: icon,
+    h: h, frag: frag, esc: esc, $: $, $$: $$, icon: icon, plural: plural,
     coinBadge: coinBadge, avatarStyle: avatarStyle, shortAddress: shortAddress,
     sparkline: sparkline, areaChart: areaChart, nftArt: nftArt,
     toast: toast, copy: copy,
