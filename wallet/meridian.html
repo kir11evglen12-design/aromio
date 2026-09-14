@@ -323,8 +323,8 @@ input { border: 0; outline: 0; background: none; }
 
 .quickrow {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
   padding-bottom: 16px;
 }
 
@@ -332,12 +332,13 @@ input { border: 0; outline: 0; background: none; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
-  padding: 12px 4px 10px;
+  gap: 6px;
+  padding: 11px 2px 9px;
   border-radius: var(--r-md);
   background: rgb(255 255 255 / 3.5%);
   border: 1px solid var(--line);
-  font-size: 11.5px;
+  font-size: 11px;
+  letter-spacing: -.01em;
   font-weight: 560;
   color: var(--dim);
   transition: background .18s, color .18s, transform .18s var(--pop);
@@ -3459,7 +3460,9 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
       quick("qr", "Получить", receiveSheet),
       quick("logout", "На биржу", function () { exchangeSheet(); }),
       quick("swap", "Обмен", function () { swapSheet(); }),
-      quick("stake", "Стейкинг", function () { app().go("staking"); })
+      quick("stake", "Стейкинг", function () { app().go("staking"); }),
+      quick("calc", "Калькулятор", function () { app().go("calc"); }),
+      quick("key", "Адреса", function () { app().go("addresses"); })
     ]));
 
     var tabs = h("div", { class: "tabs", role: "tablist" });
@@ -3610,7 +3613,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     scroll.appendChild(chartHost);
     scroll.appendChild(seg);
 
-    scroll.appendChild(h("div", { class: "quickrow" }, [
+    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:repeat(3,1fr)" }, [
       quick("arrow-up-right", "Отправить", function () { sendSheet(tokenId); }),
       quick("logout", "На биржу", function () { exchangeSheet(tokenId); }),
       quick("swap", "Обмен", function () { swapSheet(tokenId); })

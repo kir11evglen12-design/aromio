@@ -404,7 +404,9 @@
       quick("qr", "Получить", receiveSheet),
       quick("logout", "На биржу", function () { exchangeSheet(); }),
       quick("swap", "Обмен", function () { swapSheet(); }),
-      quick("stake", "Стейкинг", function () { app().go("staking"); })
+      quick("stake", "Стейкинг", function () { app().go("staking"); }),
+      quick("calc", "Калькулятор", function () { app().go("calc"); }),
+      quick("key", "Адреса", function () { app().go("addresses"); })
     ]));
 
     var tabs = h("div", { class: "tabs", role: "tablist" });
@@ -555,7 +557,7 @@
     scroll.appendChild(chartHost);
     scroll.appendChild(seg);
 
-    scroll.appendChild(h("div", { class: "quickrow" }, [
+    scroll.appendChild(h("div", { class: "quickrow", style: "grid-template-columns:repeat(3,1fr)" }, [
       quick("arrow-up-right", "Отправить", function () { sendSheet(tokenId); }),
       quick("logout", "На биржу", function () { exchangeSheet(tokenId); }),
       quick("swap", "Обмен", function () { swapSheet(tokenId); })
