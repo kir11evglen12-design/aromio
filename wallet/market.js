@@ -46,6 +46,48 @@
     { id: "all", label: "ВСЁ", points: 140, step: 13140, vol: 0.0480 }
   ];
 
+  /**
+   * Networks a token can be withdrawn over, because that is the one choice
+   * that actually loses people money: an address is only valid on its own
+   * network, and some chains reject a deposit that arrives without a memo.
+   * `pattern` is what an address on that network looks like.
+   */
+  var NETWORKS = {
+    mrd:  [{ id: "meridian", label: "Meridian",            pattern: /^[1-9A-HJ-NP-Za-km-z]{32,46}$/, memo: false, min: 5 }],
+    btc:  [{ id: "bitcoin",  label: "Bitcoin",             pattern: /^(bc1[a-z0-9]{20,60}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/, memo: false, min: 0.0002 }],
+    eth:  [{ id: "ethereum", label: "Ethereum (ERC-20)",   pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 0.005 },
+           { id: "arbitrum", label: "Arbitrum One",        pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 0.001 }],
+    sol:  [{ id: "solana",   label: "Solana",              pattern: /^[1-9A-HJ-NP-Za-km-z]{32,46}$/, memo: false, min: 0.05 }],
+    ton:  [{ id: "ton",      label: "TON",                 pattern: /^[UEk0][QF][A-Za-z0-9_-]{46}$/, memo: true,  min: 0.5 }],
+    usdc: [{ id: "solana",   label: "Solana (SPL)",        pattern: /^[1-9A-HJ-NP-Za-km-z]{32,46}$/, memo: false, min: 1 },
+           { id: "ethereum", label: "Ethereum (ERC-20)",   pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 10 },
+           { id: "tron",     label: "TRON (TRC-20)",       pattern: /^T[1-9A-HJ-NP-Za-km-z]{33}$/, memo: false, min: 2 }],
+    doge: [{ id: "dogecoin", label: "Dogecoin",            pattern: /^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{32}$/, memo: false, min: 5 }],
+    xrp:  [{ id: "xrp",      label: "XRP Ledger",          pattern: /^r[1-9A-HJ-NP-Za-km-z]{24,34}$/, memo: true,  min: 1 }],
+    ada:  [{ id: "cardano",  label: "Cardano",             pattern: /^addr1[a-z0-9]{40,90}$/, memo: false, min: 2 }],
+    avax: [{ id: "avalanche", label: "Avalanche C-Chain",  pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 0.05 }],
+    link: [{ id: "ethereum", label: "Ethereum (ERC-20)",   pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 0.5 }],
+    dot:  [{ id: "polkadot", label: "Polkadot",            pattern: /^1[1-9A-HJ-NP-Za-km-z]{46,47}$/, memo: false, min: 1 }],
+    ltc:  [{ id: "litecoin", label: "Litecoin",            pattern: /^(ltc1[a-z0-9]{20,60}|[LM3][a-km-zA-HJ-NP-Z1-9]{25,34})$/, memo: false, min: 0.002 }],
+    atom: [{ id: "cosmos",   label: "Cosmos Hub",          pattern: /^cosmos1[a-z0-9]{38}$/, memo: true,  min: 0.1 }],
+    near: [{ id: "near",     label: "NEAR",                pattern: /^[a-z0-9._-]{2,64}$/, memo: false, min: 0.1 }]
+  };
+
+  function networksFor(tokenId) { return NETWORKS[tokenId] || NETWORKS.mrd; }
+
+  /**
+   * Exchanges people withdraw to. Nothing here talks to them: the wallet
+   * only knows the name you picked, and the address you pasted from your
+   * own account there.
+   */
+  var EXCHANGES = [
+    { id: "bybit",   name: "Bybit" },
+    { id: "binance", name: "Binance" },
+    { id: "okx",     name: "OKX" },
+    { id: "bitget",  name: "Bitget" },
+    { id: "other",   name: "Другая биржа" }
+  ];
+
   /* Named validators, so a stake is placed somewhere rather than nowhere.
      `bonus` shifts the token's base APY; `fee` is the operator's cut. */
   var VALIDATORS = [
@@ -186,6 +228,7 @@
 
   var api = {
     TOKENS: TOKENS, FRAMES: FRAMES, CURRENCIES: CURRENCIES, VALIDATORS: VALIDATORS,
+    NETWORKS: NETWORKS, EXCHANGES: EXCHANGES, networksFor: networksFor,
     apyFor: apyFor,
     byId: function (id) { return BY_ID[id]; },
     series: series, change: change, tick: tick,

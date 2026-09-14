@@ -57,6 +57,10 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+/* The browser's own [hidden] rule loses to any display we set on a class,
+   so state it once, loudly, and toggle visibility with el.hidden. */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   height: 100%;
@@ -1834,6 +1838,48 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     { id: "all", label: "ВСЁ", points: 140, step: 13140, vol: 0.0480 }
   ];
 
+  /**
+   * Networks a token can be withdrawn over, because that is the one choice
+   * that actually loses people money: an address is only valid on its own
+   * network, and some chains reject a deposit that arrives without a memo.
+   * `pattern` is what an address on that network looks like.
+   */
+  var NETWORKS = {
+    mrd:  [{ id: "meridian", label: "Meridian",            pattern: /^[1-9A-HJ-NP-Za-km-z]{32,46}$/, memo: false, min: 5 }],
+    btc:  [{ id: "bitcoin",  label: "Bitcoin",             pattern: /^(bc1[a-z0-9]{20,60}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/, memo: false, min: 0.0002 }],
+    eth:  [{ id: "ethereum", label: "Ethereum (ERC-20)",   pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 0.005 },
+           { id: "arbitrum", label: "Arbitrum One",        pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 0.001 }],
+    sol:  [{ id: "solana",   label: "Solana",              pattern: /^[1-9A-HJ-NP-Za-km-z]{32,46}$/, memo: false, min: 0.05 }],
+    ton:  [{ id: "ton",      label: "TON",                 pattern: /^[UEk0][QF][A-Za-z0-9_-]{46}$/, memo: true,  min: 0.5 }],
+    usdc: [{ id: "solana",   label: "Solana (SPL)",        pattern: /^[1-9A-HJ-NP-Za-km-z]{32,46}$/, memo: false, min: 1 },
+           { id: "ethereum", label: "Ethereum (ERC-20)",   pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 10 },
+           { id: "tron",     label: "TRON (TRC-20)",       pattern: /^T[1-9A-HJ-NP-Za-km-z]{33}$/, memo: false, min: 2 }],
+    doge: [{ id: "dogecoin", label: "Dogecoin",            pattern: /^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{32}$/, memo: false, min: 5 }],
+    xrp:  [{ id: "xrp",      label: "XRP Ledger",          pattern: /^r[1-9A-HJ-NP-Za-km-z]{24,34}$/, memo: true,  min: 1 }],
+    ada:  [{ id: "cardano",  label: "Cardano",             pattern: /^addr1[a-z0-9]{40,90}$/, memo: false, min: 2 }],
+    avax: [{ id: "avalanche", label: "Avalanche C-Chain",  pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 0.05 }],
+    link: [{ id: "ethereum", label: "Ethereum (ERC-20)",   pattern: /^0x[0-9a-fA-F]{40}$/, memo: false, min: 0.5 }],
+    dot:  [{ id: "polkadot", label: "Polkadot",            pattern: /^1[1-9A-HJ-NP-Za-km-z]{46,47}$/, memo: false, min: 1 }],
+    ltc:  [{ id: "litecoin", label: "Litecoin",            pattern: /^(ltc1[a-z0-9]{20,60}|[LM3][a-km-zA-HJ-NP-Z1-9]{25,34})$/, memo: false, min: 0.002 }],
+    atom: [{ id: "cosmos",   label: "Cosmos Hub",          pattern: /^cosmos1[a-z0-9]{38}$/, memo: true,  min: 0.1 }],
+    near: [{ id: "near",     label: "NEAR",                pattern: /^[a-z0-9._-]{2,64}$/, memo: false, min: 0.1 }]
+  };
+
+  function networksFor(tokenId) { return NETWORKS[tokenId] || NETWORKS.mrd; }
+
+  /**
+   * Exchanges people withdraw to. Nothing here talks to them: the wallet
+   * only knows the name you picked, and the address you pasted from your
+   * own account there.
+   */
+  var EXCHANGES = [
+    { id: "bybit",   name: "Bybit" },
+    { id: "binance", name: "Binance" },
+    { id: "okx",     name: "OKX" },
+    { id: "bitget",  name: "Bitget" },
+    { id: "other",   name: "Другая биржа" }
+  ];
+
   /* Named validators, so a stake is placed somewhere rather than nowhere.
      `bonus` shifts the token's base APY; `fee` is the operator's cut. */
   var VALIDATORS = [
@@ -1974,6 +2020,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
   var api = {
     TOKENS: TOKENS, FRAMES: FRAMES, CURRENCIES: CURRENCIES, VALIDATORS: VALIDATORS,
+    NETWORKS: NETWORKS, EXCHANGES: EXCHANGES, networksFor: networksFor,
     apyFor: apyFor,
     byId: function (id) { return BY_ID[id]; },
     series: series, change: change, tick: tick,
@@ -2299,6 +2346,80 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     return tx;
   }
 
+  /* ---------- topping up ---------- */
+
+  var CARD_LIMIT = 1000000;
+
+  /** Puts money on the linked card, which is what buying draws from. */
+  function topUpCard(usd) {
+    if (!(usd > 0)) throw new Error("сумма должна быть больше нуля");
+    if (state.card.available + usd > CARD_LIMIT) throw new Error("демо-карта не принимает больше миллиона");
+    state.card.available += usd;
+    var tx = record({ kind: "topup", tokenId: "usdc", amount: usd, usd: usd, fee: 0 });
+    notify("topup", "Карта пополнена", Market.money(usd, state.settings.currency) +
+      " · на карте " + Market.money(state.card.available, state.settings.currency));
+    save();
+    return tx;
+  }
+
+  /** An incoming transfer: in a real network it would arrive from outside. */
+  function depositToken(tokenId, units, from) {
+    var token = Market.byId(tokenId);
+    if (!token) throw new Error("нет такого токена");
+    if (!(units > 0)) throw new Error("количество должно быть больше нуля");
+    setBalance(tokenId, balanceOf(tokenId) + units);
+    var tx = record({
+      kind: "in", tokenId: tokenId, amount: units, usd: units * token.price, fee: 0,
+      address: from || Vault.base58(Vault.digest("meridian/demo/deposit/" + Date.now()))
+    });
+    notify("in", "Получено " + Market.amount(units, tokenId) + " " + token.sym, "Зачислено на счёт");
+    save();
+    return tx;
+  }
+
+  /* ---------- withdrawing to an exchange ---------- */
+
+  /**
+   * A withdrawal is an ordinary transfer with the two checks that actually
+   * matter: the address has to belong to the network you picked, and some
+   * networks reject a deposit that arrives without a memo.
+   */
+  function withdrawToExchange(tokenId, units, opts) {
+    opts = opts || {};
+    var token = Market.byId(tokenId);
+    if (!token) throw new Error("нет такого токена");
+
+    var network = Market.networksFor(tokenId).filter(function (n) { return n.id === opts.network; })[0];
+    if (!network) throw new Error("выберите сеть");
+
+    var address = String(opts.address || "").trim();
+    if (!address) throw new Error("вставьте адрес пополнения с биржи");
+    if (!network.pattern.test(address))
+      throw new Error("адрес не похож на адрес сети «" + network.label + "»");
+    if (network.memo && !String(opts.memo || "").trim())
+      throw new Error("для сети «" + network.label + "» биржа требует memo");
+
+    if (!(units > 0)) throw new Error("количество должно быть больше нуля");
+    if (units < network.min)
+      throw new Error("биржа не примет меньше " + Market.amount(network.min, tokenId) + " " + token.sym);
+
+    var fee = networkFee(tokenId);
+    if (units + fee > balanceOf(tokenId) + 1e-12) throw new Error("не хватает на комиссию сети");
+
+    setBalance(tokenId, balanceOf(tokenId) - units - fee);
+    var exchange = (Market.EXCHANGES.filter(function (e) { return e.id === opts.exchange; })[0] || {}).name ||
+      opts.exchangeName || "биржу";
+    var tx = record({
+      kind: "exchange", tokenId: tokenId, amount: units, usd: units * token.price,
+      fee: fee * token.price, address: address, memo: String(opts.memo || "").trim() || null,
+      exchange: exchange, network: network.label
+    });
+    notify("exchange", "Выведено на " + exchange,
+      Market.amount(units, tokenId) + " " + token.sym + " · " + network.label);
+    save();
+    return tx;
+  }
+
   function swapQuote(fromId, toId, units) {
     var from = Market.byId(fromId), to = Market.byId(toId);
     if (!from || !to || fromId === toId) return null;
@@ -2415,7 +2536,9 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
   function addContact(name, address, note) {
     if (!String(name || "").trim()) throw new Error("нужно имя");
-    if (!addressLooksValid(address)) throw new Error("адрес выглядит неверно");
+    /* The book also holds exchange deposit addresses, and those live on
+       other networks — 0x…, T…, addr1… — so the base58 rule is too narrow. */
+    if (!addressIsPlausible(address)) throw new Error("адрес выглядит неверно");
     if (contactFor(address.trim())) throw new Error("такой адрес уже сохранён");
     var contact = { id: signature(), name: String(name).trim(), address: String(address).trim(), note: String(note || "").trim() };
     state.contacts.unshift(contact);
@@ -2483,9 +2606,14 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     save();
   }
 
-  /** Base58, and the length a 32-byte key encodes to. */
+  /** Base58, and the length a 32-byte key encodes to: this network's own. */
   function addressLooksValid(address) {
     return /^[1-9A-HJ-NP-Za-km-z]{32,46}$/.test(String(address || "").trim());
+  }
+
+  /** Any network's address, loosely: enough to store, not to send blindly. */
+  function addressIsPlausible(address) {
+    return /^[A-Za-z0-9:._-]{20,80}$/.test(String(address || "").trim());
   }
 
   function settings() { return state.settings; }
@@ -2506,7 +2634,10 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     card: function () { return state.card; },
     txs: function () { return state.txs; },
     buy: buy, sell: sell, send: send, swap: swap, swapQuote: swapQuote,
+    topUpCard: topUpCard, depositToken: depositToken, withdrawToExchange: withdrawToExchange,
+    CARD_LIMIT: CARD_LIMIT,
     networkFee: networkFee, addressLooksValid: addressLooksValid,
+    addressIsPlausible: addressIsPlausible,
     settings: settings, setSetting: setSetting, save: save,
     stakes: stakes, stake: stake, unstake: unstake, claim: claim,
     rewardsOf: rewardsOf, rewardsTotal: rewardsTotal,
@@ -3323,12 +3454,12 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     ]));
 
     scroll.appendChild(h("div", { class: "quickrow" }, [
+      quick("plus", "Пополнить", topUpSheet),
       quick("arrow-up-right", "Отправить", function () { sendSheet(); }),
       quick("qr", "Получить", receiveSheet),
+      quick("logout", "На биржу", function () { exchangeSheet(); }),
       quick("swap", "Обмен", function () { swapSheet(); }),
-      quick("stake", "Стейкинг", function () { app().go("staking"); }),
-      quick("calc", "Калькулятор", function () { app().go("calc"); }),
-      quick("key", "Адреса", function () { app().go("addresses"); })
+      quick("stake", "Стейкинг", function () { app().go("staking"); })
     ]));
 
     var tabs = h("div", { class: "tabs", role: "tablist" });
@@ -3481,7 +3612,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 
     scroll.appendChild(h("div", { class: "quickrow" }, [
       quick("arrow-up-right", "Отправить", function () { sendSheet(tokenId); }),
-      quick("qr", "Получить", receiveSheet),
+      quick("logout", "На биржу", function () { exchangeSheet(tokenId); }),
       quick("swap", "Обмен", function () { swapSheet(tokenId); })
     ]));
 
@@ -3784,7 +3915,9 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     /* Saved recipients sit right in the form — sending to a known address
        should not mean opening a second sheet and losing the amount. */
     var contactChips = h("div", { class: "picker" });
-    Store.contacts().forEach(function (contact) {
+    /* Exchange destinations live on other networks; sending to one from
+       here would fail the base58 check anyway, so they stay out. */
+    Store.contacts().filter(function (c) { return Store.addressLooksValid(c.address); }).forEach(function (contact) {
       contactChips.appendChild(h("button", {
         class: "pick", title: contact.address,
         html: '<span class="avatar" style="width:24px;height:24px;font-size:11px;' + UI.avatarStyle(contact.address) + '">' +
@@ -4203,6 +4336,264 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     ].filter(Boolean));
   }
 
+
+  /* ============================================================
+     topping up
+     ============================================================ */
+
+  function topUpSheet() {
+    var mode = "card";                    // card money, or an incoming transfer
+    var tokenId = "usdc";
+    var cur = currency();
+    var model = amountModel(function () { paint(); });
+
+    var display = h("div", { class: "amount" });
+    var summary = h("div", { class: "card" });
+    var pickerHost = h("div");
+    var chips = h("div", { class: "chips" });
+
+    var modes = h("div", { class: "seg" });
+    [["card", "На карту"], ["crypto", "Переводом"]].forEach(function (pair) {
+      modes.appendChild(h("button", {
+        class: "segbtn", "aria-pressed": String(mode === pair[0]), text: pair[1],
+        onclick: function () {
+          mode = pair[0];
+          UI.$(".segbtn", modes).forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === pair[1])); });
+          model.clear();
+          render();
+        }
+      }));
+    });
+
+    function render() {
+      pickerHost.innerHTML = "";
+      chips.innerHTML = "";
+      if (mode === "crypto") {
+        pickerHost.appendChild(tokenPicker(tokenId, function (id) { tokenId = id; model.clear(); paint(); }));
+      }
+      var presets = mode === "card" ? [100, 500, 2000] : [10, 100, 1000];
+      presets.forEach(function (value) {
+        chips.appendChild(h("button", {
+          class: "chip",
+          text: mode === "card" ? Market.money(value, cur, { dp: 0 }) : String(value),
+          onclick: function () {
+            model.set(mode === "card" ? String(Math.round(value * Market.rate(cur))) : String(value));
+          }
+        }));
+      });
+      paint();
+    }
+
+    function paint() {
+      var token = Market.byId(tokenId);
+      var typed = model.value();
+
+      if (mode === "card") {
+        display.innerHTML = bigAmount(model.get(), null, Market.CURRENCIES[cur].sign) +
+          '<div class="amount__sub">на карту •• ' + esc(Store.card().last4) + "</div>";
+        summary.innerHTML = "";
+        summary.appendChild(kv("Сейчас на карте", Market.money(Store.card().available, cur, { dp: 2 })));
+        summary.appendChild(kv("Станет", Market.money(Store.card().available + typed / Market.rate(cur), cur, { dp: 2 })));
+        summary.appendChild(kv("Комиссия", "нет"));
+      } else {
+        display.innerHTML = bigAmount(model.get(), null, token.sym) +
+          '<div class="amount__sub">≈ ' + esc(Market.money(typed * token.price, cur, { dp: 2 })) + "</div>";
+        summary.innerHTML = "";
+        summary.appendChild(kv("Сеть", Market.networksFor(tokenId)[0].label));
+        summary.appendChild(kv("Сейчас на балансе", Market.amount(Store.balanceOf(tokenId), tokenId) + " " + token.sym));
+        summary.appendChild(kv("Станет", Market.amount(Store.balanceOf(tokenId) + typed, tokenId) + " " + token.sym));
+      }
+      confirm.disabled = !(typed > 0);
+      confirm.querySelector(".hold__label span:last-child").textContent =
+        mode === "card" ? "Удерживайте, чтобы пополнить карту" : "Удерживайте, чтобы зачислить";
+    }
+
+    var confirm = holdButton("Удерживайте, чтобы пополнить карту", function () {
+      try {
+        if (mode === "card") {
+          var usd = model.value() / Market.rate(cur);
+          Store.topUpCard(usd);
+          UI.closeSheet();
+          showSuccess("Карта пополнена", Market.money(usd, cur, { dp: 2 }) +
+            " · доступно " + Market.money(Store.card().available, cur, { dp: 2 }));
+        } else {
+          var units = model.value();
+          Store.depositToken(tokenId, units);
+          UI.closeSheet();
+          showSuccess("Зачислено", Market.amount(units, tokenId) + " " + Market.byId(tokenId).sym);
+        }
+      } catch (e) { UI.toast(e.message, "alert"); }
+    });
+
+    var body = [
+      modes,
+      h("div", { style: "height:10px" }),
+      pickerHost, display, chips, keypad(model), summary,
+      h("div", { style: "height:10px" }),
+      h("div", { class: "warn warn--info" }, [
+        h("span", { html: icon("info") }),
+        h("span", { text: "Демо-пополнение: деньги появляются здесь и только здесь. Настоящий перевод пришёл бы на ваш адрес — его показывает экран «Получить»." })
+      ]),
+      h("button", {
+        class: "btn btn--ghost btn--sm", style: "margin-top:10px",
+        html: icon("qr") + "<span>Показать адрес для перевода</span>",
+        onclick: function () { UI.closeSheet(); receiveSheet(); }
+      })
+    ];
+
+    var sheet = UI.openSheet("Пополнить", body, [confirm]);
+    bindKeys(sheet, model);
+    render();
+  }
+
+  /* ============================================================
+     withdrawing to an exchange
+     ============================================================ */
+
+  function exchangeSheet(preselect) {
+    var tokenId = preselect && Store.balanceOf(preselect) > 0 ? preselect : firstFunded();
+    if (!tokenId) { UI.toast("Сначала пополните кошелёк", "info"); return; }
+
+    var exchange = "bybit";
+    var network = Market.networksFor(tokenId)[0].id;
+    var cur = currency();
+
+    var address = h("input", { class: "input input--mono", placeholder: "Адрес пополнения с биржи", spellcheck: "false" });
+    var memo = h("input", { class: "input input--mono", placeholder: "Memo / Tag", spellcheck: "false" });
+    var memoField = h("label", { class: "field" }, [
+      h("span", { class: "field__label", text: "Memo — биржа не зачислит без него" }), memo
+    ]);
+    var display = h("div", { class: "amount" });
+    var summary = h("div", { class: "card" });
+    var error = h("div", { class: "hint hint--bad", style: "display:none" });
+    var networkHost = h("div", { class: "picker" });
+    var model = amountModel(function () { paint(); });
+    address.addEventListener("input", paint);
+    memo.addEventListener("input", paint);
+
+    var exchanges = h("div", { class: "picker" });
+    Market.EXCHANGES.forEach(function (item) {
+      exchanges.appendChild(h("button", {
+        class: "pick", "aria-pressed": String(item.id === exchange), text: item.name,
+        onclick: function () {
+          exchange = item.id;
+          UI.$(".pick", exchanges).forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+          this.setAttribute("aria-pressed", "true");
+          paint();
+        }
+      }));
+    });
+
+    function renderNetworks() {
+      networkHost.innerHTML = "";
+      Market.networksFor(tokenId).forEach(function (net) {
+        networkHost.appendChild(h("button", {
+          class: "pick", "aria-pressed": String(net.id === network), text: net.label,
+          onclick: function () {
+            network = net.id;
+            renderNetworks();
+            paint();
+          }
+        }));
+      });
+    }
+
+    function current() {
+      return Market.networksFor(tokenId).filter(function (n) { return n.id === network; })[0];
+    }
+
+    function paint() {
+      var token = Market.byId(tokenId);
+      var net = current();
+      var units = model.value();
+      var fee = Store.networkFee(tokenId);
+
+      display.innerHTML = bigAmount(model.get(), null, token.sym) +
+        '<div class="amount__sub">≈ ' + esc(Market.money(units * token.price, cur, { dp: 2 })) + "</div>";
+
+      memoField.hidden = !net.memo;
+
+      var badAddress = address.value.trim() && !net.pattern.test(address.value.trim());
+      address.className = "input input--mono" + (badAddress ? " input--bad" : "");
+
+      summary.innerHTML = "";
+      summary.appendChild(kv("Биржа", (Market.EXCHANGES.filter(function (e) { return e.id === exchange; })[0] || {}).name));
+      summary.appendChild(kv("Сеть", net.label));
+      summary.appendChild(kv("Минимум", Market.amount(net.min, tokenId) + " " + token.sym));
+      summary.appendChild(kv("Комиссия сети", Market.amount(fee, tokenId) + " " + token.sym));
+      summary.appendChild(kv("Спишется", Market.amount(units + fee, tokenId) + " " + token.sym));
+
+      var problem =
+        badAddress ? "Адрес не похож на адрес сети «" + net.label + "»" :
+        (units > 0 && units < net.min) ? "Биржа не примет меньше " + Market.amount(net.min, tokenId) + " " + token.sym :
+        (units + fee > Store.balanceOf(tokenId)) ? "Не хватает на сумму с комиссией" :
+        (net.memo && address.value.trim() && !memo.value.trim()) ? "Без memo биржа не зачислит перевод" : "";
+      error.style.display = problem ? "" : "none";
+      error.textContent = problem;
+      confirm.disabled = !!problem || !(units > 0) || !net.pattern.test(address.value.trim());
+    }
+
+    var confirm = holdButton("Удерживайте, чтобы вывести", function () {
+      try {
+        var units = model.value();
+        var tx = Store.withdrawToExchange(tokenId, units, {
+          address: address.value.trim(), memo: memo.value.trim(),
+          exchange: exchange, network: network
+        });
+        if (!Store.contactFor(tx.address)) {
+          try {
+            Store.addContact(tx.exchange + " · " + Market.byId(tokenId).sym, tx.address, tx.network);
+          } catch (e) { /* a duplicate name is not worth failing the withdrawal over */ }
+        }
+        UI.closeSheet();
+        showSuccess("Отправлено на " + tx.exchange,
+          Market.amount(tx.amount, tokenId) + " " + Market.byId(tokenId).sym + " · " + tx.network);
+      } catch (e) { UI.toast(e.message, "alert"); }
+    });
+
+    var chips = h("div", { class: "chips" });
+    [[25, "25 %"], [50, "50 %"], [100, "Макс"]].forEach(function (pair) {
+      chips.appendChild(h("button", {
+        class: "chip", text: pair[1],
+        onclick: function () {
+          var room = Math.max(0, Store.balanceOf(tokenId) - (pair[0] === 100 ? Store.networkFee(tokenId) : 0));
+          model.set(trimNumber(room * pair[0] / 100, Market.byId(tokenId).dp));
+        }
+      }));
+    });
+
+    renderNetworks();
+    var body = [
+      h("div", { class: "h", text: "Куда" }), exchanges,
+      h("div", { class: "h", text: "Что выводим" }),
+      tokenPicker(tokenId, function (id) {
+        tokenId = id;
+        network = Market.networksFor(id)[0].id;
+        model.clear();
+        renderNetworks();
+        paint();
+      }, function (t) { return Store.balanceOf(t.id) > 0; }),
+      h("div", { class: "h", text: "Сеть — должна совпадать с выбранной на бирже" }), networkHost,
+      h("label", { class: "field" }, [h("span", { class: "field__label", text: "Адрес пополнения" }), address]),
+      memoField,
+      display, chips, keypad(model), error, summary,
+      h("div", { style: "height:10px" }),
+      h("div", { class: "warn" }, [
+        h("span", { html: icon("alert") }),
+        h("span", { text: "Кошелёк не связан с биржей: адрес вы берёте в своём кабинете там. Если сеть в кошельке и на бирже не совпадёт, перевод не дойдёт — вернуть его будет не к кому." })
+      ])
+    ];
+
+    var sheet = UI.openSheet("Вывод на биржу", body, [confirm]);
+    bindKeys(sheet, model);
+    paint();
+  }
+
+  function firstFunded() {
+    var found = Market.TOKENS.filter(function (t) { return Store.balanceOf(t.id) > 0; })[0];
+    return found ? found.id : null;
+  }
+
   /* ============================================================
      activity, collectibles, accounts
      ============================================================ */
@@ -4215,7 +4606,9 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     swap: { title: "Обмен",    icon: "swap",           tone: "" },
     stake:   { title: "Стейкинг",        icon: "stake", tone: "out" },
     unstake: { title: "Вывод из стейкинга", icon: "stake", tone: "in" },
-    reward:  { title: "Награда",         icon: "zap",   tone: "in" }
+    reward:  { title: "Награда",         icon: "zap",   tone: "in" },
+    topup:    { title: "Пополнение карты", icon: "card",   tone: "in" },
+    exchange: { title: "Вывод на биржу",   icon: "logout", tone: "out" }
   };
 
   function activityList() {
@@ -4235,8 +4628,11 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
       var token = Market.byId(tx.tokenId);
       var right = tx.kind === "swap"
         ? Market.amount(tx.toAmount, tx.toTokenId) + " " + Market.byId(tx.toTokenId).sym
+        : tx.kind === "topup" ? "+" + Market.money(tx.usd, currency(), { dp: 0 })
         : (meta.tone === "in" ? "+" : "−") + Market.amount(tx.amount, tx.tokenId) + " " + token.sym;
       var sub = tx.kind === "swap" ? token.sym + " → " + Market.byId(tx.toTokenId).sym
+        : tx.kind === "topup" ? "карта •• " + Store.card().last4
+        : tx.exchange ? tx.exchange + " · " + tx.network
         : tx.address ? UI.shortAddress(tx.address, 4, 4)
         : token.name;
 
@@ -4261,6 +4657,9 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
       kv("Количество", Market.amount(tx.amount, tx.tokenId) + " " + token.sym)
     ];
     if (tx.kind === "swap") rows.push(kv("Получено", Market.amount(tx.toAmount, tx.toTokenId) + " " + Market.byId(tx.toTokenId).sym));
+    if (tx.exchange) rows.push(kv("Биржа", tx.exchange));
+    if (tx.network) rows.push(kv("Сеть", tx.network));
+    if (tx.memo) rows.push(kv("Memo", tx.memo));
     if (tx.address) rows.push(kv("Адрес", UI.shortAddress(tx.address, 6, 6)));
     rows.push(kv("Сумма", Market.money(tx.usd, cur, { dp: 2 })));
     rows.push(kv("Комиссия", Market.money(tx.fee, cur, { dp: 2 })));
@@ -4727,7 +5126,8 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     UI.openSheet(onPick ? "Выбрать получателя" : "Адресная книга", [
       listHost,
       h("div", { class: "h", text: "Новый контакт" }),
-      h("div", { class: "gap" }, [name, address, note, hint])
+      h("div", { class: "gap" }, [name, address, note, hint]),
+      h("div", { class: "hint", text: "Сюда можно сохранить и адрес пополнения с биржи — тогда в заметке укажите сеть." })
     ], [
       h("button", {
         class: "btn btn--primary", html: icon("plus") + "<span>Сохранить контакт</span>",
@@ -4752,7 +5152,8 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
      ============================================================ */
 
   var NOTE_ICON = { buy: "arrow-down", sell: "arrow-up", out: "arrow-up-right", swap: "swap",
-                    stake: "stake", unstake: "stake", reward: "zap", alert: "bell" };
+                    stake: "stake", unstake: "stake", reward: "zap", alert: "bell",
+                    topup: "card", in: "arrow-down-left", exchange: "logout" };
 
   function notificationsSheet() {
     var body = [];
@@ -5125,7 +5526,8 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     receiveSheet: receiveSheet, swapSheet: swapSheet, accountsSheet: accountsSheet,
     stakingScreen: stakingScreen, stakeSheet: stakeSheet, contactsSheet: contactsSheet,
     notificationsSheet: notificationsSheet, alertSheet: alertSheet, portfolioSheet: portfolioSheet,
-    marketScreen: marketScreen, calcScreen: calcScreen, addressesScreen: addressesScreen
+    marketScreen: marketScreen, calcScreen: calcScreen, addressesScreen: addressesScreen,
+    topUpSheet: topUpSheet, exchangeSheet: exchangeSheet
   };
 })(typeof window !== "undefined" ? window : globalThis);
 

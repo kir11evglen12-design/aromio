@@ -44,6 +44,10 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+/* The browser's own [hidden] rule loses to any display we set on a class,
+   so state it once, loudly, and toggle visibility with el.hidden. */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   height: 100%;

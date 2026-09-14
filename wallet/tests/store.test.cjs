@@ -136,6 +136,58 @@ throws('stake a token without staking', () => W.stake('btc', 0.001, 'polaris'), 
 throws('stake more than free', () => W.stake('sol', 1e9, 'polaris'), /недостаточно/);
 throws('unstake an unknown position', () => W.unstake('nope'), /не найдена/);
 
+// ---------- topping up ----------
+{
+  const cardBefore = W.card().available;
+  W.topUpCard(750);
+  ok('card top-up adds exactly the amount', near(W.card().available, cardBefore + 750));
+  ok('card top-up is recorded', W.txs()[0].kind === 'topup' && W.txs()[0].usd === 750);
+  ok('card top-up costs no fee', W.txs()[0].fee === 0);
+
+  const solBefore = W.balanceOf('sol');
+  const tx = W.depositToken('sol', 2.5);
+  ok('deposit credits the token', near(W.balanceOf('sol'), solBefore + 2.5));
+  ok('deposit lands in history as incoming', tx.kind === 'in' && W.addressLooksValid(tx.address));
+}
+throws('top up with zero', () => W.topUpCard(0), /больше нуля/);
+throws('top up past the demo limit', () => W.topUpCard(W.CARD_LIMIT * 2), /миллиона/);
+throws('deposit an unknown token', () => W.depositToken('nope', 1), /нет такого/);
+
+// ---------- withdrawing to an exchange ----------
+{
+  const solAddress = Vault.base58(Vault.digest('bybit/sol/deposit'));
+  const before = W.balanceOf('sol');
+  const fee = W.networkFee('sol');
+  const tx = W.withdrawToExchange('sol', 1, { address: solAddress, exchange: 'bybit', network: 'solana' });
+  ok('withdrawal debits amount plus network fee', near(W.balanceOf('sol'), before - 1 - fee));
+  ok('withdrawal remembers where it went', tx.exchange === 'Bybit' && tx.network === 'Solana' && tx.address === solAddress);
+  ok('withdrawal is its own kind of entry', tx.kind === 'exchange');
+
+  // the mistake that actually loses money: right address, wrong network
+  const ercAddress = '0x8f3Ac1b2D4e5F60718293a4B5c6D7e8F90a1B2c3';
+  throws('an ERC-20 address on Solana is refused',
+    () => W.withdrawToExchange('usdc', 50, { address: ercAddress, exchange: 'bybit', network: 'solana' }), /сети/);
+  const ok50 = W.withdrawToExchange('usdc', 50, { address: ercAddress, exchange: 'bybit', network: 'ethereum' });
+  ok('the same address on Ethereum goes through', ok50.network === 'Ethereum (ERC-20)');
+
+  // networks that need a memo say so
+  const tonAddress = 'UQ' + 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUu1234'; // 48 chars, TON shape
+  ok('the test TON address is the right shape', tonAddress.length === 48);
+  throws('TON without a memo is refused',
+    () => W.withdrawToExchange('ton', 5, { address: tonAddress, exchange: 'bybit', network: 'ton' }), /memo/);
+  const withMemo = W.withdrawToExchange('ton', 5, { address: tonAddress, memo: '4471829', exchange: 'bybit', network: 'ton' });
+  ok('TON with a memo goes through', withMemo.memo === '4471829');
+
+  throws('below the exchange minimum', () => W.withdrawToExchange('usdc', 0.5,
+    { address: ercAddress, exchange: 'bybit', network: 'ethereum' }), /не примет меньше/);
+  throws('unknown network', () => W.withdrawToExchange('sol', 1,
+    { address: solAddress, exchange: 'bybit', network: 'made-up' }), /выберите сеть/);
+  throws('empty address', () => W.withdrawToExchange('sol', 1,
+    { address: '', exchange: 'bybit', network: 'solana' }), /вставьте адрес/);
+  throws('more than held', () => W.withdrawToExchange('sol', 1e9,
+    { address: solAddress, exchange: 'bybit', network: 'solana' }), /не хватает/);
+}
+
 // ---------- address book ----------
 {
   const before = W.contacts().length;
@@ -147,6 +199,10 @@ throws('unstake an unknown position', () => W.unstake('nope'), /не найде�
   throws('duplicate contact', () => W.addContact('Ещё раз', address), /уже сохранён/);
   throws('contact without a name', () => W.addContact('   ', Vault.base58(Vault.digest('x'))), /нужно имя/);
   throws('contact with a bad address', () => W.addContact('Кто-то', 'nope!'), /адрес/i);
+  const erc = W.addContact('Bybit · USDC', '0x8f3Ac1b2D4e5F60718293a4B5c6D7e8F90a1B2c3', 'Ethereum (ERC-20)');
+  ok('an exchange address on another network can be saved', W.contactFor(erc.address).note === 'Ethereum (ERC-20)');
+  ok('but it is not valid for this network', !W.addressLooksValid(erc.address));
+  W.removeContact(erc.id);
   W.removeContact(contact.id);
   ok('contact: removed', W.contacts().length === before && W.contactFor(address) === null);
 }

@@ -310,6 +310,80 @@
     return tx;
   }
 
+  /* ---------- topping up ---------- */
+
+  var CARD_LIMIT = 1000000;
+
+  /** Puts money on the linked card, which is what buying draws from. */
+  function topUpCard(usd) {
+    if (!(usd > 0)) throw new Error("сумма должна быть больше нуля");
+    if (state.card.available + usd > CARD_LIMIT) throw new Error("демо-карта не принимает больше миллиона");
+    state.card.available += usd;
+    var tx = record({ kind: "topup", tokenId: "usdc", amount: usd, usd: usd, fee: 0 });
+    notify("topup", "Карта пополнена", Market.money(usd, state.settings.currency) +
+      " · на карте " + Market.money(state.card.available, state.settings.currency));
+    save();
+    return tx;
+  }
+
+  /** An incoming transfer: in a real network it would arrive from outside. */
+  function depositToken(tokenId, units, from) {
+    var token = Market.byId(tokenId);
+    if (!token) throw new Error("нет такого токена");
+    if (!(units > 0)) throw new Error("количество должно быть больше нуля");
+    setBalance(tokenId, balanceOf(tokenId) + units);
+    var tx = record({
+      kind: "in", tokenId: tokenId, amount: units, usd: units * token.price, fee: 0,
+      address: from || Vault.base58(Vault.digest("meridian/demo/deposit/" + Date.now()))
+    });
+    notify("in", "Получено " + Market.amount(units, tokenId) + " " + token.sym, "Зачислено на счёт");
+    save();
+    return tx;
+  }
+
+  /* ---------- withdrawing to an exchange ---------- */
+
+  /**
+   * A withdrawal is an ordinary transfer with the two checks that actually
+   * matter: the address has to belong to the network you picked, and some
+   * networks reject a deposit that arrives without a memo.
+   */
+  function withdrawToExchange(tokenId, units, opts) {
+    opts = opts || {};
+    var token = Market.byId(tokenId);
+    if (!token) throw new Error("нет такого токена");
+
+    var network = Market.networksFor(tokenId).filter(function (n) { return n.id === opts.network; })[0];
+    if (!network) throw new Error("выберите сеть");
+
+    var address = String(opts.address || "").trim();
+    if (!address) throw new Error("вставьте адрес пополнения с биржи");
+    if (!network.pattern.test(address))
+      throw new Error("адрес не похож на адрес сети «" + network.label + "»");
+    if (network.memo && !String(opts.memo || "").trim())
+      throw new Error("для сети «" + network.label + "» биржа требует memo");
+
+    if (!(units > 0)) throw new Error("количество должно быть больше нуля");
+    if (units < network.min)
+      throw new Error("биржа не примет меньше " + Market.amount(network.min, tokenId) + " " + token.sym);
+
+    var fee = networkFee(tokenId);
+    if (units + fee > balanceOf(tokenId) + 1e-12) throw new Error("не хватает на комиссию сети");
+
+    setBalance(tokenId, balanceOf(tokenId) - units - fee);
+    var exchange = (Market.EXCHANGES.filter(function (e) { return e.id === opts.exchange; })[0] || {}).name ||
+      opts.exchangeName || "биржу";
+    var tx = record({
+      kind: "exchange", tokenId: tokenId, amount: units, usd: units * token.price,
+      fee: fee * token.price, address: address, memo: String(opts.memo || "").trim() || null,
+      exchange: exchange, network: network.label
+    });
+    notify("exchange", "Выведено на " + exchange,
+      Market.amount(units, tokenId) + " " + token.sym + " · " + network.label);
+    save();
+    return tx;
+  }
+
   function swapQuote(fromId, toId, units) {
     var from = Market.byId(fromId), to = Market.byId(toId);
     if (!from || !to || fromId === toId) return null;
@@ -426,7 +500,9 @@
 
   function addContact(name, address, note) {
     if (!String(name || "").trim()) throw new Error("нужно имя");
-    if (!addressLooksValid(address)) throw new Error("адрес выглядит неверно");
+    /* The book also holds exchange deposit addresses, and those live on
+       other networks — 0x…, T…, addr1… — so the base58 rule is too narrow. */
+    if (!addressIsPlausible(address)) throw new Error("адрес выглядит неверно");
     if (contactFor(address.trim())) throw new Error("такой адрес уже сохранён");
     var contact = { id: signature(), name: String(name).trim(), address: String(address).trim(), note: String(note || "").trim() };
     state.contacts.unshift(contact);
@@ -494,9 +570,14 @@
     save();
   }
 
-  /** Base58, and the length a 32-byte key encodes to. */
+  /** Base58, and the length a 32-byte key encodes to: this network's own. */
   function addressLooksValid(address) {
     return /^[1-9A-HJ-NP-Za-km-z]{32,46}$/.test(String(address || "").trim());
+  }
+
+  /** Any network's address, loosely: enough to store, not to send blindly. */
+  function addressIsPlausible(address) {
+    return /^[A-Za-z0-9:._-]{20,80}$/.test(String(address || "").trim());
   }
 
   function settings() { return state.settings; }
@@ -517,7 +598,10 @@
     card: function () { return state.card; },
     txs: function () { return state.txs; },
     buy: buy, sell: sell, send: send, swap: swap, swapQuote: swapQuote,
+    topUpCard: topUpCard, depositToken: depositToken, withdrawToExchange: withdrawToExchange,
+    CARD_LIMIT: CARD_LIMIT,
     networkFee: networkFee, addressLooksValid: addressLooksValid,
+    addressIsPlausible: addressIsPlausible,
     settings: settings, setSetting: setSetting, save: save,
     stakes: stakes, stake: stake, unstake: unstake, claim: claim,
     rewardsOf: rewardsOf, rewardsTotal: rewardsTotal,
