@@ -11,7 +11,7 @@ const path = require("path");
 const ROOT = __dirname;
 const OUT = path.join(ROOT, "meridian.html");
 
-const SCRIPTS = ["wordlist.js", "qr.js", "vault.js", "market.js", "wallet.js", "ui.js", "screens.js", "app.js"];
+const SCRIPTS = ["wordlist.js", "qr.js", "vault.js", "market.js", "wallet.js", "ui.js", "intro.js", "screens.js", "app.js"];
 
 const read = name => fs.readFileSync(path.join(ROOT, name), "utf8");
 

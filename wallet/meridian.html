@@ -157,9 +157,11 @@ input { border: 0; outline: 0; background: none; }
 
 .screen[hidden] { display: none; }
 
-.screen--enter { animation: screen-in .34s var(--ease) both; }
+/* The intro flies a camera; the app only nods at it — a 300 ms push out of
+   depth, enough to feel like the same world without slowing anyone down. */
+.screen--enter { animation: screen-in .3s var(--ease) both; }
 @keyframes screen-in {
-  from { opacity: 0; transform: translateY(10px) scale(.99); }
+  from { opacity: 0; transform: perspective(900px) translateZ(-70px) rotateX(2.5deg); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1050,7 +1052,24 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 }
 @keyframes ring { 0% { box-shadow: 0 0 0 0 rgb(156 187 255 / 30%); } 70%, 100% { box-shadow: 0 0 0 34px rgb(156 187 255 / 0%); } }
 .done__ring svg { width: 54px; height: 54px; color: var(--cyan); }
-.done__t { font-size: 24px; font-weight: 740; letter-spacing: -.03em; }
+.done__t {
+  position: relative;
+  font-size: 24px;
+  font-weight: 740;
+  letter-spacing: -.03em;
+}
+.done__t::before,
+.done__t::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.done__t::before { color: #ff2f6d; animation: split-l .5s var(--ease) both; }
+.done__t::after  { color: #12e6ff; animation: split-r .5s var(--ease) both; }
+@keyframes split-l { from { transform: translateX(-14px); opacity: 1; } to { transform: none; opacity: 0; } }
+@keyframes split-r { from { transform: translateX(14px);  opacity: 1; } to { transform: none; opacity: 0; } }
 .done__s { font-size: 14px; color: var(--dim); }
 
 .tick { stroke-dasharray: 60; stroke-dashoffset: 60; animation: tick .5s var(--ease) .12s forwards; }
@@ -1091,6 +1110,263 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+}
+
+/* ============================================================
+   INTRO — the opening sequence.
+
+   One scroll position, five progress values (--mark, --type, --wall,
+   --flash, --end), and every layer below is a transform written in terms
+   of them. Nothing animates on a timer, so the camera answers the finger
+   exactly like a scroll-driven site.
+   ============================================================ */
+
+.intro { background: #000; }
+
+.intro__stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  perspective: 620px;
+  perspective-origin: 50% 46%;
+  pointer-events: none;
+  --p: 0; --mark: 0; --type: 0; --wall: 0; --flash: 0; --end: 0;
+}
+
+/* the deep blue that sits behind everything, breathing with the scroll */
+.intro__glow {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(46% 38% at 50% 62%, rgb(30 70 255 / 60%), transparent 70%),
+    radial-gradient(30% 26% at 50% 44%, rgb(23 193 255 / 34%), transparent 72%);
+  opacity: calc(.22 + .38 * var(--p));
+  filter: blur(18px);                     /* constant: a changing radius re-rasterises every frame */
+  transform: scale(calc(.75 + .4 * var(--p)));
+}
+
+.intro__scene {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* ---------- the wireframe corridor ---------- */
+
+/* The planes never move; their grid does. Sliding the background along the
+   axis that depth maps to gives an endless corridor, so the camera can fly
+   as long as it likes without ever reaching an edge. */
+.tunnel {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.tunnel__plane {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4200px;
+  height: 4200px;
+  margin: -2100px 0 0 -2100px;
+  background-image:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 26%) 0 1px, transparent 1px 190px),
+    repeating-linear-gradient(0deg,  rgb(255 255 255 / 26%) 0 1px, transparent 1px 190px);
+  background-position: 0 calc(var(--p) * 2280px);
+  opacity: .5;
+  backface-visibility: hidden;
+  mask-image: radial-gradient(60% 60% at 50% 50%, #000 30%, transparent 78%);
+}
+.tunnel__plane--floor { transform: rotateX(90deg)  translateZ(-260px); }
+.tunnel__plane--ceil  { transform: rotateX(-90deg) translateZ(-300px); }
+.tunnel__plane--left  { transform: rotateY(90deg)  translateZ(-330px); }
+.tunnel__plane--right { transform: rotateY(-90deg) translateZ(-330px); }
+
+/* ---------- beat 1: the mark draws itself ---------- */
+
+.intro__beat {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform-style: preserve-3d;
+}
+
+.intro__beat--mark {
+  /* Perspective is 620px: push a layer near that and it fills the frame as a
+     white haze, so this stops well short and is gone before it gets there. */
+  opacity: calc(1 - max(0, (var(--mark) - .58)) * 2.6);
+  transform: translateZ(calc(-40px + 300px * var(--mark))) scale(calc(.86 + .34 * var(--mark)));
+}
+.intro__mark { width: 46%; max-width: 210px; overflow: visible; }
+.intro__mark .draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--mark));
+}
+.intro__mark .meridian {
+  filter: drop-shadow(0 0 10px rgb(156 187 255 / 90%));
+  stroke-dashoffset: calc(1 - max(0, (var(--mark) - .3)) * 1.43);
+}
+
+/* ---------- beat 2: the name goes past the camera ---------- */
+
+.intro__beat--type {
+  opacity: calc(min(1, var(--type) * 5) * (1 - max(0, (var(--type) - .82)) * 5.5));
+  transform: rotateY(-26deg) rotateX(4deg);
+}
+.intro__word {
+  position: absolute;
+  white-space: nowrap;
+  font-size: clamp(66px, 25vw, 128px);
+  font-weight: 800;
+  letter-spacing: -.05em;
+  line-height: 1;
+  will-change: transform;
+}
+.intro__word--solid {
+  color: #fff;
+  text-shadow: 0 0 34px rgb(60 120 255 / 90%), 0 0 90px rgb(30 70 255 / 70%);
+  transform: translate3d(calc(72vw - 172vw * var(--type)), 0, 190px);
+}
+.intro__word--ghost {
+  color: transparent;
+  -webkit-text-stroke: 1.4px rgb(255 255 255 / 62%);
+  transform: translate3d(calc(96vw - 210vw * var(--type)), -78px, -120px);
+}
+.intro__word--echo {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(156 187 255 / 30%);
+  transform: translate3d(calc(126vw - 268vw * var(--type)), 96px, -520px);
+}
+
+/* ---------- beat 3: the wall of panels ---------- */
+
+.intro__beat--wall {
+  opacity: calc(min(1, var(--wall) * 8) * (1 - max(0, (var(--wall) - .9)) * 10));
+  transform-style: preserve-3d;
+}
+.panel {
+  position: absolute;
+  overflow: hidden;
+  width: 208px;
+  height: 126px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 14px;
+  background: #0d1422;
+  border: 1px solid rgb(156 187 255 / 45%);
+  box-shadow: 0 0 50px rgb(30 70 255 / 34%);
+  text-align: left;
+  /* each panel is staggered along the corridor, so they arrive one after
+     another instead of as a single slab */
+  --phase: clamp(0, (var(--wall) - var(--i) * .055) * 1.34, 1);
+  transform:
+    translate3d(var(--x), var(--y), calc(-2900px + 3500px * var(--phase)))
+    rotateY(calc(var(--tilt) * 1deg));
+  opacity: calc(min(1, var(--phase) * 6) * (1 - max(0, (var(--phase) - .88)) * 8));
+  will-change: transform;
+}
+
+/* ---------- beat 4: the seam, split into channels ---------- */
+
+.intro__flash {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: calc(min(1, var(--flash) * 3) * (1 - max(0, (var(--flash) - .5)) * 2));
+  mix-blend-mode: screen;
+}
+.intro__flash::before,
+.intro__flash::after {
+  content: attr(data-text);
+  position: absolute;
+  font-size: clamp(40px, 15vw, 76px);
+  font-weight: 800;
+  letter-spacing: -.045em;
+  filter: blur(calc(2px * (1 - var(--flash))));
+}
+.intro__flash::before {
+  color: #ff2f6d;
+  transform: translateX(calc(-42px + 40px * var(--flash))) skewX(-6deg);
+}
+.intro__flash::after {
+  color: #12e6ff;
+  transform: translateX(calc(42px - 40px * var(--flash))) skewX(-6deg);
+}
+
+/* ---------- the scroller and the end card ---------- */
+
+.intro__scroll {
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  scroll-behavior: auto;
+}
+.intro__runway { height: 460%; }
+
+.intro__end {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 0 20px 26px;
+  opacity: var(--end-o, 1);
+}
+.intro__title {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -.045em;
+  color: #fff;
+  text-shadow: 0 0 40px rgb(30 70 255 / 70%);
+}
+.intro__sub { font-size: 14.5px; line-height: 1.5; color: var(--dim); max-width: 32ch; }
+.intro__actions { display: flex; flex-direction: column; gap: 10px; padding-top: 8px; }
+
+.intro__cue {
+  position: absolute;
+  left: 0; right: 0; bottom: 22px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 55%);
+  pointer-events: none;
+  transition: opacity .3s;
+  animation: cue 2.2s ease-in-out infinite;
+}
+.intro__cue svg { width: 18px; height: 18px; }
+@keyframes cue { 50% { transform: translateY(6px); } }
+
+.intro__skip {
+  position: absolute;
+  top: 14px; right: 14px;
+  z-index: 3;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 70%);
+  background: rgb(255 255 255 / 8%);
+  transition: opacity .3s, background .2s;
+}
+.intro__skip:hover { background: rgb(255 255 255 / 14%); color: #fff; }
+
+/* a still frame for anyone who would rather not be flown anywhere */
+.intro--still .intro__cue,
+.intro--still .intro__skip { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .intro__cue { animation: none; }
 }
 
 </style>
@@ -3052,6 +3328,182 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
 })(typeof window !== "undefined" ? window : globalThis);
 
 </script>
+<!-- intro.js -->
+<script>
+/**
+ * The opening sequence.
+ *
+ * Same grammar as the reference: a wireframe tunnel in perspective, the mark
+ * drawn stroke by stroke, huge type flying past the camera, a wall of panels
+ * sweeping by, an RGB split on the seam. Scroll drives the camera, exactly
+ * as it does there — the page is a timeline, not a slideshow.
+ *
+ * No libraries. Scrolling writes five progress values onto the stage as CSS
+ * variables, and every layer is a transform expressed in terms of them, so
+ * the whole scene animates on the compositor.
+ */
+(function (global) {
+  "use strict";
+
+  var UI = global.UI;
+  var h = UI.h, icon = UI.icon;
+
+  /* Where each beat lives on the scroll, 0 to 1. */
+  var BEATS = {
+    mark:  [0.00, 0.18],
+    type:  [0.14, 0.44],
+    wall:  [0.38, 0.76],
+    flash: [0.74, 0.84],
+    end:   [0.82, 1.00]
+  };
+
+  var clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+  var seg = function (p, range) { return clamp01((p - range[0]) / (range[1] - range[0])); };
+
+  function reducedMotion() {
+    return typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  /* The mark, drawn rather than placed: every stroke is dashed so the scroll
+     can pull it into existence. */
+  var MARK = '' +
+    '<svg class="intro__mark" viewBox="0 0 120 120" aria-hidden="true">' +
+      '<g fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round">' +
+        '<circle class="draw" cx="60" cy="60" r="46" pathLength="1"/>' +
+        '<ellipse class="draw" cx="60" cy="60" rx="34" ry="46" pathLength="1"/>' +
+        '<ellipse class="draw" cx="60" cy="60" rx="15" ry="46" pathLength="1"/>' +
+        '<path class="draw" d="M14 60h92" pathLength="1"/>' +
+        '<path class="draw" d="M22 38h76" pathLength="1"/>' +
+        '<path class="draw" d="M22 82h76" pathLength="1"/>' +
+      "</g>" +
+      '<path class="draw meridian" d="M60 8v104" fill="none" stroke="#9cbbff" stroke-width="3" stroke-linecap="round" pathLength="1"/>' +
+    "</svg>";
+
+  /** Six panels flying past, carrying the product rather than placeholders. */
+  var PANELS = [
+    { x: -104, y: -132, tilt:  20, label: "БАЛАНС",   body: '<span class="p__big">19 606,37 $</span><span class="p__up">+2,25 %</span>' },
+    { x:  108, y:  -96, tilt: -20, label: "ГРАФИК",   body: '<svg viewBox="0 0 120 46" class="p__chart"><path d="M2 38 18 30 30 34 44 18 58 24 72 10 88 16 104 6 118 12" fill="none" stroke="#24d6a0" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></svg>' },
+    { x: -118, y:   34, tilt:  22, label: "КУПИТЬ",   body: '<span class="p__btn">КУПИТЬ</span>' },
+    { x:  114, y:   62, tilt: -22, label: "СТЕЙКИНГ", body: '<span class="p__big">8,4 %</span><span class="p__dim">годовых</span>' },
+    { x:  -96, y:  158, tilt:  18, label: "НА БИРЖУ", body: '<span class="p__mono">0x8f3A…B2c3</span><span class="p__dim">Ethereum</span>' },
+    { x:  102, y: -212, tilt: -18, label: "АДРЕСА",   body: '<span class="p__mono">9ELRvD…Eey1</span><span class="p__dim">счёт № 0</span>' }
+  ];
+
+  /**
+   * Builds the intro. `onDone` runs when the visitor leaves it, either by
+   * scrolling to the end and choosing an action, or by skipping.
+   */
+  function screen(actions) {
+    var stage = h("div", { class: "intro__stage" });
+
+    /* --- the tunnel: four planes making a corridor --- */
+    var tunnel = h("div", { class: "tunnel" }, ["floor", "ceil", "left", "right"].map(function (side) {
+      return h("div", { class: "tunnel__plane tunnel__plane--" + side });
+    }));
+
+    /* --- beats --- */
+    var mark = h("div", { class: "intro__beat intro__beat--mark", html: MARK });
+
+    var type = h("div", { class: "intro__beat intro__beat--type" }, [
+      h("span", { class: "intro__word intro__word--ghost", text: "MERIDIAN" }),
+      h("span", { class: "intro__word intro__word--solid", text: "MERIDIAN" }),
+      h("span", { class: "intro__word intro__word--echo", text: "MERIDIAN" })
+    ]);
+
+    var wall = h("div", { class: "intro__beat intro__beat--wall" }, PANELS.map(function (panel, i) {
+      var node = h("div", {
+        class: "panel",
+        html: '<span class="p__label">' + panel.label + "</span>" +
+              '<span class="p__body">' + panel.body + "</span>"
+      });
+      node.style.setProperty("--x", panel.x + "px");
+      node.style.setProperty("--y", panel.y + "px");
+      node.style.setProperty("--tilt", panel.tilt);
+      node.style.setProperty("--i", i);
+      return node;
+    }));
+
+    var scene = h("div", { class: "intro__scene" }, [tunnel, mark, type, wall]);
+    var glow = h("div", { class: "intro__glow" });
+    var flash = h("div", { class: "intro__flash", "data-text": "MERIDIAN" });
+
+    stage.appendChild(glow);
+    stage.appendChild(scene);
+    stage.appendChild(flash);
+
+    /* --- the end card, and the scroller that drives everything --- */
+    var end = h("div", { class: "intro__end" }, [
+      h("div", { class: "intro__title", text: "Meridian" }),
+      h("div", { class: "intro__sub", text: "Кошелёк с большими кнопками «Купить» и «Продать». Симулятор: настоящих денег и настоящей сети здесь нет." }),
+      h("div", { class: "intro__actions" }, [
+        h("button", {
+          class: "btn btn--primary", html: icon("plus") + "<span>Создать кошелёк</span>",
+          onclick: actions.create
+        }),
+        h("button", {
+          class: "btn btn--ghost", html: icon("key") + "<span>У меня уже есть фраза</span>",
+          onclick: actions.restore
+        })
+      ])
+    ]);
+
+    var cue = h("div", { class: "intro__cue", html: icon("chevron-down") + "<span>листайте</span>" });
+
+    var scroller = h("div", { class: "scroll intro__scroll" }, [
+      h("div", { class: "intro__runway" }),
+      end
+    ]);
+
+    var skip = h("button", {
+      class: "intro__skip", text: "Пропустить",
+      onclick: function () { finish(); }
+    });
+
+    var root = h("div", { class: "screen intro" }, [stage, scroller, cue, skip]);
+
+    /* --- driving it --- */
+    function paint() {
+      var max = scroller.scrollHeight - scroller.clientHeight;
+      var p = max > 0 ? clamp01(scroller.scrollTop / max) : 1;
+      stage.style.setProperty("--p", p.toFixed(4));
+      stage.style.setProperty("--mark", seg(p, BEATS.mark).toFixed(4));
+      stage.style.setProperty("--type", seg(p, BEATS.type).toFixed(4));
+      stage.style.setProperty("--wall", seg(p, BEATS.wall).toFixed(4));
+      stage.style.setProperty("--flash", seg(p, BEATS.flash).toFixed(4));
+      stage.style.setProperty("--end", seg(p, BEATS.end).toFixed(4));
+      cue.style.opacity = p > 0.04 ? "0" : "";
+      skip.style.opacity = p > 0.9 ? "0" : "";
+      skip.style.pointerEvents = p > 0.9 ? "none" : "";
+    }
+
+    var ticking = false;
+    scroller.addEventListener("scroll", function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { paint(); ticking = false; });
+    }, { passive: true });
+
+    function finish() {
+      scroller.scrollTo({ top: scroller.scrollHeight, behavior: reducedMotion() ? "auto" : "smooth" });
+    }
+
+    /* Nobody should have to scroll through a title sequence to reach a
+       wallet they have already seen — or at all, if motion is unwelcome. */
+    if (reducedMotion() || actions.instant) {
+      root.classList.add("intro--still");
+      setTimeout(function () { scroller.scrollTop = scroller.scrollHeight; paint(); }, 0);
+    } else {
+      setTimeout(paint, 0);
+    }
+
+    root.__tick = null;
+    return root;
+  }
+
+  global.Intro = { screen: screen, BEATS: BEATS };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
 <!-- screens.js -->
 <script>
 /**
@@ -3089,27 +3541,10 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
      ============================================================ */
 
   function welcome() {
-    return h("div", { class: "screen screen--enter" }, [
-      h("div", { class: "topbar" }, [
-        h("div", { class: "spacer" }),
-        h("span", { class: "pill", html: '<span class="pill__dot"></span>демо' })
-      ]),
-      h("div", { class: "hero", html: MARK }),
-      h("div", { class: "hero", style: "flex:0" }, [
-        h("div", { class: "hero__title", text: BRAND }),
-        h("div", { class: "hero__sub", text: "Кошелёк с большими кнопками «Купить» и «Продать». Симулятор: настоящих денег и настоящей сети здесь нет." })
-      ]),
-      h("div", { class: "foot" }, [
-        h("button", {
-          class: "btn btn--primary", html: icon("plus") + "<span>Создать кошелёк</span>",
-          onclick: function () { app().go("create"); }
-        }),
-        h("button", {
-          class: "btn btn--ghost", html: icon("key") + "<span>У меня уже есть фраза</span>",
-          onclick: function () { app().go("import"); }
-        })
-      ])
-    ]);
+    return global.Intro.screen({
+      create: function () { app().go("create"); },
+      restore: function () { app().go("import"); }
+    });
   }
 
   /** Password + confirmation, shared by the create and import flows. */
@@ -5506,7 +5941,7 @@ button.balance:hover { background: rgb(255 255 255 / 3%); }
       h("div", { class: "done__ring", html:
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
         '<path class="tick" d="M20 6 9 17l-5-5"/></svg>' }),
-      h("div", { class: "done__t", text: title }),
+      h("div", { class: "done__t", text: title, dataset: { text: title } }),
       h("div", { class: "done__s", text: sub }),
       h("div", { style: "position:absolute;left:16px;right:16px;bottom:22px" }, [
         h("button", { class: "btn btn--primary", text: "Готово", onclick: function () { close(); } })

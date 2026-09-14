@@ -33,27 +33,10 @@
      ============================================================ */
 
   function welcome() {
-    return h("div", { class: "screen screen--enter" }, [
-      h("div", { class: "topbar" }, [
-        h("div", { class: "spacer" }),
-        h("span", { class: "pill", html: '<span class="pill__dot"></span>демо' })
-      ]),
-      h("div", { class: "hero", html: MARK }),
-      h("div", { class: "hero", style: "flex:0" }, [
-        h("div", { class: "hero__title", text: BRAND }),
-        h("div", { class: "hero__sub", text: "Кошелёк с большими кнопками «Купить» и «Продать». Симулятор: настоящих денег и настоящей сети здесь нет." })
-      ]),
-      h("div", { class: "foot" }, [
-        h("button", {
-          class: "btn btn--primary", html: icon("plus") + "<span>Создать кошелёк</span>",
-          onclick: function () { app().go("create"); }
-        }),
-        h("button", {
-          class: "btn btn--ghost", html: icon("key") + "<span>У меня уже есть фраза</span>",
-          onclick: function () { app().go("import"); }
-        })
-      ])
-    ]);
+    return global.Intro.screen({
+      create: function () { app().go("create"); },
+      restore: function () { app().go("import"); }
+    });
   }
 
   /** Password + confirmation, shared by the create and import flows. */
@@ -2450,7 +2433,7 @@
       h("div", { class: "done__ring", html:
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
         '<path class="tick" d="M20 6 9 17l-5-5"/></svg>' }),
-      h("div", { class: "done__t", text: title }),
+      h("div", { class: "done__t", text: title, dataset: { text: title } }),
       h("div", { class: "done__s", text: sub }),
       h("div", { style: "position:absolute;left:16px;right:16px;bottom:22px" }, [
         h("button", { class: "btn btn--primary", text: "Готово", onclick: function () { close(); } })
