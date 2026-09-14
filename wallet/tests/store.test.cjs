@@ -241,6 +241,57 @@ throws('deposit an unknown token', () => W.depositToken('nope', 1), /нет та
   ok('the notification list is capped', W.notes().length <= 50);
 }
 
+// ---------- letters to email ----------
+{
+  ok('no address means no letters', W.outbox().length === 0);
+  W.buy('sol', 30);
+  ok('and an event still leaves none', W.outbox().length === 0);
+
+  throws('a malformed address is refused', () => W.setMailAddress('not-an-email'), /почты/);
+  ok('a plain address is accepted', (W.setMailAddress('holder@example.com'), W.mail().address === 'holder@example.com'));
+  ok('an empty address clears the setting', (W.setMailAddress(''), W.mail().address === ''));
+  W.setMailAddress('holder@example.com');
+
+  const before = W.outbox().length;
+  W.buy('sol', 30);
+  const letter = W.outbox()[0];
+  ok('a purchase now writes a letter', W.outbox().length === before + 1 && letter.kind === 'buy');
+  ok('the subject names the event', W.letterSubject(letter).startsWith('Meridian · Куплено'));
+  const body = W.letterBody(letter);
+  ok('the body carries account, event, balance and time',
+     /Счёт: /.test(body) && /Событие: /.test(body) && /Баланс после: /.test(body) && /Время: /.test(body));
+  ok('the body never claims it was sent by a server', /на вашем устройстве/.test(body));
+  ok('a fresh letter is unsent', letter.sent === false && W.pendingLetters().length > 0);
+
+  W.setMailGroup('trade', false);
+  const quiet = W.outbox().length;
+  W.buy('sol', 30);
+  ok('a switched-off group writes nothing', W.outbox().length === quiet);
+  W.setMailGroup('staking', true);
+  W.stake('sol', 1, 'polaris');
+  ok('a switched-on group does write', W.outbox()[0].kind === 'stake');
+  throws('an unknown group is refused', () => W.setMailGroup('nope', true), /нет такой группы/);
+
+  const summary = W.digest();
+  ok('the digest counts what is pending', summary.count === W.pendingLetters().length);
+  ok('the digest lists every pending event', summary.body.split('\n\n').length >= summary.count);
+
+  const link = W.mailtoLink('Тема письма', 'Тело письма');
+  ok('the mailto link addresses the holder', link.indexOf('mailto:holder%40example.com') === 0);
+  ok('the mailto link escapes subject and body',
+     link.indexOf('subject=' + encodeURIComponent('Тема письма')) !== -1 &&
+     link.indexOf('body=' + encodeURIComponent('Тело письма')) !== -1);
+
+  W.markLetterSent(W.outbox()[0].id);
+  ok('marking one sent removes it from pending', W.outbox()[0].sent === true);
+  W.markAllSent();
+  ok('marking all sent empties the pending list', W.pendingLetters().length === 0 && W.digest() === null);
+  W.clearOutbox();
+  ok('clearing empties the outbox', W.outbox().length === 0);
+  W.setMailAddress('');
+  W.setMailGroup('trade', true);
+}
+
 // ---------- accounts ----------
 {
   const first = W.account().address;

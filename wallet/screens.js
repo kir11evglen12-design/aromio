@@ -2274,6 +2274,166 @@
     return value.toFixed(2).replace(/0+$/, "").replace(/[.,]$/, "").replace(".", ",");
   }
 
+
+  /* ============================================================
+     letters to email
+     ============================================================ */
+
+  /**
+   * The wallet makes no network requests, so it cannot post a letter itself.
+   * What it can do honestly: compose the letter here and hand it to the mail
+   * client already filled in — and say plainly that this is what happens.
+   */
+  function mailScreen() {
+    var scroll = h("div", { class: "scroll" });
+    var mail = Store.mail();
+
+    var address = h("input", {
+      class: "input", type: "email", placeholder: "you@example.com",
+      value: mail.address, spellcheck: "false", autocapitalize: "off", id: "mail-address"
+    });
+    var hint = h("div", { class: "hint" });
+
+    function saveAddress() {
+      try {
+        Store.setMailAddress(address.value);
+        hint.className = "hint";
+        hint.textContent = Store.mail().address
+          ? "Письма будут складываться в исходящие по мере событий."
+          : "Без адреса письма не формируются.";
+        address.className = "input";
+      } catch (e) {
+        hint.className = "hint hint--bad";
+        hint.textContent = e.message;
+        address.className = "input input--bad";
+      }
+      renderOutbox();
+    }
+    address.addEventListener("change", saveAddress);
+    address.addEventListener("blur", saveAddress);
+
+    scroll.appendChild(h("div", { class: "h", text: "Адрес" }));
+    scroll.appendChild(address);
+    scroll.appendChild(hint);
+
+    scroll.appendChild(h("div", { class: "h", text: "О чём писать" }));
+    Object.keys(Store.MAIL_GROUPS).forEach(function (key) {
+      var group = Store.MAIL_GROUPS[key];
+      var on = !!Store.mail().on[key];
+      var sw = h("button", { class: "switch", role: "switch", "aria-checked": String(on), "aria-label": group.label });
+      scroll.appendChild(h("button", {
+        class: "opt",
+        onclick: function () {
+          on = !on;
+          Store.setMailGroup(key, on);
+          sw.setAttribute("aria-checked", String(on));
+        }
+      }, [
+        h("span", { class: "opt__ico", html: icon("mail") }),
+        h("span", { style: "flex:1;text-align:left" }, [
+          h("div", { class: "opt__t", text: group.label }),
+          h("div", { class: "opt__s", text: group.hint })
+        ]),
+        sw
+      ]));
+    });
+
+    var outboxHost = h("div", { class: "list" });
+    var footer = h("div", { class: "gap", style: "padding-top:12px" });
+
+    function renderOutbox() {
+      var letters = Store.outbox();
+      outboxHost.innerHTML = "";
+      footer.innerHTML = "";
+
+      if (!letters.length) {
+        outboxHost.appendChild(h("div", { class: "empty", html: icon("mail") +
+          "<div>" + (Store.mail().address ? "Писем пока нет" : "Укажите адрес, и письма начнут появляться") + "</div>" }));
+        return;
+      }
+
+      letters.forEach(function (letter) {
+        outboxHost.appendChild(h("button", {
+          class: "tx" + (letter.sent ? "" : " tx--unread"),
+          onclick: function () { letterSheet(letter, renderOutbox); },
+          html:
+            '<span class="tx__ico">' + icon(letter.sent ? "check" : "mail") + "</span>" +
+            '<span style="min-width:0"><span class="tx__t">' + esc(Store.letterSubject(letter).replace("Meridian · ", "")) + "</span>" +
+            '<br><span class="tx__s">' + esc(letter.sent ? "отправлено" : "готово к отправке") + " · " + esc(UI.timeLabel(letter.at)) + "</span></span>" +
+            '<span style="color:var(--dim);display:flex">' + icon("chevron-right") + "</span>"
+        }));
+      });
+
+      var pending = Store.pendingLetters();
+      if (pending.length) {
+        var summary = Store.digest();
+        footer.appendChild(h("a", {
+          class: "btn btn--primary", href: Store.mailtoLink(summary.subject, summary.body), target: "_blank", rel: "noopener",
+          html: icon("send") + "<span>Одним письмом (" + summary.count + ")</span>",
+          onclick: function () { setTimeout(function () { Store.markAllSent(); renderOutbox(); }, 60); }
+        }));
+        footer.appendChild(h("button", {
+          class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать сводку</span>",
+          onclick: function () { UI.copy(summary.subject + "\n\n" + summary.body, "Сводка скопирована"); }
+        }));
+      }
+      footer.appendChild(h("button", {
+        class: "btn btn--ghost btn--sm", html: icon("trash") + "<span>Очистить исходящие</span>",
+        onclick: function () { Store.clearOutbox(); renderOutbox(); UI.toast("Исходящие очищены", "trash"); }
+      }));
+    }
+
+    scroll.appendChild(h("div", { class: "h", text: "Исходящие" }));
+    scroll.appendChild(outboxHost);
+    scroll.appendChild(footer);
+
+    scroll.appendChild(h("div", { class: "h", text: "Как это работает" }));
+    scroll.appendChild(h("div", { class: "warn warn--info" }, [
+      h("span", { html: icon("info") }),
+      h("span", { text: "Кошелёк не подключён к почтовому серверу и ничего не отправляет сам: письмо складывается здесь, а открывает и отправляет его ваша почтовая программа. Чтобы письма уходили сами, нужен сервер — без него никакое приложение в браузере отправить почту не может." })
+    ]));
+
+    renderOutbox();
+
+    return h("div", { class: "screen screen--enter" }, [
+      h("div", { class: "topbar" }, [
+        h("button", { class: "iconbtn", "aria-label": "Назад", html: icon("arrow-left"), onclick: function () { app().back(); } }),
+        h("b", { style: "font-size:17px;letter-spacing:-.02em", text: "Письма на почту" }),
+        h("div", { class: "spacer" }),
+        bellButton()
+      ]),
+      scroll
+    ]);
+  }
+
+  function letterSheet(letter, onChange) {
+    var subject = Store.letterSubject(letter);
+    var body = Store.letterBody(letter);
+    UI.openSheet("Письмо", [
+      h("div", { class: "card" }, [
+        kv("Кому", Store.mail().address || "адрес не указан"),
+        kv("Когда", UI.dayLabel(letter.at) + ", " + UI.timeLabel(letter.at)),
+        kv("Статус", letter.sent ? "отправлено" : "готово к отправке")
+      ]),
+      h("div", { class: "h", text: "Тема" }),
+      h("div", { class: "card", style: "font-size:14px;font-weight:600", text: subject }),
+      h("div", { class: "h", text: "Текст" }),
+      h("pre", { class: "card letter", text: body })
+    ], [
+      h("a", {
+        class: "btn btn--primary", href: Store.mailtoLink(subject, body), target: "_blank", rel: "noopener",
+        html: icon("send") + "<span>Открыть в почте</span>",
+        onclick: function () {
+          setTimeout(function () { Store.markLetterSent(letter.id); UI.closeSheet(); if (onChange) onChange(); }, 60);
+        }
+      }),
+      h("button", {
+        class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать письмо</span>",
+        onclick: function () { UI.copy(subject + "\n\n" + body, "Письмо скопировано"); }
+      })
+    ]);
+  }
+
   /* ============================================================
      settings
      ============================================================ */
@@ -2311,6 +2471,11 @@
     scroll.appendChild(h("div", { class: "h", text: "Списки" }));
     scroll.appendChild(linkOpt("users", "Адресная книга",
       UI.plural(Store.contacts().length, "контакт", "контакта", "контактов"), function () { contactsSheet(); }));
+    scroll.appendChild(linkOpt("mail", "Письма на почту",
+      Store.mail().address
+        ? Store.mail().address + " · " + UI.plural(Store.pendingLetters().length, "письмо ждёт", "письма ждут", "писем ждут")
+        : "не настроено",
+      function () { app().go("mail"); }));
     scroll.appendChild(linkOpt("bell", "Уведомления и оповещения",
       UI.plural(Store.alerts().length, "оповещение ждёт цену", "оповещения ждут цену", "оповещений ждут цену") +
       " · " + UI.plural(Store.unreadCount(), "непрочитанное", "непрочитанных", "непрочитанных"), notificationsSheet));
@@ -2457,6 +2622,6 @@
     stakingScreen: stakingScreen, stakeSheet: stakeSheet, contactsSheet: contactsSheet,
     notificationsSheet: notificationsSheet, alertSheet: alertSheet, portfolioSheet: portfolioSheet,
     marketScreen: marketScreen, calcScreen: calcScreen, addressesScreen: addressesScreen,
-    topUpSheet: topUpSheet, exchangeSheet: exchangeSheet
+    topUpSheet: topUpSheet, exchangeSheet: exchangeSheet, mailScreen: mailScreen
   };
 })(typeof window !== "undefined" ? window : globalThis);

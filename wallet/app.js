@@ -28,10 +28,11 @@
     calc:     function () { return Screens.calcScreen(); },
     addresses: function () { return Screens.addressesScreen(); },
     market:   function () { return Screens.marketScreen(); },
+    mail:     function () { return Screens.mailScreen(); },
     settings: function () { return Screens.settingsScreen(); }
   };
 
-  var NEEDS_WALLET = { home: 1, token: 1, staking: 1, calc: 1, addresses: 1, market: 1, settings: 1 };
+  var NEEDS_WALLET = { home: 1, token: 1, staking: 1, calc: 1, addresses: 1, market: 1, mail: 1, settings: 1 };
 
   function mount(node) {
     var host = UI.$("#app");

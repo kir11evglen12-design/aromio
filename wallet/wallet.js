@@ -54,6 +54,7 @@
     stored.contacts = stored.contacts || [];
     stored.alerts = stored.alerts || [];
     stored.notes = stored.notes || [];
+    stored.mail = stored.mail || defaultMail();
     stored.derive = stored.derive || "cobalt";
     stored.accounts.forEach(function (acc) {
       acc.balances = acc.balances || {};
@@ -192,7 +193,8 @@
       card: { last4: "4417", available: 5000 },
       contacts: starterContacts(),
       alerts: [],
-      notes: []
+      notes: [],
+      mail: defaultMail()
     };
     phrase = recovery;
     save();
@@ -237,6 +239,142 @@
   }
 
   /* ---------- operations ---------- */
+
+  /* ---------- letters ---------- */
+
+  var MAIL_GROUPS = {
+    trade:   { label: "Покупка и продажа", hint: "когда купили или продали монету",     kinds: ["buy", "sell"] },
+    move:    { label: "Переводы",          hint: "отправка, входящие и вывод на биржу", kinds: ["out", "in", "exchange"] },
+    staking: { label: "Стейкинг",          hint: "ставки, вывод и забранные награды",   kinds: ["stake", "unstake", "reward"] },
+    alerts:  { label: "Оповещения о цене", hint: "когда цена пересекла вашу отметку",   kinds: ["alert"] },
+    card:    { label: "Пополнение карты",  hint: "когда положили денег на карту",       kinds: ["topup"] }
+  };
+
+  var MAX_OUTBOX = 60;
+
+  function defaultMail() {
+    return {
+      address: "",
+      on: { trade: true, move: true, staking: false, alerts: true, card: false },
+      outbox: []
+    };
+  }
+
+  function mail() { return state.mail; }
+
+  /** Deliberately plain: an address is a name, an at-sign and a dotted host. */
+  function emailLooksValid(address) {
+    return /^[^\s@]{1,64}@[^\s@.]+(\.[^\s@.]+)+$/.test(String(address || "").trim());
+  }
+
+  function setMailAddress(address) {
+    var value = String(address || "").trim();
+    if (value && !emailLooksValid(value)) throw new Error("адрес почты выглядит неверно");
+    state.mail.address = value;
+    save();
+  }
+
+  function setMailGroup(group, enabled) {
+    if (!MAIL_GROUPS[group]) throw new Error("нет такой группы событий");
+    state.mail.on[group] = !!enabled;
+    save();
+  }
+
+  function groupOf(kind) {
+    var found = null;
+    Object.keys(MAIL_GROUPS).forEach(function (key) {
+      if (MAIL_GROUPS[key].kinds.indexOf(kind) !== -1) found = key;
+    });
+    return found;
+  }
+
+  /** The letter one event becomes. Composed here so it can be read back. */
+  function composeLetter(kind, title, detail) {
+    var acc = account();
+    var when = Date.now();
+    return {
+      id: signature(),
+      kind: kind,
+      title: title,
+      detail: detail || "",
+      account: acc.name,
+      address: acc.address,
+      balance: total(),
+      currency: state.settings.currency,
+      at: when,
+      sent: false
+    };
+  }
+
+  function letterTime(at) { return new Date(at).toLocaleString("ru-RU"); }
+
+  /** The letter as text: what lands in the mail client. */
+  function letterBody(letter) {
+    return [
+      "Счёт: " + letter.account + " (" + letter.address.slice(0, 6) + "…" + letter.address.slice(-4) + ")",
+      "Событие: " + letter.title,
+      letter.detail ? "Подробности: " + letter.detail : null,
+      "Баланс после: " + Market.money(letter.balance, letter.currency, { dp: 2 }),
+      "Время: " + letterTime(letter.at),
+      "",
+      "—",
+      "Письмо сформировано кошельком Meridian на вашем устройстве."
+    ].filter(function (line) { return line !== null; }).join("\n");
+  }
+
+  function letterSubject(letter) { return "Meridian · " + letter.title; }
+
+  /** Queues a letter if this kind of event is switched on and there is an address. */
+  function queueLetter(kind, title, detail) {
+    var group = groupOf(kind);
+    if (!group || !state.mail.address || !state.mail.on[group]) return null;
+    var letter = composeLetter(kind, title, detail);
+    state.mail.outbox.unshift(letter);
+    if (state.mail.outbox.length > MAX_OUTBOX) state.mail.outbox.length = MAX_OUTBOX;
+    return letter;
+  }
+
+  function outbox() { return state.mail.outbox; }
+  function pendingLetters() { return state.mail.outbox.filter(function (l) { return !l.sent; }); }
+
+  function markLetterSent(id) {
+    state.mail.outbox.forEach(function (l) { if (l.id === id) l.sent = true; });
+    save();
+  }
+
+  function markAllSent() {
+    state.mail.outbox.forEach(function (l) { l.sent = true; });
+    save();
+  }
+
+  function clearOutbox() {
+    state.mail.outbox = [];
+    save();
+  }
+
+  /** Everything unsent, folded into one letter. */
+  function digest() {
+    var pending = pendingLetters();
+    if (!pending.length) return null;
+    var body = pending.map(function (letter, i) {
+      return (i + 1) + ". " + letter.title +
+        (letter.detail ? "\n   " + letter.detail : "") +
+        "\n   " + letterTime(letter.at);
+    }).join("\n\n");
+    return {
+      count: pending.length,
+      subject: "Meridian · сводка, событий: " + pending.length,
+      body: body + "\n\nБаланс: " + Market.money(total(), state.settings.currency, { dp: 2 }) +
+        "\n\n—\nПисьмо сформировано кошельком Meridian на вашем устройстве."
+    };
+  }
+
+  /** A mailto: link — the one way to actually post a letter with no server. */
+  function mailtoLink(subject, body) {
+    return "mailto:" + encodeURIComponent(state.mail.address) +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+  }
 
   function record(tx) {
     tx.id = signature();
@@ -563,6 +701,7 @@
   function notify(kind, title, body) {
     state.notes.unshift({ id: signature(), kind: kind, title: title, body: body, at: Date.now(), read: false });
     if (state.notes.length > MAX_NOTES) state.notes.length = MAX_NOTES;
+    queueLetter(kind, title, body);
   }
 
   function markNotesRead() {
@@ -608,6 +747,12 @@
     contacts: contacts, contactFor: contactFor, addContact: addContact, removeContact: removeContact,
     alerts: alerts, addAlert: addAlert, removeAlert: removeAlert, checkAlerts: checkAlerts,
     notes: notes, unreadCount: unreadCount, markNotesRead: markNotesRead,
+    mail: mail, MAIL_GROUPS: MAIL_GROUPS, emailLooksValid: emailLooksValid,
+    setMailAddress: setMailAddress, setMailGroup: setMailGroup,
+    composeLetter: composeLetter, letterBody: letterBody, letterSubject: letterSubject,
+    outbox: outbox, pendingLetters: pendingLetters,
+    markLetterSent: markLetterSent, markAllSent: markAllSent, clearOutbox: clearOutbox,
+    digest: digest, mailtoLink: mailtoLink,
     FEES: FEES, NETWORK_FEE_USD: NETWORK_FEE_USD, HOURS_PER_SECOND: HOURS_PER_SECOND
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
