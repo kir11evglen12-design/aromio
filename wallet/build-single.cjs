@@ -43,5 +43,13 @@ if (stray !== SCRIPTS.length) {
 }
 
 fs.writeFileSync(OUT, html);
+
+/* Also into the published site. The storefront's Vite build empties docs/,
+   so this runs after it and puts the wallet back — see package.json. */
+const SITE = path.join(ROOT, "..", "docs", "wallet");
+fs.mkdirSync(SITE, { recursive: true });
+fs.writeFileSync(path.join(SITE, "index.html"), html);
+
 const kb = (Buffer.byteLength(html) / 1024).toFixed(0);
 console.log(`meridian.html — ${kb} KB, ${SCRIPTS.length} modules + styles inlined`);
+console.log(`docs/wallet/index.html — same file, for GitHub Pages`);

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node wallet/build-single.cjs",
     "typecheck": "tsc -b",
     "test:wallet": "node wallet/tests/run.cjs",
     "preview": "vite preview"
