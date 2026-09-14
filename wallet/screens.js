@@ -946,9 +946,12 @@
         h("div", { class: "mono", style: "font-size:13px;word-break:break-all;line-height:1.5", text: acc.address })
       ]),
       h("div", { style: "height:10px" }),
-      h("div", { class: "warn warn--info" }, [
-        h("span", { html: icon("info") }),
-        h("span", { text: "Адрес демонстрационный: за ним нет реальной сети, и отправленные на него настоящие средства пропадут." })
+      h("div", { class: "warn" }, [
+        h("span", { html: icon("alert") }),
+        h("span", {}, [
+          h("b", { text: "Это не настоящий адрес." }),
+          h("span", { text: " За ним нет ни блокчейна, ни приватного ключа: он посчитан из демо-фразы этим приложением. Настоящая криптовалюта, отправленная сюда, исчезнет навсегда — подписать перевод обратно не сможет никто." })
+        ])
       ])
     ], [
       h("button", {
@@ -1208,9 +1211,12 @@
       });
     }
 
-    scroll.appendChild(h("div", { class: "warn warn--info" }, [
-      h("span", { html: icon("info") }),
-      h("span", { text: "Адрес — это номер счёта, посчитанный из вашей секретной фразы. Ничего не «выдаётся» и никуда не отправляется: те же двенадцать слов на любом устройстве дадут ровно эти же адреса." })
+    scroll.appendChild(h("div", { class: "warn" }, [
+      h("span", { html: icon("alert") }),
+      h("span", {}, [
+        h("b", { text: "Адреса демонстрационные." }),
+        h("span", { text: " Каждый посчитан из вашей фразы как sha256 — форма настоящая, но блокчейна и ключа за ними нет. Присылать на них криптовалюту нельзя: она пропадёт безвозвратно." })
+      ])
     ]));
 
     scroll.appendChild(h("div", { class: "h", text: "Уже используются" }));
@@ -1242,6 +1248,10 @@
         h("div", { class: "qrcard", html: qr })
       ]),
       h("div", { class: "card mono", style: "font-size:13px;word-break:break-all;line-height:1.5", text: address }),
+      h("div", { class: "warn" }, [
+        h("span", { html: icon("alert") }),
+        h("span", { text: "Демонстрационный адрес: настоящие средства сюда отправлять нельзя." })
+      ]),
       h("div", { class: "h", text: "Как получен" }),
       h("div", { class: "card" }, [
         kv("Номер счёта", String(index)),
@@ -2367,14 +2377,16 @@
       var pending = Store.pendingLetters();
       if (pending.length) {
         var summary = Store.digest();
-        footer.appendChild(h("a", {
-          class: "btn btn--primary", href: Store.mailtoLink(summary.subject, summary.body), target: "_blank", rel: "noopener",
-          html: icon("send") + "<span>Одним письмом (" + summary.count + ")</span>",
-          onclick: function () { setTimeout(function () { Store.markAllSent(); renderOutbox(); }, 60); }
-        }));
         footer.appendChild(h("button", {
-          class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать сводку</span>",
-          onclick: function () { UI.copy(summary.subject + "\n\n" + summary.body, "Сводка скопирована"); }
+          class: "btn btn--primary", html: icon("copy") + "<span>Скопировать сводку (" + summary.count + ")</span>",
+          onclick: function () {
+            UI.copy(summary.subject + "\n\n" + summary.body, "Сводка скопирована — вставьте в письмо");
+            Store.markAllSent();
+            renderOutbox();
+          }
+        }));
+        footer.appendChild(mailtoButton(summary.subject, summary.body, function () {
+          Store.markAllSent(); renderOutbox();
         }));
       }
       footer.appendChild(h("button", {
@@ -2406,6 +2418,34 @@
     ]);
   }
 
+  /**
+   * A mailto: link, plus the truth about it. Inside a sandboxed preview the
+   * browser refuses to hand the URL to a mail client and nothing happens at
+   * all, so the button says whether it worked and copying stays the reliable
+   * path.
+   */
+  function mailtoButton(subject, body, onOpened) {
+    var link = Store.mailtoLink(subject, body);
+    return h("a", {
+      class: "btn btn--ghost", href: link, target: "_blank", rel: "noopener",
+      html: icon("send") + "<span>Открыть в почте</span>",
+      onclick: function (event) {
+        var opened = false;
+        try {
+          var win = window.open(link, "_blank");
+          opened = !!win;
+        } catch (e) { opened = false; }
+        if (!opened) {
+          /* blocked — most likely a sandboxed frame; say so instead of
+             pretending the letter went somewhere */
+          event.preventDefault();
+          UI.copy(subject + "\n\n" + body, "Почта здесь не открывается — письмо скопировано");
+        }
+        if (onOpened) setTimeout(onOpened, 80);
+      }
+    });
+  }
+
   function letterSheet(letter, onChange) {
     var subject = Store.letterSubject(letter);
     var body = Store.letterBody(letter);
@@ -2420,16 +2460,19 @@
       h("div", { class: "h", text: "Текст" }),
       h("pre", { class: "card letter", text: body })
     ], [
-      h("a", {
-        class: "btn btn--primary", href: Store.mailtoLink(subject, body), target: "_blank", rel: "noopener",
-        html: icon("send") + "<span>Открыть в почте</span>",
+      h("button", {
+        class: "btn btn--primary", html: icon("copy") + "<span>Скопировать письмо</span>",
         onclick: function () {
-          setTimeout(function () { Store.markLetterSent(letter.id); UI.closeSheet(); if (onChange) onChange(); }, 60);
+          UI.copy(subject + "\n\n" + body, "Письмо скопировано");
+          Store.markLetterSent(letter.id);
+          UI.closeSheet();
+          if (onChange) onChange();
         }
       }),
-      h("button", {
-        class: "btn btn--ghost", html: icon("copy") + "<span>Скопировать письмо</span>",
-        onclick: function () { UI.copy(subject + "\n\n" + body, "Письмо скопировано"); }
+      mailtoButton(subject, body, function () {
+        Store.markLetterSent(letter.id);
+        UI.closeSheet();
+        if (onChange) onChange();
       })
     ]);
   }
@@ -2488,6 +2531,21 @@
       kv("RPC", "нет — данные локальные"),
       kv("Версия", "1.0")
     ]));
+
+    scroll.appendChild(h("div", { class: "h", text: "Баланс" }));
+    scroll.appendChild(linkOpt("plus", "Пополнить", "положить денег на карту или зачислить монету", topUpSheet));
+    scroll.appendChild(linkOpt("wallet", "Начислить демо-портфель",
+      "ненастоящие средства, чтобы осмотреться", function () {
+        Store.loadDemoPortfolio();
+        app().refresh();
+        UI.toast("Демо-портфель начислен", "wallet");
+      }));
+    scroll.appendChild(linkOpt("trash", "Обнулить балансы",
+      "счёт станет пустым, история останется", function () {
+        Store.zeroOut();
+        app().refresh();
+        UI.toast("Балансы обнулены", "trash");
+      }));
 
     scroll.appendChild(h("div", { class: "h", text: "Опасная зона" }));
     scroll.appendChild(h("div", { style: "padding-top:4px" }, [

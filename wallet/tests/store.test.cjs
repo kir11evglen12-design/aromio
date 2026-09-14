@@ -26,10 +26,26 @@ const phrase = Vault.newPhrase();
 W.create('pass-12345', phrase);
 ok('wallet exists after create', W.exists() && W.isUnlocked());
 ok('address derives from the phrase', W.account().address === Vault.addressFor(phrase, 0));
-ok('card starts at 5000', W.card().available === 5000);
+
+// a new wallet invents nothing: no money, no history, no contacts
+ok('a new wallet starts empty', W.total() === 0 && W.card().available === 0);
+ok('and with no history', W.txs().length === 0 && W.stakes().length === 0 && W.contacts().length === 0);
+
+// everything below is funded on purpose, the way a holder would
+const fund = () => {
+  W.topUpCard(5000);
+  W.depositToken('sol', 12.482);
+  W.depositToken('eth', 1.24);
+  W.depositToken('usdc', 1840.5);
+  W.depositToken('ton', 320);
+  W.depositToken('mrd', 1180);
+  W.stake('sol', 6, 'polaris');
+};
+fund();
+ok('card holds what was put on it', W.card().available === 5000);
 const startTotal = W.total();
 ok('total = Σ (free + staked) × price', near(startTotal, Market.TOKENS.reduce((s, t) => s + W.holdingOf(t.id) * t.price, 0)));
-ok('total counts the starter stake', startTotal > Market.TOKENS.reduce((s, t) => s + W.balanceOf(t.id) * t.price, 0));
+ok('total counts what is staked', startTotal > Market.TOKENS.reduce((s, t) => s + W.balanceOf(t.id) * t.price, 0));
 
 // ---------- buy ----------
 {
@@ -304,6 +320,20 @@ throws('deposit an unknown token', () => W.depositToken('nope', 1), /нет та
   W.selectAccount(99);
   ok('out-of-range account index is clamped', W.account().address === Vault.addressFor(phrase, 1));
   W.selectAccount(0);
+}
+
+// ---------- the demo portfolio is opt-in ----------
+{
+  W.zeroOut();
+  ok('zeroing empties balances, stakes and the card',
+     W.total() === 0 && W.stakes().length === 0 && W.card().available === 0);
+  ok('zeroing keeps the history', W.txs().length > 0);
+  W.loadDemoPortfolio();
+  ok('the demo portfolio fills the wallet', W.total() > 1000 && W.card().available === 5000);
+  ok('and says out loud that it is not real', /ненастоящие/.test(W.notes()[0].body));
+  W.zeroOut();
+  ok('and it can be emptied again', W.total() === 0);
+  fund();
 }
 
 // ---------- lock, persistence, reset ----------

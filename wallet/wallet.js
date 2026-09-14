@@ -138,39 +138,42 @@
 
   /* ---------- creation, locking ---------- */
 
-  function starterPortfolio() {
-    return { mrd: 1180, btc: 0.0412, eth: 1.24, sol: 12.482, ton: 320, usdc: 1840.5, doge: 12500 };
+  /* A new wallet starts at zero: no invented money, no invented history.
+     Everything below arrives through «Пополнить», the way the holder
+     decides. `demoPortfolio` exists for anyone who wants the old filled
+     wallet to look around in, and it is opt-in from settings. */
+
+  function demoPortfolio() {
+    return {
+      balances: { mrd: 1180, btc: 0.0412, eth: 1.24, sol: 12.482, ton: 320, usdc: 1840.5, doge: 12500 },
+      card: 5000,
+      stakes: [{
+        id: signature(), tokenId: "sol", amount: 6, validator: "polaris",
+        apy: Market.apyFor("sol", "polaris"), since: Date.now() - 1080 * 1000, carried: 0
+      }],
+      contacts: [
+        { id: signature(), name: "Аня", address: Vault.base58(Vault.digest("meridian/demo/anya")), note: "обмен на карту" },
+        { id: signature(), name: "Холодный кошелёк", address: Vault.base58(Vault.digest("meridian/demo/cold")), note: "долгое хранение" }
+      ]
+    };
   }
 
-  /** A little history so the activity tab has something true to show. */
-  /** One position already running, so the staking screen opens with content. */
-  function starterStakes() {
-    return [{
-      id: signature(), tokenId: "sol", amount: 6, validator: "polaris",
-      apy: Market.apyFor("sol", "polaris"),
-      since: Date.now() - 1080 * 1000,    // 1080 demo hours ≈ 45 days of rewards
-      carried: 0
-    }];
+  /** Fills an empty wallet with something to look at, or empties it again. */
+  function loadDemoPortfolio() {
+    var demo = demoPortfolio();
+    account().balances = demo.balances;
+    account().stakes = demo.stakes;
+    state.card.available = demo.card;
+    state.contacts = demo.contacts;
+    notify("topup", "Демо-портфель начислен", "Это ненастоящие средства — только для осмотра");
+    save();
   }
 
-  function starterContacts() {
-    return [
-      { id: signature(), name: "Аня", address: Vault.base58(Vault.digest("meridian/demo/anya")), note: "обмен на карту" },
-      { id: signature(), name: "Холодный кошелёк", address: Vault.base58(Vault.digest("meridian/demo/cold")), note: "долгое хранение" }
-    ];
-  }
-
-  function starterHistory() {
-    var day = 86400000;
-    var now = Date.now();
-    return [
-      { id: signature(), kind: "buy",  tokenId: "sol",  amount: 4.2,   usd: 774.2,  fee: 9.29, at: now - day * 2 - 3600e3 * 5, status: "ok" },
-      { id: signature(), kind: "swap", tokenId: "usdc", amount: 620,   usd: 620,    fee: 1.55, at: now - day * 4, status: "ok",
-        toTokenId: "mrd", toAmount: 284.3 },
-      { id: signature(), kind: "in",   tokenId: "eth",  amount: 0.35,  usd: 1338.6, fee: 0,    at: now - day * 9, status: "ok",
-        address: Vault.base58(Vault.digest("meridian/demo/sender")) },
-      { id: signature(), kind: "buy",  tokenId: "btc",  amount: 0.0412, usd: 2935.1, fee: 35.2, at: now - day * 21, status: "ok" }
-    ];
+  function zeroOut() {
+    account().balances = {};
+    account().stakes = [];
+    state.card.available = 0;
+    save();
   }
 
   function create(password, recovery) {
@@ -184,14 +187,14 @@
         name: "Основной",
         index: 0,
         address: Vault.addressFor(recovery, 0, "meridian"),
-        balances: starterPortfolio(),
-        stakes: starterStakes()
+        balances: {},
+        stakes: []
       }],
       active: 0,
       settings: { currency: "USD", hidden: false, network: "mainnet" },
-      txs: starterHistory(),
-      card: { last4: "4417", available: 5000 },
-      contacts: starterContacts(),
+      txs: [],
+      card: { last4: "4417", available: 0 },
+      contacts: [],
       alerts: [],
       notes: [],
       mail: defaultMail()
@@ -738,7 +741,7 @@
     txs: function () { return state.txs; },
     buy: buy, sell: sell, send: send, swap: swap, swapQuote: swapQuote,
     topUpCard: topUpCard, depositToken: depositToken, withdrawToExchange: withdrawToExchange,
-    CARD_LIMIT: CARD_LIMIT,
+    loadDemoPortfolio: loadDemoPortfolio, zeroOut: zeroOut, CARD_LIMIT: CARD_LIMIT,
     networkFee: networkFee, addressLooksValid: addressLooksValid,
     addressIsPlausible: addressIsPlausible,
     settings: settings, setSetting: setSetting, save: save,
