@@ -1,0 +1,10 @@
+{
+  "symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "TONUSDT"],
+  "timeframes": ["15m", "1h", "4h"],
+  "minScore": 45,
+  "cooldownBars": 6,
+  "sources": ["binance", "bybit"],
+  "tz": "Europe/Moscow",
+  "host": "127.0.0.1",
+  "port": 8787
+}

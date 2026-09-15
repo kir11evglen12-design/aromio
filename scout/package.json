@@ -1,0 +1,15 @@
+{
+  "name": "meridian-scout",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Сканер торговых сетапов: считает по биржевым данным, принимает алерты TradingView, шлёт находки в Telegram",
+  "type": "commonjs",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "scan": "node scout.js scan",
+    "serve": "node scout.js serve",
+    "watch": "node scout.js watch",
+    "selftest": "node scout.js selftest",
+    "test": "node tests/run.cjs"
+  }
+}

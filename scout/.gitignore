@@ -1,0 +1,5 @@
+# Findings, alerts and logs — yours, not the repository's.
+data/
+
+# Settings with a secret in them. Copy scout.config.example.json instead.
+scout.config.json
