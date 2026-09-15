@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AROMIO — вертикальный ролик 1080×1920</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+  html,body{margin:0;background:#05080d;overflow:hidden}
+  canvas{display:block;width:1080px;height:1920px}
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="scene.js"></script>
+<script>
+window.__ready=false;
+document.fonts.ready.then(async()=>{
+  await document.fonts.load('400 52px Inter');
+  await document.fonts.load('300 132px Cormorant');
+  AROMIO.bind('c'); AROMIO.init(); AROMIO.renderFrame(0);
+  window.renderFrame=AROMIO.renderFrame;
+  window.DURATION=AROMIO.DURATION;
+  window.__ready=true;
+});
+</script>
+</body>
+</html>
