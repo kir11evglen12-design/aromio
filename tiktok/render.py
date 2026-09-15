@@ -64,15 +64,18 @@ def encode(frames, mp4, fps=FPS):
     уезжает в пурпур (проверено: +18R/-11G/+21B)."""
     vf = ("split[a][b];[b]gblur=sigma=16[bl];"                  # мягкое свечение
           "[a][bl]blend=all_mode=screen:all_opacity=0.17,"
-          "noise=alls=7:allf=t+u,"                              # плёночное зерно
-          "unsharp=3:3:0.30:3:3:0.0,"
+          # RGB -> YUV строго здесь: noise/unsharp живут в YUV, и если не
+          # перевести явно, ffmpeg вставит свою конвертацию по bt601
           "scale=in_range=full:out_range=tv"
           ":in_color_matrix=bt709:out_color_matrix=bt709,"
-          "format=yuv420p")
+          "format=yuv420p,"
+          "noise=c0s=4:c0f=t+u,"                                # зерно только по яркости
+          # сила зерна прямо бьёт по битрейту: c0s=8 давало 33 Мбит/с, c0s=4 — 2.5
+          "unsharp=3:3:0.30:3:3:0.0")
     subprocess.run([ffmpeg(), "-hide_banner", "-loglevel", "error", "-y",
                     "-framerate", str(fps), "-i", str(frames / "f%05d.png"),
                     "-vf", vf, "-c:v", "libx264", "-profile:v", "high", "-level", "4.1",
-                    "-preset", "slow", "-crf", "19", "-pix_fmt", "yuv420p",
+                    "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p",
                     "-colorspace", "bt709", "-color_primaries", "bt709",
                     "-color_trc", "bt709", "-color_range", "tv",
                     "-movflags", "+faststart", "-r", str(fps), str(mp4)], check=True)
