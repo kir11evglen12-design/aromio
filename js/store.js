@@ -159,20 +159,24 @@
       return false;
     }
 
-    const subtotal = getCart().reduce((sum, i) => sum + i.lineTotal, 0);
-    if (subtotal < meta.minTotal) {
-      Aromio.Toast.show({
-        type: "error",
-        title: "Промокод пока недоступен",
-        message: "Минимальная сумма заказа — " + utils.formatPrice(meta.minTotal),
-      });
-      return false;
-    }
-
     promoCode = code;
     utils.setJSON(KEYS.promo, promoCode);
     notify();
-    Aromio.Toast.show({ type: "success", title: "Промокод применён", message: meta.description });
+
+    const subtotal = getCart().reduce((sum, i) => sum + i.lineTotal, 0);
+    if (subtotal < meta.minTotal) {
+      // Store it anyway: getCartTotals()/the cart UI already know how to show
+      // an applied-but-not-yet-active promo with an "add N more" hint, and it
+      // activates on its own once the cart crosses the threshold. Rejecting
+      // the code outright here just made the user re-type it later.
+      Aromio.Toast.show({
+        type: "info",
+        title: "Промокод сохранён",
+        message: "Активируется при заказе от " + utils.formatPrice(meta.minTotal),
+      });
+    } else {
+      Aromio.Toast.show({ type: "success", title: "Промокод применён", message: meta.description });
+    }
     return true;
   }
 
