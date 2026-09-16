@@ -165,6 +165,15 @@
       else if (e.target.closest("[data-story-prev]")) back();
     });
 
+    // The prev/next controls are full-height tap zones sized for mouse/touch;
+    // arrow keys give keyboard users the same step-through without relying
+    // on the focus-trap alone (there was previously no way to move between
+    // slides except waiting out the 5s auto-advance or closing entirely).
+    modal.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") advance();
+      else if (e.key === "ArrowLeft") back();
+    });
+
     modal.addEventListener("transitionend", (e) => {
       if (e.target === modal && !modal.classList.contains("open")) clearTimeout(timer);
     });

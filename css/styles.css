@@ -1826,7 +1826,7 @@ select.select {
   inset: 0;
   display: flex;
 }
-.story-nav-zones span {
+.story-nav-zones button {
   flex: 1;
 }
 
