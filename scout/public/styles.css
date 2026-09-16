@@ -1,5 +1,6 @@
 /* The Meridian palette: flat, no gradients, one accent. */
 :root {
+  color-scheme: dark;
   --void: #070a11;
   --app: #0c111b;
   --card: #141a27;
@@ -15,6 +16,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 html, body {
   margin: 0;
@@ -32,7 +34,8 @@ code { font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: v
 
 /* ---- header ---- */
 .top {
-  position: sticky; top: 0; z-index: 5;
+  /* Never a bare 0: on a phone that tucks the header under the status bar. */
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
   display: grid; align-items: center; gap: 12px 16px;
   grid-template-columns: auto minmax(0, 1fr) auto;
   padding: 14px 20px;
@@ -82,14 +85,19 @@ code { font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: v
   padding: 18px 20px 8px;
   align-items: start;
 }
-.col { display: grid; gap: 14px; min-width: 0; }
+/* One column that is allowed to be narrower than its widest child —
+   without minmax(0, …) a grid track is sized to max-content and a long
+   line inside it widens the whole page. */
+.col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
 @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
 .section__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .section__head--tight { margin-bottom: 12px; }
 
-.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
-.list { display: grid; gap: 12px; }
+/* min-width: 0 or a wide child (the chart) sets the column's floor and the
+   whole page starts scrolling sideways on a phone. */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; min-width: 0; }
+.list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .list--tight { gap: 8px; }
 .empty { color: var(--dim); font-size: 13.5px; padding: 18px 0; text-align: center; }
 
@@ -131,7 +139,7 @@ code { font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: v
 
 /* ---- chart ---- */
 .card--chart { padding-bottom: 14px; }
-.chart { position: relative; height: 340px; border-radius: 12px; overflow: hidden; background: var(--ink); }
+.chart { position: relative; width: 100%; height: 340px; border-radius: 12px; overflow: hidden; background: var(--ink); }
 .chart iframe { border: 0; }
 /* Sits behind whatever the widget draws, so an offline panel is not blank. */
 .chart__hint { position: absolute; inset: 0; display: grid; place-items: center; color: var(--dim); font-size: 13px; text-align: center; padding: 0 20px; }
@@ -143,7 +151,7 @@ code { font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: v
 .alert span { color: var(--dim); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .alert time { margin-left: auto; color: var(--dim); font-size: 12px; white-space: nowrap; flex: none; }
 
-.scans { display: grid; gap: 6px; font-size: 12.5px; }
+.scans { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; font-size: 12.5px; }
 .scan { display: flex; gap: 8px; align-items: baseline; }
 .scan b { font-weight: 550; }
 .scan em {
@@ -202,3 +210,27 @@ select.input { padding-right: 8px; }
   font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--blue);
 }
 .foot a, .note a { color: var(--blue); }
+
+/* ---- the candlestick chart the page draws itself ---- */
+.candles { width: 100%; max-width: 100%; height: 100%; display: block; }
+.candle { fill: currentColor; stroke: currentColor; }
+.candle--up { color: var(--up); }
+.candle--down { color: var(--down); }
+.mark { stroke-width: 1; stroke-dasharray: 4 4; opacity: .85; }
+.mark--entry { stroke: var(--blue); fill: var(--blue); }
+.mark--stop { stroke: var(--down); fill: var(--down); }
+.mark--target { stroke: var(--up); fill: var(--up); }
+.mark__text { font: 600 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; stroke: none; }
+.mark__name { font: 9px/1 -apple-system, sans-serif; fill: var(--dim); stroke: none; letter-spacing: .04em; }
+
+/* ---- the demo banner ---- */
+.banner {
+  margin: 12px 20px 0; padding: 12px 15px;
+  background: #2a2113; border: 1px solid #4a3a1c; border-radius: 14px;
+  font-size: 13px; color: #f0d79a;
+}
+.banner b { color: #ffd98a; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

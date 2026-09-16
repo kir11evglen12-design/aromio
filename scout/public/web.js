@@ -28,6 +28,20 @@
   var chosen = null;
   var chartFor = null;
   var running = false;
+  var demoMode = false;
+  var series = {};                        // symbol|tf -> candles, for drawing what was analysed
+
+  /* Only the demo build carries these: series with a known pattern inside,
+     so the page can still show what a setup looks like where no exchange
+     is reachable. */
+  var demoSets = (window.SCOUT_DEMO || []).map(function (set) {
+    return {
+      symbol: set.symbol, tf: set.tf, htfTrend: set.htfTrend || null,
+      candles: set.candles.map(function (row) {
+        return { t: row[0], o: row[1], h: row[2], l: row[3], c: row[4], v: row[5] };
+      })
+    };
+  });
 
   var el = {
     symbols: document.getElementById("symbols"),
@@ -39,8 +53,13 @@
     scans: document.getElementById("scans"),
     chart: document.getElementById("chart"),
     chartTitle: document.getElementById("chartTitle"),
-    status: document.getElementById("status")
+    status: document.getElementById("status"),
+    banner: document.getElementById("banner"),
+    chartSource: document.getElementById("chartSource"),
+    chartNote: document.getElementById("chartNote")
   };
+
+  var CHART_NOTE = el.chartNote ? el.chartNote.textContent : "";
 
   function load() {
     try { return JSON.parse(localStorage.getItem(STORE)); } catch (e) { return null; }
@@ -120,6 +139,7 @@
             minScore: prefs.minScore
           });
           var last = data.candles[data.candles.length - 1];
+          series[symbol + "|" + tf] = data.candles;
           scans.push({
             symbol: symbol, tf: tf, source: data.source, price: last.c,
             at: last.t, found: list.length
@@ -199,14 +219,94 @@
     var key = setup.symbol + "|" + setup.tf;
     if (chartFor !== key) {
       chartFor = key;
-      UI.chart(el.chart, setup.symbol, setup.tf, el.chartTitle);
+      showChart(setup);
     }
     draw();
   }
 
+  /** Our own candles for a made-up series, TradingView for a real pair. */
+  function showChart(setup) {
+    var bars = series[setup.symbol + "|" + setup.tf];
+    var own = function () {
+      el.chartTitle.textContent = setup.symbol + " · " + (UI.TF[setup.tf] || setup.tf);
+      el.chart.textContent = "";
+      UI.candles(el.chart, bars, setup, UI.price);
+    };
+    if (demoMode) return own();
+    UI.chart(el.chart, setup.symbol, setup.tf, el.chartTitle, bars ? own : null);
+  }
+
+  /* ---------- demo ---------- */
+
+  /** One quick question: is any exchange reachable from here at all? */
+  async function reachable() {
+    try { await market.klines("BTCUSDT", "1h", 60, { timeout: 4000 }); return true; }
+    catch (e) { return false; }
+  }
+
+  function runDemo() {
+    demoMode = true;
+    chosen = null;
+    chartFor = null;
+    found = [];
+    scans = [];
+    if (el.banner) el.banner.hidden = false;
+    setChartLabels(true);
+    setControls(false);
+
+    demoSets.forEach(function (set) {
+      series[set.symbol + "|" + set.tf] = set.candles;
+      var list = setups.detect(set.symbol, set.tf, set.candles, { htfTrend: set.htfTrend, minScore: 0 });
+      list.forEach(function (setup) { found.push(setup); });
+      scans.push({
+        symbol: set.symbol, tf: set.tf, source: "встроенный ряд",
+        price: set.candles[set.candles.length - 1].c, found: list.length
+      });
+    });
+    found.sort(function (a, b) { return b.score - a.score; });
+    status("Здесь нет доступа к бирже — показан разбор встроенных рядов, это не живые цены.", "bad");
+    draw();
+  }
+
+  async function start() {
+    if (running) return;
+    /* Some windows have no way out to an exchange at all — a sandboxed
+       frame, for one. Asking anyway would only spend a second failing. */
+    if (window.SCOUT_OFFLINE && demoSets.length) return runDemo();
+    if (demoSets.length) {
+      status("Проверяю, отвечает ли биржа…");
+      el.scan.disabled = true;
+      var live = await reachable();
+      el.scan.disabled = false;
+      if (!live) return runDemo();
+      demoMode = false;
+      if (el.banner) el.banner.hidden = true;
+      setChartLabels(false);
+      setControls(true);
+    }
+    return scanAll();
+  }
+
+  /** The chart panel has to say who actually drew what is in it. */
+  function setChartLabels(demo) {
+    if (el.chartSource) el.chartSource.textContent = demo ? "рисует Scout" : "TradingView";
+    if (el.chartNote) {
+      el.chartNote.textContent = demo
+        ? "Свечи нарисованы этой страницей — это ровно тот ряд, по которому найден сетап, с уровнями входа, стопа и целей. На живых парах здесь стоит график TradingView."
+        : CHART_NOTE;
+    }
+  }
+
+  /** In demo mode the watchlist controls have nothing to act on. */
+  function setControls(on) {
+    [el.symbols, el.score].forEach(function (node) { if (node) node.disabled = !on; });
+    Array.prototype.forEach.call(el.tfs.querySelectorAll("button"), function (node) { node.disabled = !on; });
+    el.tfs.style.opacity = el.symbols.style.opacity = el.score.style.opacity = on ? "" : ".5";
+  }
+
   /* ---------- go ---------- */
 
-  el.scan.addEventListener("click", scanAll);
+  el.scan.addEventListener("click", start);
   el.symbols.addEventListener("change", readSymbols);
   el.symbols.addEventListener("blur", readSymbols);
   el.score.addEventListener("change", function () {
@@ -216,6 +316,6 @@
 
   drawControls();
   draw();
-  UI.chart(el.chart, prefs.symbols[0], prefs.timeframes[0], el.chartTitle);
-  scanAll();
+  if (!demoSets.length) UI.chart(el.chart, prefs.symbols[0], prefs.timeframes[0], el.chartTitle);
+  start();
 })();

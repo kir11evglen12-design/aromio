@@ -95,7 +95,7 @@
    * TradingView's own embed — the only legitimate way to show their chart.
    * It needs the network; offline the panel keeps the hint behind it.
    */
-  function chart(host, symbol, tf, title) {
+  function chart(host, symbol, tf, title, onFail) {
     host.textContent = "";
     if (title) title.textContent = symbol + " · " + (TF[tf] || tf);
 
@@ -123,6 +123,9 @@
       backgroundColor: "#08111f",
       gridColor: "rgba(156, 187, 255, 0.06)"
     });
+    /* Blocked by a network, an extension or a sandbox — draw the candles
+       ourselves rather than leave a hole. */
+    script.onerror = function () { if (onFail) onFail(host); };
     holder.appendChild(script);
   }
 

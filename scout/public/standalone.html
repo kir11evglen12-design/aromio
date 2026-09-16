@@ -50,6 +50,15 @@
   </div>
 </header>
 
+<div class="banner" id="banner" hidden>
+  <b>Это демонстрация.</b> Биржа из этого окна недоступна, поэтому разбор
+  посчитан по встроенным рядам — они собраны специально, чтобы показать
+  каждый из четырёх сетапов. Это не настоящие цены и не живой рынок.
+  По ссылке
+  <a href="https://kir11evglen12-design.github.io/aromio/scout/" target="_blank" rel="noopener">та же страница</a>
+  считает по живым свечам биржи, а кнопка «Обновить» проверит связь ещё раз.
+</div>
+
 <div class="status" id="status"></div>
 
 <main class="grid">
@@ -66,10 +75,10 @@
     <div class="card card--chart">
       <div class="section__head section__head--tight">
         <h2 id="chartTitle">График</h2>
-        <span class="muted">TradingView</span>
+        <span class="muted" id="chartSource">TradingView</span>
       </div>
       <div id="chart" class="chart"></div>
-      <p class="note">График рисует TradingView. Сам анализ идёт по свечам биржи — публичного доступа к данным TradingView нет ни у кого, кроме их собственных виджетов.</p>
+      <p class="note" id="chartNote">График рисует TradingView. Сам анализ идёт по свечам биржи — публичного доступа к данным TradingView нет ни у кого, кроме их собственных виджетов.</p>
     </div>
 
     <div class="card">
