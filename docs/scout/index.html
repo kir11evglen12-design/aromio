@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Meridian Scout</title>
+<meta name="description" content="Сканер торговых сетапов: считает по свечам биржи прямо в браузере.">
+<style>
+/* The Meridian palette: flat, no gradients, one accent. */
+:root {
+  --void: #070a11;
+  --app: #0c111b;
+  --card: #141a27;
+  --card-hi: #1b2333;
+  --line: #1f2838;
+  --blue: #9cbbff;
+  --ink: #08111f;
+  --text: #e8edf8;
+  --dim: #8592ab;
+  --up: #24d6a0;
+  --down: #ff5c7c;
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--void);
+  color: var(--text);
+  font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h2 { font-size: 15px; font-weight: 600; margin: 0; letter-spacing: .01em; }
+code { font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--blue); }
+
+.muted, .note { color: var(--dim); }
+.note { font-size: 12.5px; margin: 10px 0 0; }
+
+/* ---- header ---- */
+.top {
+  position: sticky; top: 0; z-index: 5;
+  display: grid; align-items: center; gap: 12px 16px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 14px 20px;
+  background: var(--app);
+  border-bottom: 1px solid var(--line);
+}
+/* Under a laptop width the chips drop to their own row and the button
+   keeps its place next to the name. */
+@media (max-width: 1100px) {
+  .top { grid-template-columns: auto auto; justify-content: space-between; }
+  .chips { grid-column: 1 / -1; order: 3; }
+}
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand__mark { width: 30px; height: 30px; color: var(--blue); flex: none; }
+.brand__name { font-size: 17px; font-weight: 650; letter-spacing: .02em; }
+.brand__sub { font-size: 12px; color: var(--dim); }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 1100px) { .chips { justify-content: flex-start; } }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--line);
+  font-size: 12.5px; color: var(--dim); white-space: nowrap;
+}
+.chip b { color: var(--text); font-weight: 550; }
+.chip--on { color: var(--up); border-color: #1d3b34; }
+.chip--off { color: var(--dim); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+
+/* ---- the one big button ---- */
+.btn {
+  appearance: none; border: 0; cursor: pointer;
+  font: inherit; font-weight: 600;
+  padding: 13px 22px; border-radius: 14px;
+  background: var(--card-hi); color: var(--text);
+  transition: transform .08s ease, background .15s ease;
+}
+.btn--primary { background: var(--blue); color: var(--ink); }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: .55; cursor: default; }
+
+/* ---- layout ---- */
+.grid {
+  display: grid; gap: 16px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  padding: 18px 20px 8px;
+  align-items: start;
+}
+.col { display: grid; gap: 14px; min-width: 0; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+.section__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.section__head--tight { margin-bottom: 12px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.list { display: grid; gap: 12px; }
+.list--tight { gap: 8px; }
+.empty { color: var(--dim); font-size: 13.5px; padding: 18px 0; text-align: center; }
+
+/* ---- a setup ---- */
+.setup {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 15px 16px; cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+.setup:hover, .setup--active { background: var(--card-hi); border-color: #2c3a52; }
+
+.setup__top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tag {
+  font-size: 11.5px; font-weight: 600; letter-spacing: .04em;
+  padding: 4px 9px; border-radius: 8px;
+  background: #101724; color: var(--dim); border: 1px solid var(--line);
+}
+.tag--pair { color: var(--text); }
+.tag--long { background: #0f2a22; color: var(--up); border-color: #1d3b34; }
+.tag--short { background: #2c1420; color: var(--down); border-color: #45202f; }
+.setup__score { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--dim); }
+.stars { color: var(--blue); letter-spacing: .08em; }
+
+.setup__title { font-size: 15.5px; font-weight: 600; margin: 11px 0 12px; }
+
+.levels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border-radius: 12px; overflow: hidden; }
+.level { background: var(--card); padding: 9px 10px; min-width: 0; }
+.setup--active .level, .setup:hover .level { background: var(--card-hi); }
+.level__name { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.level__value { font-size: 14px; font-weight: 600; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.level--stop .level__value { color: var(--down); }
+.level--target .level__value { color: var(--up); }
+
+.reasons { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 5px; }
+.reasons li { font-size: 13px; color: var(--dim); padding-left: 14px; position: relative; }
+.reasons li::before { content: "·"; position: absolute; left: 4px; color: var(--blue); }
+
+.setup__foot { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--dim); }
+
+/* ---- chart ---- */
+.card--chart { padding-bottom: 14px; }
+.chart { position: relative; height: 340px; border-radius: 12px; overflow: hidden; background: var(--ink); }
+.chart iframe { border: 0; }
+/* Sits behind whatever the widget draws, so an offline panel is not blank. */
+.chart__hint { position: absolute; inset: 0; display: grid; place-items: center; color: var(--dim); font-size: 13px; text-align: center; padding: 0 20px; }
+.tradingview-widget-container { position: relative; height: 100%; }
+
+/* ---- alerts and scans ---- */
+.alert { display: flex; gap: 10px; align-items: baseline; font-size: 13px; padding: 8px 10px; background: var(--card-hi); border-radius: 10px; }
+.alert b, .alert span:first-of-type { white-space: nowrap; flex: none; }
+.alert span { color: var(--dim); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.alert time { margin-left: auto; color: var(--dim); font-size: 12px; white-space: nowrap; flex: none; }
+
+.scans { display: grid; gap: 6px; font-size: 12.5px; }
+.scan { display: flex; gap: 8px; align-items: baseline; }
+.scan b { font-weight: 550; }
+.scan em {
+  font-style: normal; color: var(--dim); margin-left: auto;
+  min-width: 0; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.scan b, .scan span { flex: none; }
+.scan--bad em { color: var(--down); }
+
+.how { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+.how summary { cursor: pointer; font-size: 13.5px; color: var(--blue); }
+.how ol { margin: 10px 0 0; padding-left: 20px; font-size: 13px; color: var(--dim); display: grid; gap: 7px; }
+
+.foot { padding: 18px 20px 28px; color: var(--dim); font-size: 12.5px; max-width: 760px; }
+
+/* ---- the standalone page: its own controls ---- */
+.top--standalone { grid-template-columns: auto auto; }
+.top--standalone .controls { grid-column: 1 / -1; }
+@media (min-width: 1100px) {
+  .top--standalone { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .top--standalone .brand { order: 1; }
+  .top--standalone .controls { order: 2; grid-column: auto; justify-content: flex-end; }
+  .top--standalone .btn { order: 3; }
+}
+
+.controls { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field--narrow { max-width: 110px; }
+.field__name { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+
+.input {
+  appearance: none; font: inherit; font-size: 13.5px;
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--line); border-radius: 11px;
+  padding: 9px 12px; min-width: 240px;
+}
+.field--narrow .input { min-width: 0; width: 100%; }
+.input:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+select.input { padding-right: 8px; }
+
+.toggles { display: flex; gap: 6px; flex-wrap: wrap; }
+.toggle {
+  appearance: none; cursor: pointer; font: inherit; font-size: 13px;
+  background: var(--card); color: var(--dim);
+  border: 1px solid var(--line); border-radius: 11px; padding: 9px 12px;
+}
+.toggle--on { background: var(--card-hi); color: var(--text); border-color: #2c3a52; }
+
+.status { padding: 0 20px; margin-top: 12px; font-size: 13px; color: var(--dim); min-height: 18px; }
+.status--bad { color: var(--down); }
+
+.card--warn { border-color: #2c3a52; }
+.code {
+  margin: 12px 0 0; padding: 12px 14px; overflow-x: auto;
+  background: var(--ink); border-radius: 12px;
+  font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--blue);
+}
+.foot a, .note a { color: var(--blue); }
+
+</style>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='13' fill='none' stroke='%239cbbff' stroke-width='2'/><path d='M16 3v26' stroke='%239cbbff' stroke-width='2'/></svg>">
+</head>
+<body>
+
+<header class="top top--standalone">
+  <div class="brand">
+    <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <ellipse cx="16" cy="16" rx="6.5" ry="13" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M3 16h26M16 3v26" stroke="currentColor" stroke-width="1.6"/>
+    </svg>
+    <div>
+      <div class="brand__name">Scout</div>
+      <div class="brand__sub">считает прямо в браузере</div>
+    </div>
+  </div>
+
+  <button class="btn btn--primary" id="scan">
+    <span class="btn__label">Обновить</span>
+  </button>
+
+  <div class="controls">
+    <label class="field">
+      <span class="field__name">пары</span>
+      <input id="symbols" class="input" spellcheck="false" autocapitalize="characters"
+             placeholder="BTCUSDT, ETHUSDT" aria-label="Пары через запятую">
+    </label>
+    <div class="field">
+      <span class="field__name">таймфреймы</span>
+      <div class="toggles" id="tfs"></div>
+    </div>
+    <label class="field field--narrow">
+      <span class="field__name">порог</span>
+      <select id="score" class="input" aria-label="Минимум очков">
+        <option value="0">любой</option>
+        <option value="45">45</option>
+        <option value="60">60</option>
+        <option value="75">75</option>
+      </select>
+    </label>
+  </div>
+</header>
+
+<div class="status" id="status"></div>
+
+<main class="grid">
+
+  <section class="col">
+    <div class="section__head">
+      <h2>Найденные сетапы</h2>
+      <span class="muted" id="count"></span>
+    </div>
+    <div id="setups" class="list"><div class="empty">Считаю…</div></div>
+  </section>
+
+  <aside class="col">
+    <div class="card card--chart">
+      <div class="section__head section__head--tight">
+        <h2 id="chartTitle">График</h2>
+        <span class="muted">TradingView</span>
+      </div>
+      <div id="chart" class="chart"></div>
+      <p class="note">График рисует TradingView. Сам анализ идёт по свечам биржи — публичного доступа к данным TradingView нет ни у кого, кроме их собственных виджетов.</p>
+    </div>
+
+    <div class="card">
+      <div class="section__head section__head--tight"><h2>Что проверено</h2></div>
+      <div id="scans" class="scans"></div>
+    </div>
+
+    <div class="card card--warn">
+      <div class="section__head section__head--tight"><h2>Чего на этой странице нет</h2></div>
+      <p class="note">
+        Она считает, только пока открыта, и ничего никуда не шлёт. Постоянное
+        наблюдение, сообщения в Telegram и приём алертов TradingView — это уже
+        программа, которую надо запустить у себя:
+      </p>
+      <pre class="code">git clone https://github.com/kir11evglen12-design/aromio
+cd aromio/scout
+node scout.js selftest
+node scout.js serve</pre>
+      <p class="note">Нужен Node.js 18 и выше. Зависимостей нет.
+        <a href="https://github.com/kir11evglen12-design/aromio/tree/main/scout" target="_blank" rel="noopener">Как настроить Telegram и TradingView</a>.
+      </p>
+    </div>
+  </aside>
+
+</main>
+
+<footer class="foot">
+  Данные — публичные свечи Binance, при отказе Bybit. Сетапы считаются в вашем
+  браузере, никуда не отправляются и нигде не сохраняются, кроме списка пар в
+  памяти этого браузера.
+  <br><br>
+  Scout показывает условия, которые он умеет распознавать, и цену, на которой
+  идея перестаёт быть верной. Это не совет и не прогноз: решение и размер
+  позиции — ваши.
+</footer>
+
+<script>
+/* lib/ta.js */
+(function () {
+/**
+ * Indicators, written out rather than imported.
+ *
+ * Every function here takes plain arrays and returns plain arrays of the
+ * same length, with `null` where there is not enough history yet. That
+ * keeps indices aligned with the candles, so a setup can always point at
+ * the exact bar it was found on.
+ */
+"use strict";
+
+/** Simple average of a window ending at i. */
+function sma(values, period) {
+  const out = new Array(values.length).fill(null);
+  let sum = 0;
+  for (let i = 0; i < values.length; i++) {
+    sum += values[i];
+    if (i >= period) sum -= values[i - period];
+    if (i >= period - 1) out[i] = sum / period;
+  }
+  return out;
+}
+
+/** Exponential average, seeded with the first simple average. */
+function ema(values, period) {
+  const out = new Array(values.length).fill(null);
+  if (values.length < period) return out;
+  const k = 2 / (period + 1);
+  let prev = values.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  out[period - 1] = prev;
+  for (let i = period; i < values.length; i++) {
+    prev = values[i] * k + prev * (1 - k);
+    out[i] = prev;
+  }
+  return out;
+}
+
+/** Wilder's smoothing — what RSI and ATR are actually defined on. */
+function wilder(values, period) {
+  const out = new Array(values.length).fill(null);
+  if (values.length < period) return out;
+  let prev = values.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  out[period - 1] = prev;
+  for (let i = period; i < values.length; i++) {
+    prev = (prev * (period - 1) + values[i]) / period;
+    out[i] = prev;
+  }
+  return out;
+}
+
+function rsi(closes, period = 14) {
+  const gains = [0], losses = [0];
+  for (let i = 1; i < closes.length; i++) {
+    const d = closes[i] - closes[i - 1];
+    gains.push(Math.max(d, 0));
+    losses.push(Math.max(-d, 0));
+  }
+  const ag = wilder(gains, period), al = wilder(losses, period);
+  return closes.map((_, i) => {
+    if (ag[i] === null || al[i] === null) return null;
+    if (al[i] === 0) return 100;
+    const rs = ag[i] / al[i];
+    return 100 - 100 / (1 + rs);
+  });
+}
+
+/** True range of each bar, then Wilder-smoothed. */
+function atr(candles, period = 14) {
+  const tr = candles.map((c, i) => {
+    if (i === 0) return c.h - c.l;
+    const prev = candles[i - 1].c;
+    return Math.max(c.h - c.l, Math.abs(c.h - prev), Math.abs(c.l - prev));
+  });
+  return wilder(tr, period);
+}
+
+/**
+ * Swing points: a high with `left` lower highs before it and `right` after.
+ * The last `right` bars can never be swings yet — that is the point, a
+ * swing is only confirmed once price has moved away from it.
+ */
+function swings(candles, left = 2, right = 2) {
+  const highs = [], lows = [];
+  for (let i = left; i < candles.length - right; i++) {
+    let isHigh = true, isLow = true;
+    for (let j = i - left; j <= i + right; j++) {
+      if (j === i) continue;
+      if (candles[j].h >= candles[i].h) isHigh = false;
+      if (candles[j].l <= candles[i].l) isLow = false;
+    }
+    if (isHigh) highs.push({ i, price: candles[i].h });
+    if (isLow) lows.push({ i, price: candles[i].l });
+  }
+  return { highs, lows };
+}
+
+function median(values) {
+  const list = values.filter(v => v != null).slice().sort((a, b) => a - b);
+  if (!list.length) return null;
+  const mid = list.length >> 1;
+  return list.length % 2 ? list[mid] : (list[mid - 1] + list[mid]) / 2;
+}
+
+/** Where `value` sits inside `values`, 0 to 1. */
+function percentRank(values, value) {
+  const list = values.filter(v => v != null);
+  if (!list.length) return null;
+  return list.filter(v => v <= value).length / list.length;
+}
+
+/** Slope of a least-squares line through the last `n` values, per bar. */
+function slope(values, n) {
+  const list = values.slice(-n).filter(v => v != null);
+  if (list.length < 2) return null;
+  const xs = list.map((_, i) => i);
+  const mx = xs.reduce((a, b) => a + b, 0) / list.length;
+  const my = list.reduce((a, b) => a + b, 0) / list.length;
+  let num = 0, den = 0;
+  for (let i = 0; i < list.length; i++) {
+    num += (xs[i] - mx) * (list[i] - my);
+    den += (xs[i] - mx) ** 2;
+  }
+  return den === 0 ? 0 : num / den;
+}
+
+const closes = candles => candles.map(c => c.c);
+const volumes = candles => candles.map(c => c.v);
+
+globalThis.TA = { sma, ema, wilder, rsi, atr, swings, median, percentRank, slope, closes, volumes };
+
+})();
+</script>
+<script>
+/* lib/setups.js */
+(function () {
+/**
+ * Setup detectors.
+ *
+ * Each one looks at closed candles only and either returns a setup or null.
+ * A setup is never just "signal here": it carries the levels it was built
+ * from, an entry, a stop, two targets and the reasons in plain words, so
+ * the decision stays with the person reading it.
+ *
+ * None of this predicts anything. It recognises conditions that have a
+ * name, and says how far price would have to go against the idea before
+ * the idea is wrong.
+ */
+"use strict";
+
+const ta = globalThis.TA;
+
+const LOOKBACK = 40;          // how far back a detector may reach for structure
+const MIN_RR = 1.2;           // below this the idea is not worth writing down
+
+/* ---------- helpers ---------- */
+
+function lastDefined(series) {
+  for (let i = series.length - 1; i >= 0; i--) if (series[i] != null) return series[i];
+  return null;
+}
+
+function highest(candles, from, to) {
+  let best = -Infinity;
+  for (let i = Math.max(0, from); i <= Math.min(candles.length - 1, to); i++) best = Math.max(best, candles[i].h);
+  return best;
+}
+
+function lowest(candles, from, to) {
+  let best = Infinity;
+  for (let i = Math.max(0, from); i <= Math.min(candles.length - 1, to); i++) best = Math.min(best, candles[i].l);
+  return best;
+}
+
+/** Everything a detector needs, computed once per symbol and timeframe. */
+function context(symbol, tf, candles, htfTrend) {
+  const closes = ta.closes(candles);
+  return {
+    symbol, tf, candles, closes,
+    htfTrend: htfTrend || null,
+    ema21: ta.ema(closes, 21),
+    ema50: ta.ema(closes, 50),
+    ema200: ta.ema(closes, 200),
+    rsi: ta.rsi(closes, 14),
+    atr: ta.atr(candles, 14),
+    swings: ta.swings(candles, 3, 3),
+    volMedian: ta.median(ta.volumes(candles).slice(-20)),
+    last: candles.length - 1
+  };
+}
+
+/**
+ * Turns a raw idea into a setup, or rejects it. This is where every
+ * detector's output gets the same shape and the same sanity checks.
+ */
+function build(ctx, idea) {
+  const { entry, stop, side } = idea;
+  if (!(entry > 0) || !(stop > 0)) return null;
+  const risk = side === "long" ? entry - stop : stop - entry;
+  if (!(risk > 0)) return null;                     // stop on the wrong side
+
+  /* The stop has to stay inside what this market actually moves. Six ATR
+     is wide but reachable; past that the risk unit is so big that the
+     targets stop meaning anything, and under a sixth of an ATR the stop
+     is inside the noise and gets taken out for no reason. */
+  const atrNow = lastDefined(ctx.atr) || risk;
+  if (risk > atrNow * 6 || risk < atrNow * 0.15) return null;
+
+  const dir = side === "long" ? 1 : -1;
+  const targets = idea.targets && idea.targets.length
+    ? idea.targets
+    : [entry + dir * risk * 1.5, entry + dir * risk * 3];
+  const rr = Math.abs(targets[targets.length - 1] - entry) / risk;
+  if (rr < MIN_RR) return null;
+
+  const bar = ctx.candles[ctx.last];
+  const setup = {
+    id: `${ctx.symbol}|${ctx.tf}|${idea.kind}|${bar.t}`,
+    symbol: ctx.symbol,
+    tf: ctx.tf,
+    kind: idea.kind,
+    title: idea.title,
+    side,
+    at: bar.t,
+    price: bar.c,
+    entry, stop, targets,
+    rr: Number(rr.toFixed(2)),
+    rr1: Number((Math.abs(targets[0] - entry) / risk).toFixed(2)),
+    riskPct: Number(((risk / entry) * 100).toFixed(2)),
+    atr: Number(atrNow.toFixed(8)),
+    levels: idea.levels || {},
+    reasons: idea.reasons.slice()
+  };
+  setup.score = score(ctx, setup);
+  return setup;
+}
+
+/**
+ * How much the conditions agree with each other. Not a probability — a
+ * count of confirmations, so two setups can be compared at a glance.
+ */
+function score(ctx, setup) {
+  let points = 25;
+  const bar = ctx.candles[ctx.last];
+  const ema200 = lastDefined(ctx.ema200);
+  const ema50 = lastDefined(ctx.ema50);
+  const long = setup.side === "long";
+
+  if (ema200 != null) {
+    const withTrend = long ? bar.c > ema200 : bar.c < ema200;
+    if (withTrend) { points += 15; setup.reasons.push("по стороне EMA200"); }
+    else points -= 10;
+  }
+  if (ema50 != null && ema200 != null) {
+    const stacked = long ? ema50 > ema200 : ema50 < ema200;
+    if (stacked) points += 10;
+  }
+  if (ctx.htfTrend) {
+    if ((long && ctx.htfTrend === "up") || (!long && ctx.htfTrend === "down")) {
+      points += 20;
+      setup.reasons.push("старший таймфрейм в ту же сторону");
+    } else if (ctx.htfTrend !== "flat") {
+      points -= 15;
+      setup.reasons.push("старший таймфрейм против");
+    }
+  }
+  if (ctx.volMedian && bar.v >= ctx.volMedian * 1.5) {
+    points += 12;
+    setup.reasons.push("объём выше обычного");
+  }
+  if (setup.rr >= 3) points += 18;
+  else if (setup.rr >= 2) points += 12;
+  else if (setup.rr >= 1.5) points += 6;
+
+  return Math.max(0, Math.min(100, Math.round(points)));
+}
+
+/* ---------- detectors ---------- */
+
+/**
+ * Structure break, then a return to the broken level that holds.
+ * The level that stopped price before is expected to stop it again from
+ * the other side; the stop goes where that stops being true.
+ */
+function breakRetest(ctx) {
+  const { candles, last } = ctx;
+  const atrNow = lastDefined(ctx.atr);
+  if (!atrNow) return null;
+  const bar = candles[last];
+
+  for (const side of ["long", "short"]) {
+    const long = side === "long";
+    const pivots = long ? ctx.swings.highs : ctx.swings.lows;
+
+    /* Every pivot in reach is a candidate, newest first. Taking only the
+       newest one would miss the pattern almost every time: the thrust
+       that broke the level leaves a fresher pivot of its own behind, and
+       that one has not been broken by anything. */
+    const candidates = pivots
+      .filter(p => p.i >= last - LOOKBACK && p.i <= last - 3)
+      .slice()
+      .reverse();
+
+    for (const level of candidates) {
+      /* the break: a close beyond the level, clear of it by enough that a
+         single tick through does not count */
+      let breakAt = -1;
+      for (let i = level.i + 1; i <= last; i++) {
+        const past = long ? candles[i].c - level.price : level.price - candles[i].c;
+        if (past > atrNow * 0.25) { breakAt = i; break; }
+      }
+      if (breakAt < 0 || last - breakAt < 2) continue;
+
+      /* the retest: price came back within a third of an ATR of the level */
+      let touched = -1;
+      for (let i = breakAt + 1; i <= last; i++) {
+        const dist = long ? candles[i].l - level.price : level.price - candles[i].h;
+        if (dist <= atrNow * 0.35) { touched = i; break; }
+      }
+      if (touched < 0) continue;
+
+      /* and the current bar closed back on the breakout side */
+      if (long ? bar.c <= level.price : bar.c >= level.price) continue;
+
+      const swingAfter = long
+        ? lowest(candles, breakAt, last) - atrNow * 0.4
+        : highest(candles, breakAt, last) + atrNow * 0.4;
+
+      return build(ctx, {
+        kind: "break-retest",
+        title: "Пробой уровня и ретест",
+        side,
+        entry: bar.c,
+        stop: swingAfter,
+        levels: { уровень: level.price, пробой: candles[breakAt].c },
+        reasons: [
+          long ? "пробит максимум структуры" : "пробит минимум структуры",
+          "цена вернулась к уровню и удержала его"
+        ]
+      });
+    }
+  }
+  return null;
+}
+
+/**
+ * A trend that gave a discount: price pulls into the fast average and
+ * closes back out of it without breaking the slow one.
+ */
+function trendPullback(ctx) {
+  const { candles, last } = ctx;
+  const bar = candles[last];
+  const e21 = ctx.ema21[last], e50 = ctx.ema50[last], e200 = ctx.ema200[last];
+  const rsiNow = ctx.rsi[last];
+  const atrNow = lastDefined(ctx.atr);
+  if (e21 == null || e50 == null || e200 == null || rsiNow == null || !atrNow) return null;
+
+  /* An ordering of averages is not a trend. In a flat market EMA50 and
+     EMA200 sit on top of each other and one of them is always nominally
+     above — so ask for daylight between them, measured in ATR, and for
+     the fast average to be actually going somewhere. */
+  const spread = Math.abs(e50 - e200) >= atrNow * 0.5;
+  const drift = ta.slope(ctx.ema21.slice(0, last + 1), 10);
+  if (!spread || drift == null) return null;
+
+  const up = e50 > e200 && bar.c > e200 && drift > 0;
+  const down = e50 < e200 && bar.c < e200 && drift < 0;
+  if (!up && !down) return null;
+
+  const side = up ? "long" : "short";
+  const touched = up ? bar.l <= e21 * 1.001 : bar.h >= e21 * 0.999;
+  const closedBack = up ? bar.c > e21 : bar.c < e21;
+  const rsiRoom = up ? rsiNow >= 35 && rsiNow <= 60 : rsiNow <= 65 && rsiNow >= 40;
+  if (!touched || !closedBack || !rsiRoom) return null;
+
+  const stop = up
+    ? lowest(candles, last - 3, last) - atrNow * 0.5
+    : highest(candles, last - 3, last) + atrNow * 0.5;
+
+  return build(ctx, {
+    kind: "trend-pullback",
+    title: "Откат в тренде к EMA21",
+    side,
+    entry: bar.c,
+    stop,
+    levels: { EMA21: e21, EMA50: e50, EMA200: e200 },
+    reasons: [
+      up ? "EMA50 выше EMA200 — тренд вверх" : "EMA50 ниже EMA200 — тренд вниз",
+      "EMA21 идёт в ту же сторону",
+      "откат к EMA21 и закрытие обратно",
+      `RSI ${rsiNow.toFixed(0)} — без перегрева`
+    ]
+  });
+}
+
+/**
+ * A range that got quiet, then left. The measured move of the range is
+ * the target, because that is the only number the range itself gives.
+ */
+function squeezeBreak(ctx) {
+  const { candles, last } = ctx;
+  if (last < 120) return null;
+  const bar = candles[last];
+  const atrNow = lastDefined(ctx.atr);
+  if (!atrNow) return null;
+
+  /* how wide the previous twenty bars were, in ATR, over the last hundred */
+  const widths = [];
+  for (let i = 100; i <= last; i++) {
+    const hi = highest(candles, i - 20, i - 1);
+    const lo = lowest(candles, i - 20, i - 1);
+    const a = ctx.atr[i];
+    if (a) widths.push({ i, ratio: (hi - lo) / a });
+  }
+  if (widths.length < 20) return null;
+  const current = widths[widths.length - 1];
+  const rank = ta.percentRank(widths.map(w => w.ratio), current.ratio);
+  if (rank == null || rank > 0.3) return null;               // not quiet enough
+
+  const hi = highest(candles, last - 20, last - 1);
+  const lo = lowest(candles, last - 20, last - 1);
+  const height = hi - lo;
+  if (!(height > 0)) return null;
+
+  const up = bar.c > hi;
+  const down = bar.c < lo;
+  if (!up && !down) return null;
+  if (ctx.volMedian && bar.v < ctx.volMedian * 1.2) return null;
+
+  /* The stop goes where the breakout itself is wrong — under the bar that
+     made it, or under the range if the range is the tighter of the two.
+     Hanging it on the far side of the range instead would cost the whole
+     height of the range to make the height of the range back. */
+  const side = up ? "long" : "short";
+  return build(ctx, {
+    kind: "squeeze-break",
+    title: "Сжатие и выход из диапазона",
+    side,
+    entry: bar.c,
+    stop: up
+      ? Math.max(lo, bar.l) - atrNow * 0.3
+      : Math.min(hi, bar.h) + atrNow * 0.3,
+    targets: up
+      ? [hi + height, hi + height * 2]
+      : [lo - height, lo - height * 2],
+    levels: { верх: hi, низ: lo, высота: height, ретест: up ? hi : lo },
+    reasons: [
+      `диапазон уже, чем ${Math.round((1 - rank) * 100)} % последних ста баров`,
+      up ? "закрытие выше границы диапазона" : "закрытие ниже границы диапазона",
+      "первая цель — высота диапазона от границы, вторая — две высоты"
+    ]
+  });
+}
+
+/**
+ * Price made a new extreme, momentum did not. Only counted when the bar
+ * that follows takes back the swing between the two lows.
+ */
+function rsiDivergence(ctx) {
+  const { candles, last } = ctx;
+  const bar = candles[last];
+  const atrNow = lastDefined(ctx.atr);
+  if (!atrNow) return null;
+
+  for (const side of ["long", "short"]) {
+    const long = side === "long";
+    const pivots = (long ? ctx.swings.lows : ctx.swings.highs)
+      .filter(p => p.i >= last - LOOKBACK * 2);
+    if (pivots.length < 2) continue;
+    const [prev, curr] = pivots.slice(-2);
+    if (curr.i > last - 2) continue;
+
+    /* Both halves have to be worth the name: a new extreme that clears
+       the old one by a third of an ATR, and a momentum gap of a few
+       points rather than a rounding difference. */
+    const priceExtreme = long
+      ? curr.price < prev.price - atrNow * 0.3
+      : curr.price > prev.price + atrNow * 0.3;
+    const rsiPrev = ctx.rsi[prev.i], rsiCurr = ctx.rsi[curr.i];
+    if (rsiPrev == null || rsiCurr == null) continue;
+    const rsiHolds = long ? rsiCurr > rsiPrev + 3 : rsiCurr < rsiPrev - 3;
+    const rsiZone = long ? rsiCurr < 45 : rsiCurr > 55;
+    if (!priceExtreme || !rsiHolds || !rsiZone) continue;
+
+    /* the trigger: price takes back the swing between the two pivots */
+    const between = long ? highest(candles, prev.i, curr.i) : lowest(candles, prev.i, curr.i);
+    if (long ? bar.c <= between : bar.c >= between) continue;
+
+    return build(ctx, {
+      kind: "rsi-divergence",
+      title: long ? "Бычья дивергенция RSI" : "Медвежья дивергенция RSI",
+      side,
+      entry: bar.c,
+      stop: long ? curr.price - atrNow * 0.5 : curr.price + atrNow * 0.5,
+      levels: {
+        [long ? "минимум" : "максимум"]: curr.price,
+        предыдущий: prev.price,
+        RSI: Number(rsiCurr.toFixed(1))
+      },
+      reasons: [
+        long ? "цена ниже, RSI выше — импульс слабеет" : "цена выше, RSI ниже — импульс слабеет",
+        `RSI ${rsiPrev.toFixed(0)} → ${rsiCurr.toFixed(0)}`,
+        "забран промежуточный экстремум"
+      ]
+    });
+  }
+  return null;
+}
+
+const DETECTORS = [breakRetest, trendPullback, squeezeBreak, rsiDivergence];
+
+/** Every setup visible on the last closed bar, best first. */
+function detect(symbol, tf, candles, options) {
+  options = options || {};
+  if (!candles || candles.length < 60) return [];
+  const ctx = context(symbol, tf, candles, options.htfTrend);
+  const found = [];
+  for (const detector of DETECTORS) {
+    let setup = null;
+    try { setup = detector(ctx); } catch (e) { setup = null; }
+    if (setup && setup.score >= (options.minScore || 0)) found.push(setup);
+  }
+  return found.sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Direction of a higher timeframe, for agreement scoring.
+ *
+ * "Flat" is the honest answer far more often than either direction: two
+ * averages a hair apart are not a trend, whichever of them happens to be
+ * on top, so the gap has to be worth at least half an ATR before this
+ * calls it anything.
+ */
+function trendOf(candles) {
+  if (!candles || candles.length < 60) return "flat";
+  const closes = ta.closes(candles);
+  const deep = candles.length >= 200;
+  const fast = lastDefined(ta.ema(closes, deep ? 50 : 20));
+  const slow = lastDefined(ta.ema(closes, deep ? 200 : 50));
+  const atrNow = lastDefined(ta.atr(candles, 14));
+  const price = closes[closes.length - 1];
+  if (fast == null || slow == null || !atrNow) return "flat";
+  if (Math.abs(fast - slow) < atrNow * 0.5) return "flat";
+  if (price > slow && fast > slow) return "up";
+  if (price < slow && fast < slow) return "down";
+  return "flat";
+}
+
+globalThis.Setups = { detect, trendOf, context, build, score, DETECTORS, MIN_RR };
+
+})();
+</script>
+<script>
+/* lib/market.js */
+(function () {
+/**
+ * Candles, from an exchange.
+ *
+ * TradingView has no public data API — the charts you see there are not
+ * something a program is allowed to read. So the analysis runs on the
+ * exchange's own klines, which is the same data TradingView draws for a
+ * spot pair anyway. Two sources, in order: whichever answers first wins.
+ *
+ * The bar still forming is always dropped. A setup found on a candle that
+ * has not closed can disappear before you read the message.
+ */
+"use strict";
+
+const TIMEFRAMES = {
+  "1m":  { ms: 60e3,      binance: "1m",  bybit: "1",   tv: "1"   },
+  "5m":  { ms: 300e3,     binance: "5m",  bybit: "5",   tv: "5"   },
+  "15m": { ms: 900e3,     binance: "15m", bybit: "15",  tv: "15"  },
+  "30m": { ms: 1800e3,    binance: "30m", bybit: "30",  tv: "30"  },
+  "1h":  { ms: 3600e3,    binance: "1h",  bybit: "60",  tv: "60"  },
+  "2h":  { ms: 7200e3,    binance: "2h",  bybit: "120", tv: "120" },
+  "4h":  { ms: 14400e3,   binance: "4h",  bybit: "240", tv: "240" },
+  "1d":  { ms: 86400e3,   binance: "1d",  bybit: "D",   tv: "D"   }
+};
+
+const HIGHER = { "1m": "15m", "5m": "1h", "15m": "4h", "30m": "4h", "1h": "4h", "2h": "1d", "4h": "1d", "1d": "1d" };
+
+/** The timeframe one step up, for checking the setup against the tide. */
+function higherOf(tf) { return HIGHER[tf] || "4h"; }
+function msOf(tf) { return (TIMEFRAMES[tf] || TIMEFRAMES["1h"]).ms; }
+function known(tf) { return Object.prototype.hasOwnProperty.call(TIMEFRAMES, tf); }
+
+const num = v => {
+  const n = typeof v === "number" ? v : parseFloat(v);
+  return Number.isFinite(n) ? n : null;
+};
+
+/** One candle, in the only shape the rest of the program knows. */
+function candle(t, o, h, l, c, v) {
+  const bar = { t: num(t), o: num(o), h: num(h), l: num(l), c: num(c), v: num(v) || 0 };
+  const sane = bar.t != null && [bar.o, bar.h, bar.l, bar.c].every(x => x != null && x > 0) &&
+               bar.h >= bar.l && bar.h >= bar.o && bar.h >= bar.c && bar.l <= bar.o && bar.l <= bar.c;
+  return sane ? bar : null;
+}
+
+async function getJson(url, timeout) {
+  /* No User-Agent header on purpose: a browser refuses to set one, and
+     this module runs in one too — the standalone page does its own
+     scanning with exactly this code. */
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(timeout || 12000),
+    headers: { accept: "application/json" }
+  });
+  if (!res.ok) throw new Error("HTTP " + res.status + " " + res.statusText);
+  return res.json();
+}
+
+/* ---------------- sources ---------------- */
+
+const binance = {
+  name: "binance",
+  url(symbol, tf, limit) {
+    return "https://api.binance.com/api/v3/klines?symbol=" + encodeURIComponent(symbol) +
+      "&interval=" + TIMEFRAMES[tf].binance + "&limit=" + Math.min(limit, 1000);
+  },
+  parse(body) {
+    if (!Array.isArray(body)) throw new Error("не массив свечей");
+    /* [openTime, open, high, low, close, volume, closeTime, ...] — oldest first */
+    return body.map(r => candle(r[0], r[1], r[2], r[3], r[4], r[5])).filter(Boolean);
+  }
+};
+
+const bybit = {
+  name: "bybit",
+  url(symbol, tf, limit) {
+    return "https://api.bybit.com/v5/market/kline?category=spot&symbol=" + encodeURIComponent(symbol) +
+      "&interval=" + TIMEFRAMES[tf].bybit + "&limit=" + Math.min(limit, 1000);
+  },
+  parse(body) {
+    if (!body || !body.result || !Array.isArray(body.result.list)) {
+      throw new Error(body && body.retMsg ? body.retMsg : "нет result.list");
+    }
+    /* [start, open, high, low, close, volume, turnover] — newest first here */
+    return body.result.list
+      .map(r => candle(r[0], r[1], r[2], r[3], r[4], r[5]))
+      .filter(Boolean)
+      .sort((a, b) => a.t - b.t);
+  }
+};
+
+const SOURCES = { binance, bybit };
+const ORDER = ["binance", "bybit"];
+
+/**
+ * Closed candles for a symbol, newest last.
+ *
+ * `options.sources` picks and orders the exchanges; the default tries
+ * Binance and falls back to Bybit. Whatever answers, the last bar is
+ * dropped unless the clock says it has already closed.
+ */
+async function klines(symbol, tf, limit, options) {
+  options = options || {};
+  if (!known(tf)) throw new Error("неизвестный таймфрейм: " + tf);
+  limit = Math.max(60, Math.min(limit || 400, 1000));
+
+  const names = (options.sources && options.sources.length ? options.sources : ORDER)
+    .filter(n => SOURCES[n]);
+  if (!names.length) throw new Error("не задан ни один источник данных");
+
+  const problems = [];
+  for (const name of names) {
+    const source = SOURCES[name];
+    try {
+      const body = await getJson(source.url(symbol, tf, limit + 1), options.timeout);
+      let bars = source.parse(body);
+      if (bars.length < 60) throw new Error("слишком мало свечей: " + bars.length);
+      bars = dropUnclosed(bars, tf, options.now);
+      return { symbol, tf, source: name, candles: bars };
+    } catch (e) {
+      problems.push(name + ": " + (e && e.message ? e.message : e));
+    }
+  }
+  throw new Error("не удалось получить свечи " + symbol + " " + tf + " — " + problems.join("; "));
+}
+
+/** Removes the bar that is still being painted. */
+function dropUnclosed(bars, tf, now) {
+  const step = msOf(tf);
+  const t = now == null ? Date.now() : now;
+  while (bars.length && bars[bars.length - 1].t + step > t) bars = bars.slice(0, -1);
+  return bars;
+}
+
+/** When the candle currently open will close. */
+function nextClose(tf, now) {
+  const step = msOf(tf);
+  const t = now == null ? Date.now() : now;
+  return Math.ceil((t + 1) / step) * step;
+}
+
+/**
+ * TradingView writes symbols with the exchange in front and a suffix for
+ * perpetuals; the exchange APIs want neither.
+ */
+function normaliseSymbol(raw) {
+  if (!raw) return "";
+  let s = String(raw).trim().toUpperCase();
+  if (s.includes(":")) s = s.slice(s.indexOf(":") + 1);
+  s = s.replace(/\.P$/, "").replace(/[^A-Z0-9]/g, "");
+  return s;
+}
+
+/** The reverse of the TradingView interval codes. */
+function timeframeFromTv(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim().toUpperCase();
+  const direct = Object.keys(TIMEFRAMES).find(tf => tf.toUpperCase() === s);
+  if (direct) return direct;
+  return Object.keys(TIMEFRAMES).find(tf => TIMEFRAMES[tf].tv === s) || null;
+}
+
+globalThis.Market = {
+  TIMEFRAMES, SOURCES, ORDER,
+  klines, dropUnclosed, nextClose, candle,
+  higherOf, msOf, known, normaliseSymbol, timeframeFromTv
+};
+
+})();
+</script>
+<script>
+/* public/render.js */
+/**
+ * Drawing a setup. Shared by both front ends.
+ *
+ * There are two: the page served by `scout.js serve`, which reads findings
+ * from the service, and the standalone page, which scans in the browser
+ * itself. They must show a setup identically — same numbers, same wording
+ * — so the drawing lives here and each of them only supplies the data.
+ */
+(function (global) {
+  "use strict";
+
+  var TF = { "1m": "1 мин", "5m": "5 мин", "15m": "15 мин", "30m": "30 мин",
+             "1h": "1 час", "2h": "2 часа", "4h": "4 часа", "1d": "1 день" };
+  var TV_TF = { "1m": "1", "5m": "5", "15m": "15", "30m": "30", "1h": "60", "2h": "120", "4h": "240", "1d": "D" };
+
+  /** Enough digits to tell two prices apart, and no more. */
+  function price(value) {
+    var v = Math.abs(value);
+    var digits = v >= 1000 ? 2 : v >= 10 ? 3 : v >= 1 ? 4 : v >= 0.01 ? 6 : 8;
+    return Number(value.toFixed(digits)).toLocaleString("ru-RU", { maximumFractionDigits: digits });
+  }
+
+  function dec(value) { return String(value).replace(".", ","); }
+
+  function stars(score) {
+    var filled = Math.max(1, Math.min(5, Math.round(score / 20)));
+    return "★".repeat(filled) + "☆".repeat(5 - filled);
+  }
+
+  function when(ms) {
+    var d = new Date(ms), now = new Date();
+    var sameDay = d.toDateString() === now.toDateString();
+    return d.toLocaleString("ru-RU", sameDay
+      ? { hour: "2-digit", minute: "2-digit" }
+      : { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function node(tag, attrs, children) {
+    var n = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (key) {
+      if (key === "text") n.textContent = attrs[key];
+      else if (key === "html") n.innerHTML = attrs[key];
+      else if (key === "onclick") n.addEventListener("click", attrs[key]);
+      else n.setAttribute(key, attrs[key]);
+    });
+    (children || []).forEach(function (child) { if (child) n.appendChild(child); });
+    return n;
+  }
+
+  function levels(setup) {
+    var rows = [
+      { name: "вход", value: price(setup.entry), cls: "" },
+      { name: "стоп", value: price(setup.stop), cls: "level--stop" },
+      { name: "цель 1", value: price(setup.targets[0]), cls: "level--target" },
+      { name: "цель 2", value: setup.targets[1] == null ? "—" : price(setup.targets[1]), cls: "level--target" }
+    ];
+    return node("div", { class: "levels" }, rows.map(function (row) {
+      return node("div", { class: "level " + row.cls }, [
+        node("div", { class: "level__name", text: row.name }),
+        node("div", { class: "level__value", text: row.value })
+      ]);
+    }));
+  }
+
+  /** One finding, exactly as both pages show it. */
+  function card(setup, options) {
+    options = options || {};
+    return node("div", {
+      class: "setup" + (options.active ? " setup--active" : ""),
+      onclick: options.onPick || function () {}
+    }, [
+      node("div", { class: "setup__top" }, [
+        node("span", { class: "tag tag--pair", text: setup.symbol }),
+        node("span", { class: "tag", text: TF[setup.tf] || setup.tf }),
+        node("span", { class: "tag tag--" + setup.side, text: setup.side === "long" ? "ЛОНГ" : "ШОРТ" }),
+        node("span", { class: "setup__score" }, [
+          node("span", { class: "stars", text: stars(setup.score) }),
+          node("span", { text: setup.score + "/100" })
+        ])
+      ]),
+      node("div", { class: "setup__title", text: setup.title }),
+      levels(setup),
+      node("ul", { class: "reasons" }, setup.reasons.map(function (reason) {
+        return node("li", { text: reason });
+      })),
+      node("div", { class: "setup__foot" }, [
+        node("span", { text: "R:R " + dec(setup.rr1) + " → " + dec(setup.rr) }),
+        node("span", { text: "риск " + dec(setup.riskPct) + " %" }),
+        node("span", { text: "свеча " + when(setup.at) })
+      ])
+    ]);
+  }
+
+  /**
+   * TradingView's own embed — the only legitimate way to show their chart.
+   * It needs the network; offline the panel keeps the hint behind it.
+   */
+  function chart(host, symbol, tf, title) {
+    host.textContent = "";
+    if (title) title.textContent = symbol + " · " + (TF[tf] || tf);
+
+    host.appendChild(node("div", {
+      class: "chart__hint",
+      text: "График рисует TradingView — для него нужен интернет"
+    }));
+
+    var holder = node("div", { class: "tradingview-widget-container" }, [node("div", {})]);
+    host.appendChild(holder);
+
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.async = true;
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    script.text = JSON.stringify({
+      symbol: "BINANCE:" + symbol,
+      interval: TV_TF[tf] || "60",
+      theme: "dark",
+      style: "1",
+      locale: "ru",
+      autosize: true,
+      hide_side_toolbar: true,
+      allow_symbol_change: false,
+      backgroundColor: "#08111f",
+      gridColor: "rgba(156, 187, 255, 0.06)"
+    });
+    holder.appendChild(script);
+  }
+
+  global.ScoutUI = { TF: TF, TV_TF: TV_TF, price: price, dec: dec, stars: stars, when: when, node: node, card: card, chart: chart };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* public/web.js */
+/**
+ * The standalone page: the scanner with no service behind it.
+ *
+ * Binance and Bybit answer public kline requests from a browser, so the
+ * same `market.js` and the same detectors that the service runs can run
+ * here, in the tab, on real candles. That makes this page an honest
+ * showcase rather than a screenshot with made-up numbers.
+ *
+ * What it cannot be is a watchman. A page only works while it is open, it
+ * cannot write to Telegram and TradingView cannot reach it with a
+ * webhook. Those need `scout.js` running somewhere that stays on, and the
+ * page says so rather than pretending otherwise.
+ */
+(function () {
+  "use strict";
+
+  var UI = window.ScoutUI;
+  var market = window.Market;
+  var setups = window.Setups;
+  var node = UI.node;
+
+  var STORE = "scout.web.v1";
+  var TIMEFRAMES = ["15m", "1h", "4h", "1d"];
+
+  var prefs = load() || { symbols: ["BTCUSDT", "ETHUSDT", "SOLUSDT"], timeframes: ["1h", "4h"], minScore: 45 };
+  var found = [];
+  var scans = [];
+  var chosen = null;
+  var chartFor = null;
+  var running = false;
+
+  var el = {
+    symbols: document.getElementById("symbols"),
+    tfs: document.getElementById("tfs"),
+    score: document.getElementById("score"),
+    scan: document.getElementById("scan"),
+    setups: document.getElementById("setups"),
+    count: document.getElementById("count"),
+    scans: document.getElementById("scans"),
+    chart: document.getElementById("chart"),
+    chartTitle: document.getElementById("chartTitle"),
+    status: document.getElementById("status")
+  };
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORE)); } catch (e) { return null; }
+  }
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(prefs)); } catch (e) { /* private mode */ }
+  }
+
+  /* ---------- controls ---------- */
+
+  function drawControls() {
+    el.symbols.value = prefs.symbols.join(", ");
+
+    el.tfs.textContent = "";
+    TIMEFRAMES.forEach(function (tf) {
+      var on = prefs.timeframes.indexOf(tf) >= 0;
+      el.tfs.appendChild(node("button", {
+        class: "toggle" + (on ? " toggle--on" : ""),
+        type: "button",
+        text: UI.TF[tf] || tf,
+        onclick: function () {
+          var i = prefs.timeframes.indexOf(tf);
+          if (i >= 0) { if (prefs.timeframes.length > 1) prefs.timeframes.splice(i, 1); }
+          else prefs.timeframes.push(tf);
+          prefs.timeframes.sort(function (a, b) { return market.msOf(a) - market.msOf(b); });
+          save();
+          drawControls();
+        }
+      }));
+    });
+
+    el.score.value = String(prefs.minScore);
+  }
+
+  function readSymbols() {
+    var raw = el.symbols.value.split(/[,\s]+/).map(market.normaliseSymbol).filter(Boolean);
+    prefs.symbols = raw.length ? raw.slice(0, 8) : ["BTCUSDT"];
+    save();
+    drawControls();
+  }
+
+  /* ---------- scanning ---------- */
+
+  function status(text, kind) {
+    el.status.textContent = text || "";
+    el.status.className = "status" + (kind ? " status--" + kind : "");
+  }
+
+  async function scanAll() {
+    if (running) return;
+    running = true;
+    el.scan.disabled = true;
+    found = [];
+    scans = [];
+    var trends = {};
+    var total = prefs.symbols.length * prefs.timeframes.length;
+    var done = 0;
+
+    for (var s = 0; s < prefs.symbols.length; s++) {
+      for (var t = 0; t < prefs.timeframes.length; t++) {
+        var symbol = prefs.symbols[s], tf = prefs.timeframes[t];
+        status("Считаю " + symbol + " " + (UI.TF[tf] || tf) + "… (" + (done + 1) + " из " + total + ")");
+        try {
+          var data = await market.klines(symbol, tf, 400);
+
+          /* the higher timeframe, once per pair */
+          var htf = market.higherOf(tf);
+          if (htf !== tf && trends[symbol + htf] === undefined) {
+            try {
+              var above = await market.klines(symbol, htf, 260);
+              trends[symbol + htf] = setups.trendOf(above.candles);
+            } catch (e) { trends[symbol + htf] = null; }
+          }
+
+          var list = setups.detect(symbol, tf, data.candles, {
+            htfTrend: trends[symbol + htf] || null,
+            minScore: prefs.minScore
+          });
+          var last = data.candles[data.candles.length - 1];
+          scans.push({
+            symbol: symbol, tf: tf, source: data.source, price: last.c,
+            at: last.t, found: list.length
+          });
+          list.forEach(function (setup) { found.push(setup); });
+        } catch (e) {
+          scans.push({ symbol: symbol, tf: tf, error: shortError(e) });
+        }
+        done++;
+        draw();
+      }
+    }
+
+    found.sort(function (a, b) { return b.score - a.score; });
+    var broke = scans.filter(function (scan) { return scan.error; });
+    if (broke.length === scans.length) {
+      status("Ни одна биржа не ответила. Обычно это блокировка сети или расширение в браузере — " +
+             "попробуйте другую сеть или откройте страницу в другом браузере.", "bad");
+    } else {
+      status("Обновлено " + UI.when(Date.now()) + " · " +
+             (found.length ? "найдено " + found.length : "сейчас ничего не подходит") +
+             (broke.length ? " · не ответили: " + broke.length : ""));
+    }
+    draw();
+    running = false;
+    el.scan.disabled = false;
+  }
+
+  function shortError(e) {
+    var text = e && e.message ? e.message : String(e);
+    return text.length > 120 ? text.slice(0, 120) + "…" : text;
+  }
+
+  /* ---------- drawing ---------- */
+
+  function draw() {
+    el.setups.textContent = "";
+    el.count.textContent = found.length ? found.length + " найдено" : "";
+
+    if (!found.length) {
+      el.setups.appendChild(node("div", {
+        class: "empty",
+        text: running
+          ? "Считаю…"
+          : "Сейчас ничего не подходит под условия. Это нормальный результат — сетапы редки. " +
+            "Можно снизить порог или добавить пары."
+      }));
+    } else {
+      found.forEach(function (setup) {
+        el.setups.appendChild(UI.card(setup, {
+          active: chosen && chosen.id === setup.id,
+          onPick: function () { choose(setup); }
+        }));
+      });
+      if (!chosen) choose(found[0]);
+    }
+
+    el.scans.textContent = "";
+    if (!scans.length) {
+      el.scans.appendChild(node("div", { class: "empty", text: "Ещё не проверял" }));
+    }
+    scans.forEach(function (scan) {
+      el.scans.appendChild(node("div", { class: "scan" + (scan.error ? " scan--bad" : "") }, [
+        node("b", { text: scan.symbol }),
+        node("span", { text: UI.TF[scan.tf] || scan.tf }),
+        node("em", {
+          text: scan.error
+            ? scan.error
+            : (scan.found ? scan.found + " найдено · " : "") + UI.price(scan.price) + " · " + scan.source
+        })
+      ]));
+    });
+  }
+
+  function choose(setup) {
+    chosen = setup;
+    var key = setup.symbol + "|" + setup.tf;
+    if (chartFor !== key) {
+      chartFor = key;
+      UI.chart(el.chart, setup.symbol, setup.tf, el.chartTitle);
+    }
+    draw();
+  }
+
+  /* ---------- go ---------- */
+
+  el.scan.addEventListener("click", scanAll);
+  el.symbols.addEventListener("change", readSymbols);
+  el.symbols.addEventListener("blur", readSymbols);
+  el.score.addEventListener("change", function () {
+    prefs.minScore = parseInt(el.score.value, 10) || 0;
+    save();
+  });
+
+  drawControls();
+  draw();
+  UI.chart(el.chart, prefs.symbols[0], prefs.timeframes[0], el.chartTitle);
+  scanAll();
+})();
+
+</script>
+</body>
+</html>

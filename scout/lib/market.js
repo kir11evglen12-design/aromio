@@ -43,9 +43,12 @@ function candle(t, o, h, l, c, v) {
 }
 
 async function getJson(url, timeout) {
+  /* No User-Agent header on purpose: a browser refuses to set one, and
+     this module runs in one too — the standalone page does its own
+     scanning with exactly this code. */
   const res = await fetch(url, {
     signal: AbortSignal.timeout(timeout || 12000),
-    headers: { accept: "application/json", "user-agent": "meridian-scout/1.0" }
+    headers: { accept: "application/json" }
   });
   if (!res.ok) throw new Error("HTTP " + res.status + " " + res.statusText);
   return res.json();
