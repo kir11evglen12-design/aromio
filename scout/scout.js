@@ -52,6 +52,18 @@ function shortestTimeframe() {
   return known.reduce((a, b) => (market.msOf(a) <= market.msOf(b) ? a : b));
 }
 
+/** Addresses of this machine on the local network, for a phone to use. */
+function lanAddresses() {
+  const nets = require("os").networkInterfaces();
+  const found = [];
+  Object.keys(nets).forEach(name => {
+    (nets[name] || []).forEach(net => {
+      if (net.family === "IPv4" && !net.internal) found.push(net.address);
+    });
+  });
+  return found;
+}
+
 function reportLine(report) {
   return "проверено " + report.results.length + ", найдено " + report.found +
     ", отправлено " + report.sent +
@@ -126,8 +138,17 @@ async function cmdServe() {
   });
 
   await new Promise(resolve => instance.listen(config.port, config.host, resolve));
-  const base = "http://" + config.host + ":" + config.port;
+  const open = config.host === "0.0.0.0" || config.host === "::";
+  const base = "http://" + (open ? "127.0.0.1" : config.host) + ":" + config.port;
   say("Страница: " + base);
+
+  /* Bound to every interface means the phone on the same Wi-Fi can open
+     it — but only if it knows which address to type. */
+  if (open) {
+    lanAddresses().forEach(address => say("  с телефона в этой же сети: http://" + address + ":" + config.port));
+    say("  страница открыта всем в этой сети — в чужом Wi-Fi так лучше не запускать");
+  }
+
   say("Вебхук TradingView: " + base + "/tv" +
       (config.webhookSecret ? "" : "  — секрет не задан, приём выключен"));
   say("Выход в: " + notify.ready.join(", "));
