@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#070b14">
+<meta name="description" content="Тест IQ: 36 заданий в пяти блоках, 30 минут. Балл по шкале со средним 100, доверительный интервал, разбор каждого задания. Шесть заданий бесплатно.">
+<title>ИНДЕКС — тест IQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b1120'/><path d='M11 9v14M21 9v14M11 16h10' stroke='%237f9fd8' stroke-width='2.6' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="top__in">
+    <div class="brand">
+      <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="1" y="1" width="30" height="30" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M11 9v14M21 9v14M11 16h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="brand__name">Индекс</div>
+        <div class="brand__sub">тест интеллекта</div>
+      </div>
+    </div>
+    <div class="count num" id="count" hidden></div>
+    <div class="timer num" id="timer" hidden>00:00</div>
+  </div>
+  <div class="bar"><div class="bar__fill" id="progress"></div></div>
+</header>
+
+<main class="wrap">
+
+  <!-- ВИТРИНА -->
+  <section id="screen-start">
+    <div class="hero">
+      <div class="kicker">36 заданий · 5 блоков · 30 минут</div>
+      <h1>Тест IQ, который объясняет каждое задание</h1>
+      <p class="lead">
+        Балл по привычной шкале, где 100 — середина. Плюс то, чего обычно не дают:
+        интервал вместо одной цифры, разбор всех тридцати шести заданий и карта
+        сильных и слабых сторон по блокам.
+      </p>
+
+      <div class="price">
+        <div class="price__value num" id="price">129 ₽</div>
+        <div class="price__note">разовая покупка, без подписки</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn--primary" id="go-demo">Пройти 6 заданий бесплатно</button>
+        <button class="btn" id="go-buy">Купить полный тест</button>
+      </div>
+    </div>
+
+    <h2>Что внутри</h2>
+    <div class="blocklist" id="blocklist"></div>
+
+    <h2>Что вы получите</h2>
+    <div class="grid grid--2">
+      <div class="plate">
+        <div class="plate__title">Балл и его точность</div>
+        <div class="plate__text">Не только число, но и интервал: насколько результат вообще определён по вашим ответам.</div>
+      </div>
+      <div class="plate">
+        <div class="plate__title">Разбор каждого задания</div>
+        <div class="plate__text">Что было верно, что нет и почему именно так — по всем 36 заданиям, включая матрицы.</div>
+      </div>
+      <div class="plate">
+        <div class="plate__title">Сильные и слабые блоки</div>
+        <div class="plate__text">Где вы выше среднего, а где ниже — отдельно по рядам, словам, матрицам, пространству и логике.</div>
+      </div>
+      <div class="plate">
+        <div class="plate__title">Карточка результата</div>
+        <div class="plate__text">Картинка с баллом, которую можно сохранить себе или отправить.</div>
+      </div>
+    </div>
+
+    <h2>Честно о тесте</h2>
+    <p class="note">
+      <strong>Это не медицинская диагностика.</strong> Страница считает по модели, принятой в
+      тестировании: у каждого задания своя сложность, а итог переводится в шкалу со
+      средним 100 и разбросом 15. Сложность заданий взята из оценок, а не из замеров на
+      выборке населения, поэтому балл — обоснованная оценка, а не официальный результат.
+      Именно поэтому рядом всегда стоит интервал.
+      <br><br>
+      <strong>Второй раз тот же тест даёт завышенный балл</strong> — задания уже знакомы. Это верно для
+      любого теста интеллекта, не только для этого.
+      <br><br>
+      <strong>Оплата открывает доступ к заданиям и разбору</strong>, а не к конкретному числу. Балл
+      зависит только от ваших ответов.
+    </p>
+
+    <hr class="hr">
+    <div class="foot" id="foot"></div>
+  </section>
+
+  <!-- ЗАДАНИЕ -->
+  <section id="screen-test" hidden>
+    <div class="q" id="q"></div>
+    <div class="nav" id="nav"></div>
+    <div class="dots" id="dots"></div>
+  </section>
+
+  <!-- ИТОГ ПРОБНОЙ ЧАСТИ -->
+  <section id="screen-gate" hidden></section>
+
+  <!-- ОПЛАТА -->
+  <section id="screen-pay" hidden></section>
+
+  <!-- РЕЗУЛЬТАТ -->
+  <section id="screen-result" hidden></section>
+
+</main>
+
+<script src="config.js"></script>
+<script src="figures.js"></script>
+<script src="tasks.js"></script>
+<script src="score.js"></script>
+<script src="access.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
