@@ -9,6 +9,7 @@
   "use strict";
 
   const utils = Aromio.utils;
+  const MAX_QTY = 9; // sanity cap per cart line — a "+" spam-click or repeated add shouldn't produce absurd quantities
   const KEYS = {
     cart: "aromio.cart.v1",
     favorites: "aromio.favorites.v1",
@@ -76,9 +77,9 @@
 
     const existing = cart.find((c) => c.id === id && c.ml === volume.ml);
     if (existing) {
-      existing.qty += qty;
+      existing.qty = Math.min(existing.qty + qty, MAX_QTY);
     } else {
-      cart.push({ id: id, ml: volume.ml, qty: qty });
+      cart.push({ id: id, ml: volume.ml, qty: Math.min(qty, MAX_QTY) });
     }
 
     utils.setJSON(KEYS.cart, cart);
@@ -97,7 +98,7 @@
     }
     const item = cart.find((c) => c.id === id && c.ml === ml);
     if (item) {
-      item.qty = qty;
+      item.qty = Math.min(qty, MAX_QTY);
       utils.setJSON(KEYS.cart, cart);
       notify();
     }
@@ -251,6 +252,7 @@
   }
 
   Aromio.Store = {
+    MAX_QTY,
     subscribe,
     getCart,
     getCartCount,

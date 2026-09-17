@@ -114,10 +114,10 @@
 
     detailEl.addEventListener("click", (e) => {
       if (e.target.closest("[data-qty-inc]")) {
-        state.qty = utils.clamp(state.qty + 1, 1, 9);
+        state.qty = utils.clamp(state.qty + 1, 1, Aromio.Store.MAX_QTY);
         renderDetail();
       } else if (e.target.closest("[data-qty-dec]")) {
-        state.qty = utils.clamp(state.qty - 1, 1, 9);
+        state.qty = utils.clamp(state.qty - 1, 1, Aromio.Store.MAX_QTY);
         renderDetail();
       } else if (e.target.closest(".volume-chip")) {
         state.ml = Number(e.target.closest(".volume-chip").dataset.ml);
