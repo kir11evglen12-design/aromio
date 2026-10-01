@@ -20,6 +20,9 @@ function frame(s, name, inset = 0.35, color = C.gold) { // double gilt hairline 
   s.addShape(pres.shapes.RECTANGLE, { x: inset, y: inset, w: W - 2 * inset, h: H - 2 * inset, fill: { type: "none" }, line: { color, width: 1.25 }, objectName: name + "a" });
   s.addShape(pres.shapes.RECTANGLE, { x: inset + 0.09, y: inset + 0.09, w: W - 2 * inset - 0.18, h: H - 2 * inset - 0.18, fill: { type: "none" }, line: { color, width: 0.5 }, objectName: name + "b" });
 }
+function shade(s) { // dark at the top where the text sits, clear at the bottom where the scene is
+  s.addImage({ path: IMG + "shade.png", x: 0, y: 0, w: W, h: H, objectName: "shade" });
+}
 function shield(s, x, y, w) { s.addImage({ path: IMG + "shield.png", x, y, w, h: w * 1.18, objectName: "!!shield" }); }
 function text(s, t, o) { s.addText(t, { isTextBox: true, margin: 0, ...o }); }
 function gilt(s, x, y, w, h) { // painting in a gilded frame
@@ -51,8 +54,8 @@ const content = [
   (s) => {
     T(s, "В", { x: 7.15, y: 2.5, w: 0.95, h: 1.05, fontFace: HEAD, fontSize: 66, bold: true, color: C.oxblood, valign: "top" });
     T(s, "1291 году три горные долины — Ури, Швиц и Унтервальден — заключили «Вечный союз» против власти Габсбургов.", { x: 8.15, y: 2.55, w: 4.45, h: 1.2, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
-    T(s, "Через их земли шла дорога через перевал Сен-Готард из Германии в Италию. Название страны дал кантон Швиц, а 1 августа — её национальный праздник.", { x: 7.15, y: 3.85, w: 5.45, h: 1.3, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
-    T(s, "Легенда о Вильгельме Телле, сбившем стрелой яблоко с головы сына, стала символом свободы швейцарцев.", { x: 7.15, y: 5.3, w: 5.45, h: 0.95, fontFace: BODY, fontSize: 16, italic: true, color: C.oxblood, valign: "top" });
+    T(s, "Через их земли шёл путь через перевал Сен-Готард в Италию. От кантона Швиц пошло название всей страны.", { x: 7.15, y: 3.85, w: 5.45, h: 1.3, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
+    T(s, "Символ этой борьбы — легендарный стрелок Вильгельм Телль.", { x: 7.15, y: 5.3, w: 5.45, h: 0.95, fontFace: BODY, fontSize: 16, italic: true, color: C.oxblood, valign: "top" });
   },
   // 3 · Три опоры
   (s) => {
@@ -87,7 +90,7 @@ const content = [
       T(s, h, { x: x - 0.1, y: 4.1, w: cw, h: 0.4, fontFace: HEAD, fontSize: 14, bold: true, color: C.cream });
       T(s, b, { x: x - 0.1, y: 4.55, w: cw - 0.1, h: 1.0, fontFace: BODY, fontSize: 13, color: "D9C9A8", valign: "top" });
     });
-    T(s, "После Швабской войны 1499 года Швейцария фактически не подчинялась Империи.", { x: 0.85, y: 6.25, w: 10.3, h: 0.4, fontFace: BODY, fontSize: 12, italic: true, color: C.gold });
+    T(s, "После Швабской войны 1499 года Швейцария фактически не подчинялась Империи.", { x: 0.85, y: 5.3, w: 10.3, h: 0.4, fontFace: BODY, fontSize: 12, italic: true, color: C.gold });
   },
   // 5 · XIII кантонов
   (s) => {
@@ -96,14 +99,14 @@ const content = [
     T(s, "XIII", { x: 7.1, y: 1.2, w: 5.4, h: 2.0, fontFace: HEAD, fontSize: 120, bold: true, color: C.oxblood, align: "center" });
     T(s, "кантонов к 1513 году", { x: 7.1, y: 3.2, w: 5.4, h: 0.6, fontFace: HEAD, fontSize: 24, color: C.ink, align: "center" });
     T(s, "Союз тринадцати кантонов просуществовал до 1798 года. У каждого — свои законы, а общие дела решал сейм (Tagsatzung).", { x: 7.6, y: 4.1, w: 4.4, h: 1.6, fontFace: BODY, fontSize: 15, color: C.muted, align: "center", valign: "top" });
-    T(s, "«Швейцарцы превосходно вооружены и пользуются полной свободой»", { x: 0.85, y: 2.5, w: 5.8, h: 2.3, fontFace: HEAD, fontSize: 30, italic: true, color: C.cream, valign: "top" });
-    T(s, "Никколо Макиавелли, «Государь», 1513", { x: 0.85, y: 4.95, w: 5.6, h: 0.4, fontFace: BODY, fontSize: 15, color: C.gold, valign: "top" });
+    T(s, "«Швейцарцы превосходно вооружены и пользуются полной свободой»", { x: 0.85, y: 1.95, w: 5.8, h: 2.3, fontFace: HEAD, fontSize: 30, italic: true, color: C.cream, valign: "top" });
+    T(s, "Никколо Макиавелли, «Государь», 1513", { x: 0.85, y: 4.3, w: 5.6, h: 0.4, fontFace: BODY, fontSize: 15, color: C.gold, valign: "top" });
   },
   // 6 · Финал
   (s) => {
-    T(s, "Свобода общин, сильная пехота и честный труд помогли маленькой горной стране отстоять независимость среди великих держав.", { x: 2.2, y: 4.2, w: W - 4.4, h: 0.95, fontFace: BODY, fontSize: 19, italic: true, color: "E2D2B0", align: "center", valign: "top" });
-    T(s, "Выполнил(а): ученик(ца) 8 «__» класса  ·  Фамилия Имя", { x: 1.5, y: 5.35, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 14, color: C.gold, align: "center", charSpacing: 2 });
-    T(s, "Источники: А. Я. Юдовская и др. «Всеобщая история. История Нового времени», 7–8 кл.; энциклопедические статьи о Швейцарской конфедерации", { x: 1.5, y: 6.25, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 10, color: "BFAE8C", align: "center" });
+    T(s, "Свобода общин, сильная пехота и честный труд помогли маленькой горной стране отстоять независимость среди великих держав.", { x: 2.2, y: 3.35, w: W - 4.4, h: 0.95, fontFace: BODY, fontSize: 19, italic: true, color: "E2D2B0", align: "center", valign: "top" });
+    T(s, "Выполнил(а): ученик(ца) 8 «__» класса  ·  Фамилия Имя", { x: 1.5, y: 4.4, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 14, color: C.gold, align: "center", charSpacing: 2 });
+    T(s, "Источники: А. Я. Юдовская и др. «Всеобщая история. История Нового времени», 7–8 кл.; энциклопедические статьи о Швейцарской конфедерации", { x: 1.5, y: 6.75, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 10, color: "3A2A1E", align: "center" });
   },
 ];
 
@@ -111,7 +114,7 @@ const content = [
 // Fixed layer of each slide: background, painting, shield — these stay put through the transition.
 const persist = [
   (s) => {
-    bg(s, "alps_dawn.jpg"); veil(s, 45, "veil"); frame(s, "!!frame");
+    bg(s, "castle.jpg"); veil(s, 32, "veil"); frame(s, "!!frame");
     shield(s, W / 2 - 0.55, 0.85, 1.1);
   },
   (s) => {
@@ -126,19 +129,17 @@ const persist = [
     shield(s, 12.0, 0.55, 0.62);
   },
   (s) => {
-    bg(s, "walnut.jpg");
-    s.addShape(pres.shapes.RECTANGLE, { x: -0.16, y: -0.16, w: W + 0.32, h: H + 0.32, fill: { color: C.goldDeep }, line: { type: "none" }, objectName: "!!gilt" });
-    s.addImage({ path: IMG + "lake.jpg", x: 0, y: 0, w: W, h: H, sizing: { type: "cover", w: W, h: H }, objectName: "!!scene" });
-    veil(s, 45, "veil");
+    bg(s, "battle.jpg");
+    shade(s);
     shield(s, 12.0, 0.55, 0.62);
   },
   (s) => {
-    bg(s, "dusk.jpg"); veil(s, 70, "veil");
-    shield(s, 0.85, 0.85, 0.62);
+    bg(s, "town.jpg"); shade(s);
+    shield(s, 0.85, 0.45, 0.62);
   },
   (s) => {
-    bg(s, "winter.jpg"); veil(s, 40, "veil"); frame(s, "!!frame");
-    shield(s, W / 2 - 0.65, 0.75, 1.3);
+    bg(s, "village.jpg"); shade(s); frame(s, "!!frame");
+    shield(s, W / 2 - 0.5, 0.45, 1.0);
   },
 ];
 
@@ -165,12 +166,12 @@ const head = [
     pageT(s, 3, C.gold);
   },
   (s) => {
-    T(s, "CAPUT  IV", { x: 0.85, y: 2.0, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6 });
+    T(s, "CAPUT  IV", { x: 0.85, y: 1.55, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6 });
     pageT(s, 4, C.gold);
   },
   (s) => {
-    T(s, "FINIS", { x: 1, y: 2.5, w: W - 2, h: 0.45, fontFace: HEAD, fontSize: 14, color: C.gold, align: "center", charSpacing: 10 });
-    T(s, "Спасибо за внимание", { x: 1, y: 2.95, w: W - 2, h: 1.1, fontFace: HEAD, fontSize: 46, bold: true, color: C.cream, align: "center" });
+    T(s, "FINIS", { x: 1, y: 1.75, w: W - 2, h: 0.45, fontFace: HEAD, fontSize: 14, color: C.gold, align: "center", charSpacing: 10 });
+    T(s, "Спасибо за внимание", { x: 1, y: 2.15, w: W - 2, h: 1.1, fontFace: HEAD, fontSize: 46, bold: true, color: C.cream, align: "center" });
   },
 ];
 
