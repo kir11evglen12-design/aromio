@@ -48,7 +48,7 @@ const content = [
   // 1 · Титул
   (s) => {
     T(s, "Союз тринадцати кантонов среди больших войн Европы", { x: 2, y: 4.2, w: W - 4, h: 0.9, fontFace: BODY, fontSize: 21, italic: true, color: "E2D2B0", align: "center", valign: "top" });
-    T(s, "Проект по истории  ·  8 класс  ·  Фамилия Имя", { x: 1.5, y: 5.75, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 14, color: C.gold, align: "center", charSpacing: 3 });
+    T(s, "Проект по истории  ·  8 «А» класс  ·  Кирилл Ленин и Михаил Луконин", { x: 1.5, y: 5.75, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 14, color: C.gold, align: "center", charSpacing: 3 });
   },
   // 2 · Как всё началось
   (s) => {
@@ -105,7 +105,7 @@ const content = [
   // 6 · Финал
   (s) => {
     T(s, "Швейцария осталась нейтральной в войнах Европы, но внутри спорила из-за веры и власти. Богатела она ремеслом и наёмной службой.", { x: 2.2, y: 3.35, w: W - 4.4, h: 0.95, fontFace: BODY, fontSize: 19, italic: true, color: "E2D2B0", align: "center", valign: "top" });
-    T(s, "Выполнил(а): ученик(ца) 8 «__» класса  ·  Фамилия Имя", { x: 1.5, y: 4.4, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 14, color: C.gold, align: "center", charSpacing: 2 });
+    T(s, "Выполнили: ученики 8 «А» класса  ·  Кирилл Ленин и Михаил Луконин", { x: 1.5, y: 4.4, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 14, color: C.gold, align: "center", charSpacing: 2 });
     T(s, "Источники: А. Я. Юдовская и др. «Всеобщая история. История Нового времени», 7–8 кл.; энциклопедические статьи о Швейцарской конфедерации", { x: 1.5, y: 6.75, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 10, color: "3A2A1E", align: "center" });
   },
 ];
