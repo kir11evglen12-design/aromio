@@ -29,18 +29,16 @@ function gilt(s, x, y, w, h) { // painting in a gilded frame
 
 const N = require("./narrative.js");
 const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
-function page(s, i, color) {
-  text(s, ROMAN[i] + "  ·  VI", { x: 11.3, y: 6.85, w: 1.2, h: 0.3, fontFace: HEAD, fontSize: 10, color, align: "right", charSpacing: 3, objectName: "!!page" });
-}
 
 // Content that slides sideways. Every content object gets a stable name "!!c<slide>_<n>",
 // and each slide also carries off-canvas copies of its neighbours' content (previous one
 // parked to the left, next one to the right). Morph then pushes the old content out to the
-// left and pulls the new one in from the right, while the shield, title and painting stay.
+// left and pulls the new one in from the right; only identical objects (shield, painting) stay.
 let DX = 0, CUR = 0, K = 0;
 const nm = () => `!!c${CUR}_${K++}`;
 const T = (s, t, o) => text(s, t, { ...o, x: o.x + DX, objectName: nm() });
 const SH = (s, type, o) => s.addShape(type, { ...o, x: o.x + DX, objectName: nm() });
+const pageT = (s, i, color) => T(s, ROMAN[i] + "  ·  VI", { x: 11.3, y: 6.85, w: 1.2, h: 0.3, fontFace: HEAD, fontSize: 10, color, align: "right", charSpacing: 3 });
 const IM = (s, o) => s.addImage({ ...o, x: o.x + DX, objectName: nm() });
 
 const content = [
@@ -110,30 +108,22 @@ const content = [
 ];
 
 // Persistent layer of each slide: background, painting, shield, kicker, title, page number.
+// Fixed layer of each slide: background, painting, shield — these stay put through the transition.
 const persist = [
   (s) => {
     bg(s, "alps_dawn.jpg"); veil(s, 45, "veil"); frame(s, "!!frame");
     shield(s, W / 2 - 0.55, 0.85, 1.1);
-    text(s, "CONFOEDERATIO  HELVETICA  ·  MCCXCI — MDCXLVIII", { x: 1, y: 2.35, w: W - 2, h: 0.4, fontFace: HEAD, fontSize: 13, color: C.gold, align: "center", charSpacing: 6, objectName: "!!kicker" });
-    text(s, "Швейцария до XVIII века", { x: 1, y: 2.85, w: W - 2, h: 1.3, fontFace: HEAD, fontSize: 52, bold: true, color: C.cream, align: "center", objectName: "!!title" });
   },
   (s) => {
     bg(s, "parchment.jpg");
     gilt(s, 0.85, 0.85, 5.6, 5.8);
-    text(s, "Фирвальдштетское озеро — колыбель союза (иллюстрация)", { x: 0.85, y: 6.85, w: 5.6, h: 0.3, fontFace: BODY, fontSize: 10, italic: true, color: C.muted, align: "center", objectName: "!!caption" });
     shield(s, 12.0, 0.55, 0.62);
-    text(s, "CAPUT  I  ·  1291", { x: 7.15, y: 0.95, w: 4.5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6, objectName: "!!kicker" });
-    text(s, "Как всё началось", { x: 7.15, y: 1.35, w: 5.45, h: 0.9, fontFace: HEAD, fontSize: 32, bold: true, color: C.ink, objectName: "!!title" });
-    page(s, 1, C.muted);
   },
   (s) => {
     bg(s, "parchment.jpg");
     s.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: W, h: 2.25, fill: { color: C.goldDeep }, line: { color: C.gold, width: 2 }, shadow: shadow(), objectName: "!!gilt" });
     s.addImage({ path: IMG + "lake.jpg", x: 0, y: 0, w: W, h: 2.15, sizing: { type: "cover", w: W, h: 2.15 }, objectName: "!!scene" });
     shield(s, 12.0, 0.55, 0.62);
-    text(s, "CAPUT  II", { x: 0.85, y: 2.6, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6, objectName: "!!kicker" });
-    text(s, "Три опоры Швейцарии", { x: 0.85, y: 2.95, w: 9, h: 0.8, fontFace: HEAD, fontSize: 36, bold: true, color: C.ink, objectName: "!!title" });
-    page(s, 2, C.muted);
   },
   (s) => {
     bg(s, "walnut.jpg");
@@ -141,25 +131,50 @@ const persist = [
     s.addImage({ path: IMG + "lake.jpg", x: 0, y: 0, w: W, h: H, sizing: { type: "cover", w: W, h: H }, objectName: "!!scene" });
     veil(s, 45, "veil");
     shield(s, 12.0, 0.55, 0.62);
-    text(s, "CAPUT  III", { x: 0.85, y: 0.85, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6, objectName: "!!kicker" });
-    text(s, "Хроника свободы", { x: 0.85, y: 1.2, w: 9, h: 0.9, fontFace: HEAD, fontSize: 40, bold: true, color: C.cream, objectName: "!!title" });
-    page(s, 3, C.gold);
   },
   (s) => {
     bg(s, "dusk.jpg"); veil(s, 70, "veil");
     shield(s, 0.85, 0.85, 0.62);
-    text(s, "CAPUT  IV", { x: 0.85, y: 2.0, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6, objectName: "!!kicker" });
-    page(s, 4, C.gold);
   },
   (s) => {
     bg(s, "winter.jpg"); veil(s, 40, "veil"); frame(s, "!!frame");
     shield(s, W / 2 - 0.65, 0.75, 1.3);
-    text(s, "FINIS", { x: 1, y: 2.5, w: W - 2, h: 0.45, fontFace: HEAD, fontSize: 14, color: C.gold, align: "center", charSpacing: 10, objectName: "!!kicker" });
-    text(s, "Спасибо за внимание", { x: 1, y: 2.95, w: W - 2, h: 1.1, fontFace: HEAD, fontSize: 46, bold: true, color: C.cream, align: "center", objectName: "!!title" });
   },
 ];
 
-const draw = (s, i, dx) => { DX = dx; CUR = i; K = 0; content[i](s); };
+// Slide headings (kicker, title, caption, page number) slide away with the rest of the content.
+const head = [
+  (s) => {
+    T(s, "CONFOEDERATIO  HELVETICA  ·  MCCXCI — MDCXLVIII", { x: 1, y: 2.35, w: W - 2, h: 0.4, fontFace: HEAD, fontSize: 13, color: C.gold, align: "center", charSpacing: 6 });
+    T(s, "Швейцария до XVIII века", { x: 1, y: 2.85, w: W - 2, h: 1.3, fontFace: HEAD, fontSize: 52, bold: true, color: C.cream, align: "center" });
+  },
+  (s) => {
+    T(s, "Фирвальдштетское озеро — колыбель союза (иллюстрация)", { x: 0.85, y: 6.85, w: 5.6, h: 0.3, fontFace: BODY, fontSize: 10, italic: true, color: C.muted, align: "center" });
+    T(s, "CAPUT  I  ·  1291", { x: 7.15, y: 0.95, w: 4.5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6 });
+    T(s, "Как всё началось", { x: 7.15, y: 1.35, w: 5.45, h: 0.9, fontFace: HEAD, fontSize: 32, bold: true, color: C.ink });
+    pageT(s, 1, C.muted);
+  },
+  (s) => {
+    T(s, "CAPUT  II", { x: 0.85, y: 2.6, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6 });
+    T(s, "Три опоры Швейцарии", { x: 0.85, y: 2.95, w: 9, h: 0.8, fontFace: HEAD, fontSize: 36, bold: true, color: C.ink });
+    pageT(s, 2, C.muted);
+  },
+  (s) => {
+    T(s, "CAPUT  III", { x: 0.85, y: 0.85, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6 });
+    T(s, "Хроника свободы", { x: 0.85, y: 1.2, w: 9, h: 0.9, fontFace: HEAD, fontSize: 40, bold: true, color: C.cream });
+    pageT(s, 3, C.gold);
+  },
+  (s) => {
+    T(s, "CAPUT  IV", { x: 0.85, y: 2.0, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6 });
+    pageT(s, 4, C.gold);
+  },
+  (s) => {
+    T(s, "FINIS", { x: 1, y: 2.5, w: W - 2, h: 0.45, fontFace: HEAD, fontSize: 14, color: C.gold, align: "center", charSpacing: 10 });
+    T(s, "Спасибо за внимание", { x: 1, y: 2.95, w: W - 2, h: 1.1, fontFace: HEAD, fontSize: 46, bold: true, color: C.cream, align: "center" });
+  },
+];
+
+const draw = (s, i, dx) => { DX = dx; CUR = i; K = 0; head[i](s); content[i](s); };
 persist.forEach((p, i) => {
   const s = pres.addSlide();
   p(s);
