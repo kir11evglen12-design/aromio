@@ -20,7 +20,7 @@ CURTAINS = alt("p15", f'xmlns:p15="{P15}"', '<p15:prstTrans prst="curtains"/>', 
 PRESTIGE = alt("p15", f'xmlns:p15="{P15}"', '<p15:prstTrans prst="prestige"/>', 2500, "<p:fade/>")
 MORPH = alt("p159", f'xmlns:p159="{P159}"', '<p159:morph option="byObject"/>', 2200, "<p:fade/>")
 
-PLAN = {2: CURTAINS, 3: MORPH, 4: MORPH, 5: PRESTIGE, 6: MORPH}
+PLAN = {2: MORPH, 3: MORPH, 4: MORPH, 5: MORPH, 6: MORPH}  # one transition everywhere: Morph push sideways
 
 
 
@@ -74,7 +74,7 @@ with zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as zout:
             xml = data.decode("utf8")
             xml = re.sub(r"<p:transition.*?</p:transition>|<p:transition[^>]*/>", "", xml, flags=re.S)
             xml = re.sub(r"<p:timing>.*?</p:timing>", "", xml, flags=re.S)
-            tr = PLAN[int(m.group(1))] + timing(xml)
+            tr = PLAN[int(m.group(1))]
             if "</p:clrMapOvr>" in xml:
                 xml = xml.replace("</p:clrMapOvr>", "</p:clrMapOvr>" + tr, 1)
             else:
