@@ -42,6 +42,17 @@ const nm = () => `!!c${CUR}_${K++}`;
 const T = (s, t, o) => text(s, t, { ...o, x: o.x + DX, objectName: nm() });
 const SH = (s, type, o) => s.addShape(type, { ...o, x: o.x + DX, objectName: nm() });
 const pageT = (s, i, color) => T(s, ROMAN[i] + "  ·  VI", { x: 11.3, y: 6.85, w: 1.2, h: 0.3, fontFace: HEAD, fontSize: 10, color, align: "right", charSpacing: 3 });
+// "Словарик": short explanations of the hard words on a slide
+const gloss = (s, x, y, w, h, items, dark) => {
+  SH(s, pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: dark ? "140E0A" : "F3E8CF", transparency: dark ? 30 : 35 }, line: { color: C.gold, width: 0.75 } });
+  T(s, "СЛОВАРИК", { x: x + 0.2, y: y + 0.12, w: w - 0.4, h: 0.25, fontFace: HEAD, fontSize: 10, color: dark ? C.gold : C.oxblood, charSpacing: 4 });
+  const runs = [];
+  items.forEach(([t, d], i) => {
+    runs.push({ text: t, options: { bold: true } });
+    runs.push({ text: " — " + d, options: { breakLine: i < items.length - 1 } });
+  });
+  T(s, runs, { x: x + 0.2, y: y + 0.42, w: w - 0.4, h: h - 0.5, fontFace: BODY, fontSize: 12.5, color: dark ? "E6D8BC" : C.ink, valign: "top", paraSpaceAfter: 3 });
+};
 const IM = (s, o) => s.addImage({ ...o, x: o.x + DX, objectName: nm() });
 
 const content = [
@@ -53,23 +64,25 @@ const content = [
   // 2 · Как всё началось
   (s) => {
     T(s, "К", { x: 7.15, y: 2.5, w: 0.95, h: 1.05, fontFace: HEAD, fontSize: 66, bold: true, color: C.oxblood, valign: "top" });
-    T(s, "1700 году Швейцарию составляли 13 кантонов. Общего правительства не было: дела решал сейм — съезд послов кантонов.", { x: 8.15, y: 2.55, w: 4.45, h: 1.2, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
-    T(s, "Рядом были союзники — Женева, Граубюнден, Вале, Невшатель — и подвластные земли, которыми кантоны управляли сообща.", { x: 7.15, y: 3.85, w: 5.45, h: 1.3, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
-    T(s, "Каждый кантон жил по своим законам и сам решал, с кем дружить.", { x: 7.15, y: 5.3, w: 5.45, h: 0.95, fontFace: BODY, fontSize: 16, italic: true, color: C.oxblood, valign: "top" });
+    T(s, "1700 году Швейцарию составляли 13 кантонов. Общего правительства и столицы не было: общие дела решал сейм.", { x: 8.15, y: 2.55, w: 4.45, h: 1.2, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
+    T(s, "Рядом были союзники — Женева, Граубюнден, Вале, Невшатель. Подвластными землями, например Тургау, кантоны управляли сообща.", { x: 7.15, y: 3.85, w: 5.45, h: 1.3, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
+    gloss(s, 0.85, 5.5, 5.6, 1.3, [["Кантон", "область-государство внутри Швейцарского союза"], ["Сейм", "собрание послов всех кантонов для общих дел"]], false);
+    T(s, "Каждый кантон жил по своим законам, чеканил свою монету и сам решал, с кем дружить.", { x: 7.15, y: 5.3, w: 5.45, h: 0.95, fontFace: BODY, fontSize: 16, italic: true, color: C.oxblood, valign: "top" });
   },
   // 3 · Три опоры
   (s) => {
     const cols = [
-      ["I", "Наёмная служба", "Швейцарские полки служили Франции, Голландии и другим державам. Плата солдатам кормила многие деревни."],
-      ["II", "Ремесло и часы", "Крестьяне у Цюриха пряли хлопок для купцов. В Женеве и горах Юры делали часы."],
-      ["III", "Власть патрициев", "Городами правили немногие знатные семьи. Крестьяне и подвластные земли права голоса не имели."],
+      ["I", "Наёмная служба", "Швейцарские полки служили Франции, Голландии и другим державам. Плата солдатам кормила многие горные деревни."],
+      ["II", "Ремесло и часы", "Крестьяне у Цюриха дома пряли хлопок для купцов. В Женеве и горах Юры мастера делали часы на продажу по всей Европе."],
+      ["III", "Власть патрициев", "Городами правили немногие знатные семьи. Крестьяне и жители подвластных земель права голоса не имели."],
     ];
+    gloss(s, 7.45, 2.4, 5.05, 1.5, [["Наёмник", "солдат, который за плату служит чужой стране"], ["Патриции", "знатные богатые семьи, правившие городом"]], false);
     const cw = 3.6, gap = 0.47, x0 = 0.85;
     cols.forEach(([n, h, b], i) => {
       const x = x0 + i * (cw + gap);
       T(s, n, { x, y: 3.95, w: 1.3, h: 0.7, fontFace: HEAD, fontSize: 36, bold: true, color: C.oxblood });
       T(s, h, { x, y: 4.7, w: cw, h: 0.45, fontFace: HEAD, fontSize: 19, bold: true, color: C.ink });
-      T(s, b, { x, y: 5.2, w: cw, h: 1.35, fontFace: BODY, fontSize: 14, color: C.muted, valign: "top", lineSpacingMultiple: 1.05 });
+      T(s, b, { x, y: 5.2, w: cw, h: 1.5, fontFace: BODY, fontSize: 14, color: C.muted, valign: "top", lineSpacingMultiple: 1.05 });
     });
   },
   // 4 · Хроника
@@ -91,6 +104,7 @@ const content = [
       T(s, b, { x: x - 0.1, y: 4.55, w: cw - 0.1, h: 1.0, fontFace: BODY, fontSize: 13, color: "D9C9A8", valign: "top" });
     });
     T(s, "Войны шли вокруг, но на землю самой Швейцарии чужие армии не вступали.", { x: 0.85, y: 5.3, w: 10.3, h: 0.4, fontFace: BODY, fontSize: 12, italic: true, color: C.gold });
+    gloss(s, 0.85, 5.75, 11.6, 0.95, [["Нейтралитет", "неучастие в войнах других стран"], ["Протестанты и католики", "христиане разных церквей, которые долго враждовали между собой"]], true);
   },
   // 5 · XIII кантонов
   (s) => {
@@ -100,7 +114,8 @@ const content = [
     T(s, "в Базеле родился Эйлер", { x: 7.1, y: 3.2, w: 5.4, h: 0.6, fontFace: HEAD, fontSize: 24, color: C.ink, align: "center" });
     T(s, "Леонард Эйлер — один из величайших математиков. С 1727 года он работал в Петербургской академии наук.", { x: 7.6, y: 4.1, w: 4.4, h: 1.6, fontFace: BODY, fontSize: 15, color: C.muted, align: "center", valign: "top" });
     T(s, "Базель и Женева — города учёных", { x: 0.85, y: 1.95, w: 5.8, h: 2.3, fontFace: HEAD, fontSize: 30, italic: true, color: C.cream, valign: "top" });
-    T(s, "В Базеле жила семья математиков Бернулли, в 1712 году в Женеве родился Руссо.", { x: 0.85, y: 3.4, w: 5.6, h: 0.9, fontFace: BODY, fontSize: 16, color: C.gold, valign: "top" });
+    T(s, "В Базеле жила знаменитая семья математиков Бернулли, в Берне родился учёный Альбрехт фон Галлер, а в Женеве — философ Жан-Жак Руссо.", { x: 0.85, y: 3.3, w: 5.6, h: 1.1, fontFace: BODY, fontSize: 15, color: C.gold, valign: "top" });
+    gloss(s, 0.85, 4.55, 5.6, 1.55, [["Академия наук", "главное научное учреждение страны"], ["Математик", "учёный, который изучает числа, фигуры и расчёты"]], true);
   },
   // 6 · Финал
   (s) => {
@@ -119,7 +134,7 @@ const persist = [
   },
   (s) => {
     bg(s, "parchment.jpg");
-    gilt(s, 0.85, 0.85, 5.6, 5.8);
+    gilt(s, 0.85, 0.85, 5.6, 4.3);
     shield(s, 12.0, 0.55, 0.62);
   },
   (s) => {
@@ -146,31 +161,30 @@ const persist = [
 // Slide headings (kicker, title, caption, page number) slide away with the rest of the content.
 const head = [
   (s) => {
-    T(s, "CONFOEDERATIO  HELVETICA  ·  MDCC — MDCCXXX", { x: 1, y: 2.35, w: W - 2, h: 0.4, fontFace: HEAD, fontSize: 13, color: C.gold, align: "center", charSpacing: 6 });
+    T(s, "ШВЕЙЦАРСКИЙ СОЮЗ  ·  1700 — 1730", { x: 1, y: 2.35, w: W - 2, h: 0.4, fontFace: HEAD, fontSize: 13, color: C.gold, align: "center", charSpacing: 6 });
     T(s, "Швейцария в начале XVIII века", { x: 0.7, y: 2.9, w: W - 1.4, h: 1.2, fontFace: HEAD, fontSize: 44, bold: true, color: C.cream, align: "center" });
   },
   (s) => {
-    T(s, "Горное озеро в сердце Швейцарии (иллюстрация)", { x: 0.85, y: 6.85, w: 5.6, h: 0.3, fontFace: BODY, fontSize: 10, italic: true, color: C.muted, align: "center" });
-    T(s, "CAPUT  I  ·  1700", { x: 7.15, y: 0.95, w: 4.5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6 });
+    T(s, "ГЛАВА  I  ·  1700", { x: 7.15, y: 0.95, w: 4.5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6 });
     T(s, "Каким был союз", { x: 7.15, y: 1.35, w: 5.45, h: 0.9, fontFace: HEAD, fontSize: 32, bold: true, color: C.ink });
     pageT(s, 1, C.muted);
   },
   (s) => {
-    T(s, "CAPUT  II", { x: 0.85, y: 2.6, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6 });
-    T(s, "Чем жила страна", { x: 0.85, y: 2.95, w: 9, h: 0.8, fontFace: HEAD, fontSize: 36, bold: true, color: C.ink });
+    T(s, "ГЛАВА  II", { x: 0.85, y: 2.6, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6 });
+    T(s, "Чем жила страна", { x: 0.85, y: 2.95, w: 6.4, h: 0.8, fontFace: HEAD, fontSize: 36, bold: true, color: C.ink });
     pageT(s, 2, C.muted);
   },
   (s) => {
-    T(s, "CAPUT  III", { x: 0.85, y: 0.85, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6 });
+    T(s, "ГЛАВА  III", { x: 0.85, y: 0.85, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6 });
     T(s, "Хроника начала века", { x: 0.85, y: 1.2, w: 9, h: 0.9, fontFace: HEAD, fontSize: 40, bold: true, color: C.cream });
     pageT(s, 3, C.gold);
   },
   (s) => {
-    T(s, "CAPUT  IV", { x: 0.85, y: 1.55, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6 });
+    T(s, "ГЛАВА  IV", { x: 0.85, y: 1.55, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6 });
     pageT(s, 4, C.gold);
   },
   (s) => {
-    T(s, "FINIS", { x: 1, y: 1.75, w: W - 2, h: 0.45, fontFace: HEAD, fontSize: 14, color: C.gold, align: "center", charSpacing: 10 });
+    T(s, "ИТОГ", { x: 1, y: 1.75, w: W - 2, h: 0.45, fontFace: HEAD, fontSize: 14, color: C.gold, align: "center", charSpacing: 10 });
     T(s, "Спасибо за внимание", { x: 1, y: 2.15, w: W - 2, h: 1.1, fontFace: HEAD, fontSize: 46, bold: true, color: C.cream, align: "center" });
   },
 ];
