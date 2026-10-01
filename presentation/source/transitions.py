@@ -20,7 +20,7 @@ CURTAINS = alt("p15", f'xmlns:p15="{P15}"', '<p15:prstTrans prst="curtains"/>', 
 PRESTIGE = alt("p15", f'xmlns:p15="{P15}"', '<p15:prstTrans prst="prestige"/>', 2500, "<p:fade/>")
 MORPH = alt("p159", f'xmlns:p159="{P159}"', '<p159:morph option="byObject"/>', 2200, "<p:fade/>")
 
-PLAN = {1: FADE_BLACK, 2: CURTAINS, 3: MORPH, 4: MORPH, 5: PRESTIGE, 6: MORPH}
+PLAN = {2: CURTAINS, 3: MORPH, 4: MORPH, 5: PRESTIGE, 6: MORPH}
 
 
 

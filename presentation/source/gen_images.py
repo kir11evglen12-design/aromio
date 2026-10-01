@@ -66,17 +66,25 @@ def landscape(seed, sky_top, sky_low, haze, ridges, lake=None, sun=None, snow=0.
             prof = prof * (0.55 + 0.45 * (env - env.min()) / (env.max() - env.min()))
         line = (base_y - amp * prof) * H
         mask = (rows >= line[None, :]).astype(float)
-        mask = gaussian_filter(mask, 1.2)
+        mask = gaussian_filter(mask, 0.5)
         depth = i / max(1, len(ridges) - 1)
         colv = lerp(c(haze), c(col), 0.35 + 0.65 * depth)
         # vertical shading on each ridge + rock texture
         tex = fbm2d(H, W, seed + 50 + i, octaves=6, base=6)
-        shade = np.clip((rows - line[None, :]) / (H * 0.25), 0, 1)
-        layer = colv[None, None] * (1 - 0.35 * shade[..., None]) * (1 + 0.12 * tex[..., None])
+        sline = gaussian_filter(line, 18)
+        shade = np.clip((rows - sline[None, :]) / (H * 0.25), 0, 1)
+        # hillshade of a ridged 2D height field: real-looking rock faces and gullies lit from the upper left
+        hf = 1 - np.abs(fbm2d(H, W, seed + 90 + i, octaves=7, base=7))
+        hf = gaussian_filter(hf, 1.0)
+        gy, gx = np.gradient(hf * 260)
+        hs = np.clip((-gx * 0.75 - gy * 0.6) / np.sqrt(1 + gx ** 2 + gy ** 2), -1, 1)
+        near = np.exp(-np.clip(rows - sline[None, :], 0, None) / (H * (0.10 + 0.08 * depth)))
+        facet = hs * near * (1.0 if sharp else 0.35)
+        layer = colv[None, None] * (1 - 0.35 * shade[..., None]) * (1 + 0.12 * tex[..., None]) * (1 + 0.38 * facet[..., None])
         if snow > 0 and sharp:
             thr = (base_y - amp * (0.75 - 0.2 * snow)) * H
-            streak = gaussian_filter(rng.normal(0, 1, (H, W)), (14, 1.2))
-            sm = np.clip((thr + 40 * tex + 25 * streak - rows) / 18, 0, 1) * mask
+            streak = hs * 1.5
+            sm = np.clip((thr + 40 * tex + 30 * streak - rows) / 10, 0, 1) * mask * np.clip(0.55 + hs, 0, 1)
             layer = lerp(layer, lerp(c("F2EEE4"), c(haze), 0.3 * (1 - depth))[None, None], sm[..., None] * 0.9)
         img = lerp(img, layer, mask[..., None])
     if lake is not None:
@@ -100,10 +108,10 @@ def age(img, blur_mask_strength=1.0, seed=0):
     yy, xx = np.mgrid[0:h, 0:w]
     r = np.sqrt(((xx - w / 2) / (w / 2)) ** 2 + ((yy - h / 2) / (h / 2)) ** 2)
     # blurred 'замылено' areas: edges + random soft patches
-    soft = gaussian_filter(img, (14, 14, 0))
-    softer = gaussian_filter(img, (30, 30, 0))
+    soft = gaussian_filter(img, (4, 4, 0))
+    softer = gaussian_filter(img, (9, 9, 0))
     patch = fbm2d(h, w, seed + 77, octaves=3, base=2)
-    m = np.clip((r - 0.45) * 1.4 + patch * 0.6, 0, 1) * blur_mask_strength
+    m = np.clip((r - 0.95) * 1.5 + patch * 0.15, 0, 1) * blur_mask_strength
     out = lerp(img, soft, np.clip(m * 1.6, 0, 1)[..., None])
     out = lerp(out, softer, np.clip((m - 0.5) * 2, 0, 1)[..., None])
     # brush texture
@@ -125,13 +133,14 @@ def age(img, blur_mask_strength=1.0, seed=0):
             d.line([(x, y), (nx, ny)], fill=int(cr.uniform(60, 140)), width=1)
             x, y = nx, ny
     crack = np.asarray(crack.filter(ImageFilter.GaussianBlur(0.6)), float) / 255
-    out *= 1 - 0.22 * crack[..., None]
+    out *= 1 - 0.07 * crack[..., None]
     # vignette
     rx, ry = np.abs(xx - w / 2) / (w / 2), np.abs(yy - h / 2) / (h / 2)
     rr = (rx ** 4 + ry ** 4) ** 0.25
     out *= np.clip(1.08 - 0.6 * rr ** 3, 0.3, 1)[..., None]
     out = np.clip(out, 0, 1)
-    return Image.fromarray((out * 255).astype(np.uint8))
+    im = Image.fromarray((out * 255).astype(np.uint8))
+    return im.filter(ImageFilter.UnsharpMask(radius=2.2, percent=140, threshold=2))
 
 
 def save(im, name, q=88):
