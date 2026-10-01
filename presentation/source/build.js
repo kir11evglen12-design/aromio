@@ -1,7 +1,7 @@
 const pptxgen = require("pptxgenjs");
 const pres = new pptxgen();
 pres.layout = "LAYOUT_WIDE"; // 13.333 x 7.5
-pres.title = "Швейцария до XVIII века";
+pres.title = "Швейцария в начале XVIII века";
 
 const W = 13.333, H = 7.5;
 const HEAD = "Bookman Old Style", BODY = "Cambria";
@@ -47,22 +47,22 @@ const IM = (s, o) => s.addImage({ ...o, x: o.x + DX, objectName: nm() });
 const content = [
   // 1 · Титул
   (s) => {
-    T(s, "Как горные общины создали союз, который не смогла покорить ни одна империя", { x: 2, y: 4.2, w: W - 4, h: 0.9, fontFace: BODY, fontSize: 21, italic: true, color: "E2D2B0", align: "center", valign: "top" });
+    T(s, "Союз тринадцати кантонов среди больших войн Европы", { x: 2, y: 4.2, w: W - 4, h: 0.9, fontFace: BODY, fontSize: 21, italic: true, color: "E2D2B0", align: "center", valign: "top" });
     T(s, "Проект по истории  ·  8 класс  ·  Фамилия Имя", { x: 1.5, y: 5.75, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 14, color: C.gold, align: "center", charSpacing: 3 });
   },
   // 2 · Как всё началось
   (s) => {
-    T(s, "В", { x: 7.15, y: 2.5, w: 0.95, h: 1.05, fontFace: HEAD, fontSize: 66, bold: true, color: C.oxblood, valign: "top" });
-    T(s, "1291 году три горные долины — Ури, Швиц и Унтервальден — заключили «Вечный союз» против власти Габсбургов.", { x: 8.15, y: 2.55, w: 4.45, h: 1.2, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
-    T(s, "Через их земли шёл путь через перевал Сен-Готард в Италию. От кантона Швиц пошло название всей страны.", { x: 7.15, y: 3.85, w: 5.45, h: 1.3, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
-    T(s, "Символ этой борьбы — легендарный стрелок Вильгельм Телль.", { x: 7.15, y: 5.3, w: 5.45, h: 0.95, fontFace: BODY, fontSize: 16, italic: true, color: C.oxblood, valign: "top" });
+    T(s, "К", { x: 7.15, y: 2.5, w: 0.95, h: 1.05, fontFace: HEAD, fontSize: 66, bold: true, color: C.oxblood, valign: "top" });
+    T(s, "1700 году Швейцарию составляли 13 кантонов. Общего правительства не было: дела решал сейм — съезд послов кантонов.", { x: 8.15, y: 2.55, w: 4.45, h: 1.2, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
+    T(s, "Рядом были союзники — Женева, Граубюнден, Вале, Невшатель — и подвластные земли, которыми кантоны управляли сообща.", { x: 7.15, y: 3.85, w: 5.45, h: 1.3, fontFace: BODY, fontSize: 15, color: C.ink, valign: "top", lineSpacingMultiple: 1.1 });
+    T(s, "Каждый кантон жил по своим законам и сам решал, с кем дружить.", { x: 7.15, y: 5.3, w: 5.45, h: 0.95, fontFace: BODY, fontSize: 16, italic: true, color: C.oxblood, valign: "top" });
   },
   // 3 · Три опоры
   (s) => {
     const cols = [
-      ["I", "Свобода общин", "Вместо короля — ландсгемайнде: собрание всех свободных мужчин кантона, голосование поднятием руки."],
-      ["II", "Сильная пехота", "Пики и алебарды против рыцарской конницы. С 1506 года папу римского охраняет Швейцарская гвардия."],
-      ["III", "Вера и ремесло", "Реформация Цвингли в Цюрихе и Кальвина в Женеве. Женевские ювелиры стали часовщиками."],
+      ["I", "Наёмная служба", "Швейцарские полки служили Франции, Голландии и другим державам. Плата солдатам кормила многие деревни."],
+      ["II", "Ремесло и часы", "Крестьяне у Цюриха пряли хлопок для купцов. В Женеве и горах Юры делали часы."],
+      ["III", "Власть патрициев", "Городами правили немногие знатные семьи. Крестьяне и подвластные земли права голоса не имели."],
     ];
     const cw = 3.6, gap = 0.47, x0 = 0.85;
     cols.forEach(([n, h, b], i) => {
@@ -75,11 +75,11 @@ const content = [
   // 4 · Хроника
   (s) => {
     const ev = [
-      ["1291", "Вечный союз", "Ури, Швиц и Унтервальден объединяются"],
-      ["1315", "Моргартен", "Ополченцы разбили австрийских рыцарей"],
-      ["1476", "Грансон и Муртен", "Разгром Карла Смелого Бургундского"],
-      ["1515", "Мариньяно", "Поражение от Франции — курс на нейтралитет"],
-      ["1648", "Вестфальский мир", "Европа признала независимость"],
+      ["1701", "Нейтралитет", "В войне за испанское наследство союз не воюет"],
+      ["1707", "Невшатель", "Княжество переходит к королю Пруссии"],
+      ["1709", "Мальплаке", "Швейцарские полки сражаются по обе стороны"],
+      ["1712", "Вильмерген", "Протестанты Цюриха и Берна побеждают католиков"],
+      ["1723", "Майор Давель", "Восстание в земле Во против власти Берна"],
     ];
     const ly = 3.75, x0 = 1.0, step = 2.42, cw = 2.2;
     SH(s, pres.shapes.LINE, { x: 0.85, y: ly, w: W - 1.7, h: 0, line: { color: C.gold, width: 1 } });
@@ -90,21 +90,21 @@ const content = [
       T(s, h, { x: x - 0.1, y: 4.1, w: cw, h: 0.4, fontFace: HEAD, fontSize: 14, bold: true, color: C.cream });
       T(s, b, { x: x - 0.1, y: 4.55, w: cw - 0.1, h: 1.0, fontFace: BODY, fontSize: 13, color: "D9C9A8", valign: "top" });
     });
-    T(s, "После Швабской войны 1499 года Швейцария фактически не подчинялась Империи.", { x: 0.85, y: 5.3, w: 10.3, h: 0.4, fontFace: BODY, fontSize: 12, italic: true, color: C.gold });
+    T(s, "Войны шли вокруг, но на землю самой Швейцарии чужие армии не вступали.", { x: 0.85, y: 5.3, w: 10.3, h: 0.4, fontFace: BODY, fontSize: 12, italic: true, color: C.gold });
   },
   // 5 · XIII кантонов
   (s) => {
     IM(s, { path: IMG + "parchment.jpg", x: 7.1, y: 0.85, w: 5.4, h: 5.8, sizing: { type: "cover", w: 5.4, h: 5.8 } });
     SH(s, pres.shapes.RECTANGLE, { x: 7.1, y: 0.85, w: 5.4, h: 5.8, fill: { type: "none" }, line: { color: C.gold, width: 1.5 }, shadow: shadow() });
-    T(s, "XIII", { x: 7.1, y: 1.2, w: 5.4, h: 2.0, fontFace: HEAD, fontSize: 120, bold: true, color: C.oxblood, align: "center" });
-    T(s, "кантонов к 1513 году", { x: 7.1, y: 3.2, w: 5.4, h: 0.6, fontFace: HEAD, fontSize: 24, color: C.ink, align: "center" });
-    T(s, "Союз тринадцати кантонов просуществовал до 1798 года. У каждого — свои законы, а общие дела решал сейм (Tagsatzung).", { x: 7.6, y: 4.1, w: 4.4, h: 1.6, fontFace: BODY, fontSize: 15, color: C.muted, align: "center", valign: "top" });
-    T(s, "«Швейцарцы превосходно вооружены и пользуются полной свободой»", { x: 0.85, y: 1.95, w: 5.8, h: 2.3, fontFace: HEAD, fontSize: 30, italic: true, color: C.cream, valign: "top" });
-    T(s, "Никколо Макиавелли, «Государь», 1513", { x: 0.85, y: 4.3, w: 5.6, h: 0.4, fontFace: BODY, fontSize: 15, color: C.gold, valign: "top" });
+    T(s, "1707", { x: 7.1, y: 1.3, w: 5.4, h: 1.9, fontFace: HEAD, fontSize: 100, bold: true, color: C.oxblood, align: "center" });
+    T(s, "в Базеле родился Эйлер", { x: 7.1, y: 3.2, w: 5.4, h: 0.6, fontFace: HEAD, fontSize: 24, color: C.ink, align: "center" });
+    T(s, "Леонард Эйлер — один из величайших математиков. С 1727 года он работал в Петербургской академии наук.", { x: 7.6, y: 4.1, w: 4.4, h: 1.6, fontFace: BODY, fontSize: 15, color: C.muted, align: "center", valign: "top" });
+    T(s, "Базель и Женева — города учёных", { x: 0.85, y: 1.95, w: 5.8, h: 2.3, fontFace: HEAD, fontSize: 30, italic: true, color: C.cream, valign: "top" });
+    T(s, "В Базеле жила семья математиков Бернулли, в 1712 году в Женеве родился Руссо.", { x: 0.85, y: 3.4, w: 5.6, h: 0.9, fontFace: BODY, fontSize: 16, color: C.gold, valign: "top" });
   },
   // 6 · Финал
   (s) => {
-    T(s, "Свобода общин, сильная пехота и честный труд помогли маленькой горной стране отстоять независимость среди великих держав.", { x: 2.2, y: 3.35, w: W - 4.4, h: 0.95, fontFace: BODY, fontSize: 19, italic: true, color: "E2D2B0", align: "center", valign: "top" });
+    T(s, "Швейцария осталась нейтральной в войнах Европы, но внутри спорила из-за веры и власти. Богатела она ремеслом и наёмной службой.", { x: 2.2, y: 3.35, w: W - 4.4, h: 0.95, fontFace: BODY, fontSize: 19, italic: true, color: "E2D2B0", align: "center", valign: "top" });
     T(s, "Выполнил(а): ученик(ца) 8 «__» класса  ·  Фамилия Имя", { x: 1.5, y: 4.4, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 14, color: C.gold, align: "center", charSpacing: 2 });
     T(s, "Источники: А. Я. Юдовская и др. «Всеобщая история. История Нового времени», 7–8 кл.; энциклопедические статьи о Швейцарской конфедерации", { x: 1.5, y: 6.75, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 10, color: "3A2A1E", align: "center" });
   },
@@ -146,23 +146,23 @@ const persist = [
 // Slide headings (kicker, title, caption, page number) slide away with the rest of the content.
 const head = [
   (s) => {
-    T(s, "CONFOEDERATIO  HELVETICA  ·  MCCXCI — MDCXLVIII", { x: 1, y: 2.35, w: W - 2, h: 0.4, fontFace: HEAD, fontSize: 13, color: C.gold, align: "center", charSpacing: 6 });
-    T(s, "Швейцария до XVIII века", { x: 1, y: 2.85, w: W - 2, h: 1.3, fontFace: HEAD, fontSize: 52, bold: true, color: C.cream, align: "center" });
+    T(s, "CONFOEDERATIO  HELVETICA  ·  MDCC — MDCCXXX", { x: 1, y: 2.35, w: W - 2, h: 0.4, fontFace: HEAD, fontSize: 13, color: C.gold, align: "center", charSpacing: 6 });
+    T(s, "Швейцария в начале XVIII века", { x: 0.7, y: 2.9, w: W - 1.4, h: 1.2, fontFace: HEAD, fontSize: 44, bold: true, color: C.cream, align: "center" });
   },
   (s) => {
-    T(s, "Фирвальдштетское озеро — колыбель союза (иллюстрация)", { x: 0.85, y: 6.85, w: 5.6, h: 0.3, fontFace: BODY, fontSize: 10, italic: true, color: C.muted, align: "center" });
-    T(s, "CAPUT  I  ·  1291", { x: 7.15, y: 0.95, w: 4.5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6 });
-    T(s, "Как всё началось", { x: 7.15, y: 1.35, w: 5.45, h: 0.9, fontFace: HEAD, fontSize: 32, bold: true, color: C.ink });
+    T(s, "Горное озеро в сердце Швейцарии (иллюстрация)", { x: 0.85, y: 6.85, w: 5.6, h: 0.3, fontFace: BODY, fontSize: 10, italic: true, color: C.muted, align: "center" });
+    T(s, "CAPUT  I  ·  1700", { x: 7.15, y: 0.95, w: 4.5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6 });
+    T(s, "Каким был союз", { x: 7.15, y: 1.35, w: 5.45, h: 0.9, fontFace: HEAD, fontSize: 32, bold: true, color: C.ink });
     pageT(s, 1, C.muted);
   },
   (s) => {
     T(s, "CAPUT  II", { x: 0.85, y: 2.6, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.oxblood, charSpacing: 6 });
-    T(s, "Три опоры Швейцарии", { x: 0.85, y: 2.95, w: 9, h: 0.8, fontFace: HEAD, fontSize: 36, bold: true, color: C.ink });
+    T(s, "Чем жила страна", { x: 0.85, y: 2.95, w: 9, h: 0.8, fontFace: HEAD, fontSize: 36, bold: true, color: C.ink });
     pageT(s, 2, C.muted);
   },
   (s) => {
     T(s, "CAPUT  III", { x: 0.85, y: 0.85, w: 5, h: 0.35, fontFace: HEAD, fontSize: 13, color: C.gold, charSpacing: 6 });
-    T(s, "Хроника свободы", { x: 0.85, y: 1.2, w: 9, h: 0.9, fontFace: HEAD, fontSize: 40, bold: true, color: C.cream });
+    T(s, "Хроника начала века", { x: 0.85, y: 1.2, w: 9, h: 0.9, fontFace: HEAD, fontSize: 40, bold: true, color: C.cream });
     pageT(s, 3, C.gold);
   },
   (s) => {
