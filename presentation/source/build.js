@@ -27,7 +27,7 @@ function shield(s, x, y, w) { s.addImage({ path: IMG + "shield.png", x, y, w, h:
 function text(s, t, o) { s.addText(t, { isTextBox: true, margin: 0, ...o }); }
 function gilt(s, x, y, w, h) { // painting in a gilded frame
   s.addShape(pres.shapes.RECTANGLE, { x: x - 0.16, y: y - 0.16, w: w + 0.32, h: h + 0.32, fill: { color: C.goldDeep }, line: { color: C.gold, width: 2 }, shadow: shadow(), objectName: "!!gilt" });
-  s.addImage({ path: IMG + "lake.jpg", x, y, w, h, sizing: { type: "cover", w, h }, objectName: "!!scene" });
+  s.addImage({ path: IMG + "sion.jpg", x, y, w, h, sizing: { type: "cover", w, h }, objectName: "!!scene" });
 }
 
 const N = require("./narrative.js");
@@ -136,7 +136,7 @@ const persist = [
   (s) => {
     bg(s, "parchment.jpg");
     s.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: W, h: 2.25, fill: { color: C.goldDeep }, line: { color: C.gold, width: 2 }, shadow: shadow(), objectName: "!!gilt" });
-    s.addImage({ path: IMG + "lake.jpg", x: 0, y: 0, w: W, h: 2.15, sizing: { type: "cover", w: W, h: 2.15 }, objectName: "!!scene" });
+    s.addImage({ path: IMG + "sion.jpg", x: 0, y: 0, w: W, h: 2.15, sizing: { type: "cover", w: W, h: 2.15 }, objectName: "!!scene" });
     shield(s, 12.0, 0.55, 0.62);
   },
   (s) => {
@@ -145,7 +145,7 @@ const persist = [
     shield(s, 12.0, 0.55, 0.62);
   },
   (s) => {
-    bg(s, "town.jpg"); shade(s);
+    bg(s, "oldtown.jpg"); shade(s);
     shield(s, 0.85, 0.45, 0.62);
   },
   (s) => {
