@@ -21,10 +21,10 @@ def oldify(src, box, out, seed, warmth=0.35, wide=False):
     a = lerp(a, sepia, warmth)
     a = 0.06 + a * 0.88
     # brushwork: merge fine detail into strokes, then soften
-    p = kuwahara(a, 4)
-    p = kuwahara(p, 2)
-    a = p * 0.75 + gaussian_filter(a, (1.5, 1.5, 0)) * 0.25
-    a = a * 0.6 + gaussian_filter(a, (1.2, 1.2, 0)) * 0.4
+    p = kuwahara(a, 2)
+    p = kuwahara(p, 1)
+    a = p * 0.8 + a * 0.2
+    a = a * 0.85 + gaussian_filter(a, (0.8, 0.8, 0)) * 0.15
     if wide:  # full-slide background: crop to 16:9, keeping the waterline
         top = int((a.shape[0] - 1080) * 0.4)
         a = a[top:top + 1080]

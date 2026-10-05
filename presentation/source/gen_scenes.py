@@ -23,8 +23,26 @@ def new_layer():
     return im, ImageDraw.Draw(im)
 
 
-def finish(im, seed, tex=0.14):
+def masonry(h, w, seed, course=9, block=21):
+    """Mortar lines of stone/brick courses, slightly wobbly, staggered row to row."""
+    r = np.random.default_rng(seed)
+    yy, xx = np.mgrid[0:h, 0:w].astype(float)
+    wob = gaussian_filter(r.normal(0, 1, (h, w)), 3) * 6
+    row = np.floor((yy + wob * 0.3) / course)
+    hline = np.abs(((yy + wob * 0.3) % course) - course / 2) > course / 2 - 1.1
+    off = (row % 2) * block / 2 + r.uniform(0, block, size=int(h / course) + 2)[row.astype(int)] * 0.25
+    vline = np.abs(((xx + off + wob * 0.5) % block) - block / 2) > block / 2 - 1.0
+    stone = r.uniform(0.9, 1.08, size=(int(h / course) + 2, int(w / block) + 3))
+    tint = stone[row.astype(int), ((xx + off) // block).astype(int) % stone.shape[1]]
+    lines = (hline | vline).astype(float)
+    return tint * (1 - 0.22 * gaussian_filter(lines, 0.5))
+
+
+def finish(im, seed, tex=0.14, bricks=False):
     arr = np.asarray(im.resize((W, H), Image.LANCZOS)).astype(float) / 255
+    if bricks:  # stone and brick courses on walls (roofs stay plain: they are darker/redder)
+        wall = (arr[..., 3] > 0.5) & (arr[..., 0] > arr[..., 2] * 1.02) & (arr[..., :3].mean(axis=2) > 0.38)
+        arr[..., :3] *= np.where(wall, masonry(H, W, seed), 1.0)[..., None]
     n = fbm2d(H, W, seed, octaves=7, base=12)
     big = fbm2d(H, W, seed + 1, octaves=3, base=3)
     grain = gaussian_filter(R.normal(0, 1, (H, W)), (1.2, 0.6))
@@ -151,7 +169,7 @@ def castle_scene():
         x, w = fx * W * S, fw * W * S
         tower(d, x, base - 20 * S, w, fh * S, stone, roofc, rh * S, "gable" if kind == "gable" else "pyramid",
               cren=(kind == "pyramid"))
-    arr = finish(lay, 71, 0.16)
+    arr = finish(lay, 71, 0.16, bricks=True)
     img = reflect(img, arr, 0.70 * H, 0.6)
     img = comp(img, arr, "C8BFA8", 0.08)
     return img
@@ -282,7 +300,7 @@ def town_scene():
         tower(d, x, 0.64 * H * S, 30 * S, 190 * S, "B8A688", "3E3A36", 120 * S, "pyramid", win=False)
     for (wx, wy) in lit:
         d.rectangle([wx, wy, wx + 6 * S, wy + 9 * S], fill=hexc("F2B45A"))
-    arr = finish(lay, 85, 0.14)
+    arr = finish(lay, 85, 0.14, bricks=True)
     img = comp(img, arr, "B98D72", 0.06)
     # Chapel Bridge with the Water Tower
     lay2, d2 = new_layer()
@@ -297,7 +315,7 @@ def town_scene():
     tx = 0.36 * W * S
     ty = y0 + (y1 - y0) * ((tx - x0) / (x1 - x0)) + 10 * S
     tower(d2, tx, ty, 64 * S, 150 * S, "9E8A6C", "4A2A1E", 60 * S, "pyramid", cren=False)
-    arr2 = finish(lay2, 86, 0.16)
+    arr2 = finish(lay2, 86, 0.16, bricks=True)
     img = reflect(img, np.maximum(arr, 0) * 0 + arr, 0.74 * H, 0.45)
     img = reflect(img, arr2, 0.79 * H, 0.5)
     img = comp(img, arr2)

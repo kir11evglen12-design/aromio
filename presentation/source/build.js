@@ -16,7 +16,7 @@ function bg(s, file) { s.background = { path: IMG + file }; }
 function veil(s, t, name) { // dark translucent overlay over a painting
   s.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: W, h: H, fill: { color: C.night, transparency: t }, line: { type: "none" }, objectName: name });
 }
-function frame(s, name, inset = 0.35, color = C.gold) { // double gilt hairline frame
+function frame(s, name, inset = 0.6, color = C.gold) { // double gilt hairline frame
   s.addShape(pres.shapes.RECTANGLE, { x: inset, y: inset, w: W - 2 * inset, h: H - 2 * inset, fill: { type: "none" }, line: { color, width: 1.25 }, objectName: name + "a" });
   s.addShape(pres.shapes.RECTANGLE, { x: inset + 0.09, y: inset + 0.09, w: W - 2 * inset - 0.18, h: H - 2 * inset - 0.18, fill: { type: "none" }, line: { color, width: 0.5 }, objectName: name + "b" });
 }
@@ -41,7 +41,7 @@ let DX = 0, CUR = 0, K = 0;
 const nm = () => `!!c${CUR}_${K++}`;
 const T = (s, t, o) => text(s, t, { ...o, x: o.x + DX, objectName: nm() });
 const SH = (s, type, o) => s.addShape(type, { ...o, x: o.x + DX, objectName: nm() });
-const pageT = (s, i, color) => T(s, ROMAN[i] + "  ·  VI", { x: 11.3, y: 6.85, w: 1.2, h: 0.3, fontFace: HEAD, fontSize: 10, color, align: "right", charSpacing: 3 });
+const pageT = (s, i, color) => T(s, ROMAN[i] + "  ·  VI", { x: 11.1, y: 6.62, w: 1.2, h: 0.3, fontFace: HEAD, fontSize: 10, color, align: "right", charSpacing: 3 });
 // "Словарик": short explanations of the hard words on a slide
 const gloss = (s, x, y, w, h, items, dark) => {
   SH(s, pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: dark ? "140E0A" : "F3E8CF", transparency: dark ? 30 : 35 }, line: { color: C.gold, width: 0.75 } });
@@ -105,8 +105,7 @@ const content = [
   },
   // 5 · XIII кантонов
   (s) => {
-    IM(s, { path: IMG + "parchment.jpg", x: 7.1, y: 0.85, w: 5.4, h: 5.8, sizing: { type: "cover", w: 5.4, h: 5.8 } });
-    SH(s, pres.shapes.RECTANGLE, { x: 7.1, y: 0.85, w: 5.4, h: 5.8, fill: { type: "none" }, line: { color: C.gold, width: 1.5 }, shadow: shadow() });
+    IM(s, { path: IMG + "card_burnt.png", x: 7.1, y: 0.85, w: 5.4, h: 5.8 });
     T(s, "1707", { x: 7.1, y: 1.3, w: 5.4, h: 1.9, fontFace: HEAD, fontSize: 100, bold: true, color: C.oxblood, align: "center" });
     T(s, "в Базеле родился Эйлер", { x: 7.1, y: 3.2, w: 5.4, h: 0.6, fontFace: HEAD, fontSize: 24, color: C.ink, align: "center" });
     T(s, "Леонард Эйлер — один из величайших математиков. С 1727 года он работал в Петербургской академии наук — главном научном учреждении России.", { x: 7.6, y: 4.1, w: 4.4, h: 2.0, fontFace: BODY, fontSize: 15, color: C.muted, align: "center", valign: "top" });
@@ -117,7 +116,7 @@ const content = [
   (s) => {
     T(s, "Швейцария осталась нейтральной в войнах Европы, но внутри спорила из-за веры и власти. Богатела она ремеслом и наёмной службой.", { x: 2.2, y: 3.35, w: W - 4.4, h: 0.95, fontFace: BODY, fontSize: 19, italic: true, color: "E2D2B0", align: "center", valign: "top" });
     T(s, "Выполнили: ученики 8 «А» класса  ·  Кирилл Ленин и Михаил Луконин", { x: 1.5, y: 4.4, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 14, color: C.gold, align: "center", charSpacing: 2 });
-    T(s, "Источники: А. Я. Юдовская и др. «Всеобщая история. История Нового времени», 7–8 кл.; энциклопедические статьи о Швейцарской конфедерации", { x: 1.5, y: 6.75, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 10, color: "3A2A1E", align: "center" });
+    T(s, "Источники: А. Я. Юдовская и др. «Всеобщая история. История Нового времени», 7–8 кл.; энциклопедические статьи о Швейцарской конфедерации", { x: 1.5, y: 6.25, w: W - 3, h: 0.4, fontFace: BODY, fontSize: 10, color: "3A2A1E", align: "center" });
   },
 ];
 
@@ -125,31 +124,31 @@ const content = [
 // Fixed layer of each slide: background, painting, shield — these stay put through the transition.
 const persist = [
   (s) => {
-    bg(s, "castle.jpg"); veil(s, 32, "veil"); frame(s, "!!frame");
+    bg(s, "castle_burnt.jpg"); veil(s, 32, "veil"); frame(s, "!!frame");
     shield(s, W / 2 - 0.55, 0.85, 1.1);
   },
   (s) => {
-    bg(s, "parchment.jpg");
+    bg(s, "parchment_burnt.jpg");
     gilt(s, 0.85, 0.85, 5.6, 5.8);
     shield(s, 12.0, 0.55, 0.62);
   },
   (s) => {
-    bg(s, "parchment.jpg");
+    bg(s, "parchment_burnt.jpg");
     s.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: W, h: 2.25, fill: { color: C.goldDeep }, line: { color: C.gold, width: 2 }, shadow: shadow(), objectName: "!!gilt" });
     s.addImage({ path: IMG + "sion.jpg", x: 0, y: 0, w: W, h: 2.15, sizing: { type: "cover", w: W, h: 2.15 }, objectName: "!!scene" });
     shield(s, 12.0, 0.55, 0.62);
   },
   (s) => {
-    bg(s, "battle.jpg");
+    bg(s, "battle_burnt.jpg");
     shade(s);
     shield(s, 12.0, 0.55, 0.62);
   },
   (s) => {
-    bg(s, "oldtown.jpg"); shade(s);
+    bg(s, "oldtown_burnt.jpg"); shade(s);
     shield(s, 0.85, 0.45, 0.62);
   },
   (s) => {
-    bg(s, "village.jpg"); shade(s); frame(s, "!!frame");
+    bg(s, "village_burnt.jpg"); shade(s); frame(s, "!!frame");
     shield(s, W / 2 - 0.5, 0.45, 1.0);
   },
 ];

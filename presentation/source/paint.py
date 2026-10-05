@@ -23,7 +23,7 @@ def kuwahara(img, r):
     return out
 
 
-def paint(path, out, seed=0, R1=5, R2=3):
+def paint(path, out, seed=0, R1=2, R2=1):
     img = np.asarray(Image.open(path).convert("RGB")).astype(float) / 255
     h, w, _ = img.shape
     rng = np.random.default_rng(seed)
@@ -31,21 +31,21 @@ def paint(path, out, seed=0, R1=5, R2=3):
     p = kuwahara(p, R2)
     p = p * 0.7 + gaussian_filter(img, (2.0, 2.0, 0)) * 0.3  # keep tones continuous, no posterised blotches
     # soften everything a little, the far half of the picture more (sfumato)
-    soft = gaussian_filter(p, (1.6, 1.6, 0))
-    softer = gaussian_filter(p, (4.5, 4.5, 0))
+    soft = gaussian_filter(p, (0.7, 0.7, 0))
+    softer = gaussian_filter(p, (2.2, 2.2, 0))
     yy = np.linspace(0, 1, h)[:, None, None]
-    far = np.clip(1 - yy * 1.4, 0, 1) * 0.6
+    far = np.clip(1 - yy * 1.4, 0, 1) * 0.35
     p = soft * (1 - far) + softer * far
     # uneven paint thickness: soft mottling, no regular pattern
     mott = gaussian_filter(rng.normal(0, 1, (h, w)), 3.0)
     p *= (1 + 0.035 * mott / mott.std())[..., None]
     # soften hard silhouette edges so nothing reads as a vector cut-out
-    p = p * 0.55 + gaussian_filter(p, (1.3, 1.3, 0)) * 0.45
+    p = p * 0.8 + gaussian_filter(p, (1.0, 1.0, 0)) * 0.2
     Image.fromarray((np.clip(p, 0, 1) * 255).astype(np.uint8)).save(out, quality=95, subsampling=0)
 
 
 if __name__ == "__main__":
     for i, name in enumerate(["castle", "battle", "town", "village", "lake"]):
-        r = (3, 2) if name == "battle" else (5, 3)  # thin pikes survive a smaller brush
+        r = (2, 1)  # thin pikes survive a smaller brush
         paint(f"raw/{name}.jpg", f"img/{name}.jpg", i, *r)
         print("painted", name)
